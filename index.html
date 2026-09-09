@@ -452,6 +452,91 @@
       display: none !important;
     }
 
+
+    .pregunta-tarjeta {
+      width: 100%;
+      max-width: 700px;
+      margin: 0 auto;
+      padding: 28px;
+      border: 2px solid var(--borde);
+      border-radius: 22px;
+      background: linear-gradient(135deg, #f8fbff, #edf2f7);
+      text-align: center;
+    }
+
+    .contador {
+      display: inline-block;
+      margin-bottom: 18px;
+      padding: 10px 18px;
+      border-radius: 30px;
+      color: white;
+      background: var(--rojo);
+      font-size: 1.2rem;
+      font-weight: 900;
+    }
+
+    .pregunta-tarjeta h3 {
+      margin: 0 0 25px;
+      color: var(--azul);
+      font-size: clamp(1.3rem, 3vw, 2rem);
+    }
+
+    .alternativas {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .alternativa {
+      border: 2px solid var(--borde);
+      border-radius: 14px;
+      padding: 16px;
+      color: var(--azul);
+      background: white;
+      font-size: 1rem;
+      font-weight: 800;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .alternativa:hover {
+      border-color: var(--azul-claro);
+      background: #f5f9ff;
+      transform: translateY(-2px);
+    }
+
+    .alternativa.correcta {
+      border-color: var(--verde);
+      color: var(--verde);
+      background: #edfff3;
+    }
+
+    .alternativa.incorrecta {
+      border-color: var(--rojo);
+      color: var(--rojo);
+      background: #fff0f0;
+    }
+
+    .alternativa:disabled {
+      cursor: not-allowed;
+      opacity: 0.75;
+    }
+
+    .mensaje-respuesta {
+      min-height: 28px;
+      margin-top: 20px;
+      font-weight: 800;
+      text-align: center;
+    }
+
+    .mensaje-respuesta.correcto {
+      color: var(--verde);
+    }
+
+    .mensaje-respuesta.incorrecto {
+      color: var(--rojo);
+    }
+
     @media (max-width: 650px) {
       body {
         padding: 10px;
@@ -611,6 +696,16 @@
         </div>
       </div>
 
+
+      <div class="acciones">
+        <button
+          class="boton principal"
+          onclick="mostrarPantallaJuego()"
+        >
+          Iniciar pregunta de prueba
+        </button>
+      </div>
+
       <div class="lista-sala">
         <div class="grupo">
           <h4>Los Cabros del 2000</h4>
@@ -630,6 +725,49 @@
       <p class="nota">
         Los jugadores que ingresen desde otros celulares aparecerán aquí.
       </p>
+    </section>
+
+
+    <!-- PREGUNTA DE PRUEBA -->
+    <section id="pantallaJuego" class="pantalla sala">
+      <div class="sala-cabecera">
+        <h2>Desafío en curso</h2>
+        <div class="codigo">PREGUNTA <span id="numeroPregunta">1</span></div>
+      </div>
+
+      <div class="pregunta-tarjeta">
+        <div id="tiempoPregunta" class="contador">20 segundos</div>
+        <h3 id="textoPregunta">¿Cuál es el baile nacional de Chile?</h3>
+
+        <div id="alternativasPregunta" class="alternativas">
+          <button class="alternativa" onclick="responderPregunta('cueca')">Cueca</button>
+          <button class="alternativa" onclick="responderPregunta('cumbia')">Cumbia</button>
+          <button class="alternativa" onclick="responderPregunta('tonada')">Tonada</button>
+          <button class="alternativa" onclick="responderPregunta('sau-sau')">Sau-sau</button>
+        </div>
+
+        <div id="mensajeRespuesta" class="mensaje-respuesta"></div>
+      </div>
+
+      <div class="marcadores" style="margin-top:25px;">
+        <div class="marcador jovenes">
+          <h3>🇨🇱 Los Cabros del 2000</h3>
+          <div id="puntajeJuegoJovenes" class="puntaje">0</div>
+          <div>puntos</div>
+        </div>
+
+        <div class="marcador veteranos">
+          <h3>🏆 Los Clásicos de Colección</h3>
+          <div id="puntajeJuegoVeteranos" class="puntaje">0</div>
+          <div>puntos</div>
+        </div>
+      </div>
+
+      <div class="acciones">
+        <button class="boton secundario" onclick="mostrarPantalla('pantallaSala')">
+          Volver a la sala
+        </button>
+      </div>
     </section>
 
   </main>
@@ -748,6 +886,17 @@
 
     let jugadorSeleccionado = null;
     let canalJugadores = null;
+
+    let intervaloPregunta = null;
+    let preguntaRespondida = false;
+
+    const preguntaActual = {
+      id: 1,
+      texto: "¿Cuál es el baile nacional de Chile?",
+      correcta: "cueca",
+      alternativas: ["cueca", "cumbia", "tonada", "sau-sau"],
+      tiempo: 20
+    };
 
     jugadores.forEach((jugador, indice) => {
       jugador.equipo = indice < 10 ? "jovenes" : "veteranos";
@@ -1047,6 +1196,174 @@
       ACTUALIZACIÓN EN TIEMPO REAL
       ==========================================
     */
+
+
+    function mostrarPantallaJuego() {
+      mostrarPantalla("pantallaJuego");
+      preguntaRespondida = false;
+
+      document.getElementById("numeroPregunta").textContent = preguntaActual.id;
+      document.getElementById("textoPregunta").textContent = preguntaActual.texto;
+      document.getElementById("mensajeRespuesta").textContent = "";
+      document.getElementById("mensajeRespuesta").className = "mensaje-respuesta";
+
+      document.querySelectorAll(".alternativa").forEach((boton) => {
+        boton.disabled = false;
+        boton.classList.remove("correcta", "incorrecta");
+      });
+
+      iniciarCronometroPregunta();
+      cargarPuntajesJuego();
+    }
+
+    function iniciarCronometroPregunta() {
+      if (intervaloPregunta) {
+        clearInterval(intervaloPregunta);
+      }
+
+      let segundos = preguntaActual.tiempo;
+      const contador = document.getElementById("tiempoPregunta");
+      contador.textContent = `${segundos} segundos`;
+
+      intervaloPregunta = setInterval(() => {
+        segundos--;
+        contador.textContent = `${segundos} segundos`;
+
+        if (segundos <= 0) {
+          clearInterval(intervaloPregunta);
+          intervaloPregunta = null;
+
+          if (!preguntaRespondida) {
+            preguntaRespondida = true;
+            document.querySelectorAll(".alternativa").forEach((boton) => {
+              boton.disabled = true;
+            });
+
+            const mensaje = document.getElementById("mensajeRespuesta");
+            mensaje.textContent = "⏰ Se acabó el tiempo.";
+            mensaje.className = "mensaje-respuesta incorrecto";
+          }
+        }
+      }, 1000);
+    }
+
+    async function responderPregunta(respuesta) {
+      if (preguntaRespondida || !jugadorSeleccionado) {
+        return;
+      }
+
+      preguntaRespondida = true;
+
+      if (intervaloPregunta) {
+        clearInterval(intervaloPregunta);
+        intervaloPregunta = null;
+      }
+
+      const correcta = respuesta === preguntaActual.correcta;
+
+      document.querySelectorAll(".alternativa").forEach((boton) => {
+        boton.disabled = true;
+
+        if (boton.textContent.trim().toLowerCase() === preguntaActual.correcta) {
+          boton.classList.add("correcta");
+        }
+      });
+
+      const botones = document.querySelectorAll(".alternativa");
+      botones.forEach((boton) => {
+        if (boton.textContent.trim().toLowerCase() === respuesta && !correcta) {
+          boton.classList.add("incorrecta");
+        }
+      });
+
+      const mensaje = document.getElementById("mensajeRespuesta");
+
+      if (correcta) {
+        mensaje.textContent = "✅ ¡Respuesta correcta! +1 punto para tu equipo.";
+        mensaje.className = "mensaje-respuesta correcto";
+      } else {
+        mensaje.textContent = "❌ Respuesta incorrecta.";
+        mensaje.className = "mensaje-respuesta incorrecto";
+      }
+
+      const { error } = await supabaseClient
+        .from("jugadores")
+        .update({
+          puntaje: correcta ? 1 : 0,
+          respuesta_actual: respuesta,
+          respondio: true
+        })
+        .eq("nombre", jugadorSeleccionado.nombre);
+
+      if (error) {
+        console.error("Error al guardar la respuesta del jugador:", error);
+      }
+
+      const { error: errorRespuesta } = await supabaseClient
+        .from("respuestas")
+        .insert({
+          jugador: jugadorSeleccionado.nombre,
+          pregunta_id: preguntaActual.id,
+          respuesta: respuesta,
+          correcta: correcta
+        });
+
+      if (errorRespuesta) {
+        console.error("Error al guardar la respuesta:", errorRespuesta);
+      }
+
+      await actualizarPuntajeEquipo(jugadorSeleccionado.equipo);
+      await cargarPuntajesJuego();
+    }
+
+    async function actualizarPuntajeEquipo(equipo) {
+      const { data, error } = await supabaseClient
+        .from("jugadores")
+        .select("puntaje")
+        .eq("equipo", equipo)
+        .eq("conectado", true);
+
+      if (error) {
+        console.error("Error al calcular el puntaje del equipo:", error);
+        return;
+      }
+
+      const puntaje = (data || []).reduce(
+        (total, jugador) => total + Number(jugador.puntaje || 0),
+        0
+      );
+
+      const campo = equipo === "jovenes"
+        ? "puntaje_jovenes"
+        : "puntaje_veteranos";
+
+      const { error: errorPartida } = await supabaseClient
+        .from("partida")
+        .update({ [campo]: puntaje })
+        .eq("id", 1);
+
+      if (errorPartida) {
+        console.error("Error al actualizar el puntaje de la partida:", errorPartida);
+      }
+    }
+
+    async function cargarPuntajesJuego() {
+      const { data, error } = await supabaseClient
+        .from("partida")
+        .select("puntaje_jovenes, puntaje_veteranos")
+        .eq("id", 1)
+        .single();
+
+      if (error || !data) {
+        return;
+      }
+
+      document.getElementById("puntajeJuegoJovenes").textContent =
+        data.puntaje_jovenes || 0;
+
+      document.getElementById("puntajeJuegoVeteranos").textContent =
+        data.puntaje_veteranos || 0;
+    }
 
     function iniciarActualizacionSala() {
       if (canalJugadores) {
