@@ -566,29 +566,6 @@
         width: 100%;
       }
     }
-  
-    .boton-moderador {
-      display: block !important;
-      width: 100%;
-      max-width: 360px;
-      margin: 18px auto 0;
-      border: 2px solid var(--azul);
-      background: #ffffff;
-      color: var(--azul);
-      font-weight: 700;
-      cursor: pointer;
-    }
-
-    .boton-moderador:hover {
-      background: #eef4fa;
-    }
-
-    .ayuda-moderador {
-      margin: 8px auto 0;
-      color: #66727d;
-      font-size: 0.82rem;
-      text-align: center;
-    }
 </style>
 </head>
 
@@ -597,10 +574,7 @@
   <main class="app">
 
     <!-- INICIO -->
-    <section id="pantallaConductor" class="pantalla">
-      <div class="encabezado"><h2>Panel del conductor</h2><p>Ingresa el código para administrar la partida.</p></div><div class="tarjeta"><input id="codigoConductor" type="password" placeholder="Código de conductor" maxlength="8"><button class="boton principal" onclick="validarConductor()">Ingresar como conductor</button><p id="errorConductor" class="error"></p></div></section>
-
-    <section id="pantallaInicio" class="pantalla activa inicio">
+<section id="pantallaInicio" class="pantalla activa inicio">
       <div class="bandera">
         <span class="rojo"></span>
         <span class="blanco"></span>
@@ -620,12 +594,6 @@
       <button class="boton principal" onclick="mostrarSeleccion()">
         Comenzar juego
       </button>
-
-      <button class="boton secundario boton-moderador" onclick="mostrarConductor()">
-        🔐 Ingresar como moderador
-      </button>
-
-      <p class="ayuda-moderador">Acceso exclusivo para quien dirige la partida</p>
     </section>
 
 
@@ -952,22 +920,6 @@
 
       document.getElementById(id).classList.add("activa");
     }
-
-    function mostrarConductor() { mostrarPantalla("pantallaConductor"); document.getElementById("codigoConductor").value=""; document.getElementById("errorConductor").textContent=""; }
-
-    function validarConductor() {
-      const codigo = document.getElementById("codigoConductor").value.trim();
-      if (codigo === "18092026") {
-        localStorage.setItem("esConductor", "true");
-        mostrarPantalla("pantallaSala");
-        document.querySelector("#pantallaSala .mensaje h3").textContent = "Panel del conductor";
-        document.querySelector("#pantallaSala .mensaje p").textContent = "Desde aquí puedes iniciar y controlar los desafíos.";
-        const boton = document.querySelector("#pantallaSala .acciones button");
-        if (boton) { boton.textContent = "Iniciar desafío"; boton.onclick = iniciarDesafioConductor; }
-      } else { document.getElementById("errorConductor").textContent = "Código incorrecto."; }
-    }
-
-    function iniciarDesafioConductor() { mostrarPantallaJuego(); }
 
     function mostrarInicio() {
       mostrarPantalla("pantallaInicio");
