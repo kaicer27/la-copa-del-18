@@ -921,6 +921,10 @@
 
     let intervaloPregunta = null;
     let preguntaRespondida = false;
+    let continuarPresionado = false;
+    let rondaCerrada = false;
+    let retornoProgramado = false;
+      continuarPresionado = false;
 
     const preguntaActual = {
       id: 1,
@@ -1249,6 +1253,8 @@
     function mostrarPantallaJuego() {
       mostrarPantalla("pantallaJuego");
       preguntaRespondida = false;
+      rondaCerrada = false;
+      retornoProgramado = false;
 
       document.getElementById("numeroPregunta").textContent = preguntaActual.id;
       document.getElementById("textoPregunta").textContent = preguntaActual.texto;
@@ -1265,103 +1271,117 @@
     }
 
     function iniciarCronometroPregunta() {
-      if (intervaloPregunta) {
-        clearInterval(intervaloPregunta);
-      }
-
+      if (intervaloPregunta) clearInterval(intervaloPregunta);
       let segundos = preguntaActual.tiempo;
       const contador = document.getElementById("tiempoPregunta");
       contador.textContent = `${segundos} segundos`;
-
       intervaloPregunta = setInterval(() => {
         segundos--;
         contador.textContent = `${segundos} segundos`;
-
         if (segundos <= 0) {
-          clearInterval(intervaloPregunta);
-          intervaloPregunta = null;
-
-          if (!preguntaRespondida) {
-            preguntaRespondida = true;
-            document.querySelectorAll(".alternativa").forEach((boton) => {
-              boton.disabled = true;
-            });
-
-            const mensaje = document.getElementById("mensajeRespuesta");
-            mensaje.textContent = "⏰ Se acabó el tiempo.";
-            mensaje.className = "mensaje-respuesta incorrecto";
-          }
+          clearInterval(intervaloPregunta); intervaloPregunta = null;
+          cerrarRondaAutomaticamente("⏰ Se acabó el tiempo. Esperando el resultado...");
         }
       }, 1000);
     }
 
     async function responderPregunta(respuesta) {
-      if (preguntaRespondida || !jugadorSeleccionado) {
-        return;
-      }
-
+      if (preguntaRespondida || rondaCerrada || !jugadorSeleccionado) return;
       preguntaRespondida = true;
-
-      if (intervaloPregunta) {
-        clearInterval(intervaloPregunta);
-        intervaloPregunta = null;
-      }
-
+      document.querySelectorAll(".alternativa").forEach(b => b.disabled = true);
       const correcta = respuesta === preguntaActual.correcta;
-
-      document.querySelectorAll(".alternativa").forEach((boton) => {
-        boton.disabled = true;
-
-        if (boton.textContent.trim().toLowerCase() === preguntaActual.correcta) {
-          boton.classList.add("correcta");
-        }
-      });
-
-      const botones = document.querySelectorAll(".alternativa");
-      botones.forEach((boton) => {
-        if (boton.textContent.trim().toLowerCase() === respuesta && !correcta) {
-          boton.classList.add("incorrecta");
-        }
-      });
-
       const mensaje = document.getElementById("mensajeRespuesta");
+      mensaje.textContent = "✅ Respuesta registrada. Espera a que todos contesten.";
+      mensaje.className = "mensaje-respuesta";
 
-      if (correcta) {
-        mensaje.textContent = "✅ ¡Respuesta correcta! +1 punto para tu equipo.";
-        mensaje.className = "mensaje-respuesta correcto";
-      } else {
-        mensaje.textContent = "❌ Respuesta incorrecta.";
-        mensaje.className = "mensaje-respuesta incorrecto";
-      }
+      const { error } = await supabaseClient.from("jugadores").update({
+        puntaje: correcta ? 1 : 0, respuesta_actual: respuesta, respondio: true
+      }).eq("nombre", jugadorSeleccionado.nombre);
+      if (error) console.error(error);
 
-      const { error } = await supabaseClient
-        .from("jugadores")
-        .update({
-          puntaje: correcta ? 1 : 0,
-          respuesta_actual: respuesta,
-          respondio: true
-        })
-        .eq("nombre", jugadorSeleccionado.nombre);
-
-      if (error) {
-        console.error("Error al guardar la respuesta del jugador:", error);
-      }
-
-      const { error: errorRespuesta } = await supabaseClient
-        .from("respuestas")
-        .insert({
-          jugador: jugadorSeleccionado.nombre,
-          pregunta_id: preguntaActual.id,
-          respuesta: respuesta,
-          correcta: correcta
-        });
-
-      if (errorRespuesta) {
-        console.error("Error al guardar la respuesta:", errorRespuesta);
-      }
-
+      const { error: errorRespuesta } = await supabaseClient.from("respuestas").insert({
+        jugador: jugadorSeleccionado.nombre, pregunta_id: preguntaActual.id,
+        respuesta, correcta
+      });
+      if (errorRespuesta) console.error(errorRespuesta);
       await actualizarPuntajeEquipo(jugadorSeleccionado.equipo);
+      await verificarTodosRespondieron();
       await cargarPuntajesJuego();
+    }
+
+    async function verificarTodosRespondieron() {
+      const { data, error } = await supabaseClient.from("jugadores")
+        .select("nombre, respondio, conectado").eq("conectado", true);
+      if (error || !data || !data.length) return;
+      if (data.every(j => j.respondio === true)) await cerrarRondaAutomaticamente("🎉 Todos respondieron.");
+    }
+
+    async function cerrarRondaAutomaticamente(mensajeBase) {
+      if (rondaCerrada) return;
+      rondaCerrada = true;
+      if (intervaloPregunta) { clearInterval(intervaloPregunta); intervaloPregunta = null; }
+      document.querySelectorAll(".alternativa").forEach(b => b.disabled = true);
+      const mensaje = document.getElementById("mensajeRespuesta");
+      mensaje.textContent = mensajeBase;
+      mensaje.className = "mensaje-respuesta";
+      await supabaseClient.from("partida").update({ estado: "resultado" }).eq("id", 1);
+      mostrarResultadoAutomatico();
+    }
+
+    async function mostrarResultadoAutomatico() {
+      const { data } = await supabaseClient.from("respuestas").select("jugador, correcta")
+        .eq("pregunta_id", preguntaActual.id);
+      const miRespuesta = (data || []).find(r => jugadorSeleccionado && r.jugador === jugadorSeleccionado.nombre);
+      const mensaje = document.getElementById("mensajeRespuesta");
+      mensaje.textContent = miRespuesta?.correcta ? "🎉 ¡Respuesta correcta!" : "❌ Respuesta incorrecta o sin respuesta.";
+      mensaje.className = miRespuesta?.correcta ? "mensaje-respuesta correcto" : "mensaje-respuesta incorrecto";
+      document.querySelectorAll(".alternativa").forEach(b => {
+        b.disabled = true;
+        if (b.textContent.trim().toLowerCase() === preguntaActual.correcta) b.classList.add("correcta");
+      });
+
+      let boton = document.getElementById("botonContinuarResultado");
+      if (!boton) {
+        boton = document.createElement("button");
+        boton.id = "botonContinuarResultado";
+        boton.className = "boton principal";
+        boton.textContent = "Continuar al siguiente desafío";
+        boton.onclick = continuarAlSiguienteDesafio;
+        document.getElementById("pantallaJuego").appendChild(boton);
+      }
+      boton.disabled = continuarPresionado;
+      boton.textContent = continuarPresionado ? "⏳ Esperando a los demás..." : "Continuar al siguiente desafío";
+      await verificarTodosContinuaron();
+    }
+
+    async function continuarAlSiguienteDesafio() {
+      if (continuarPresionado || !jugadorSeleccionado) return;
+      continuarPresionado = true;
+      const boton = document.getElementById("botonContinuarResultado");
+      if (boton) {
+        boton.disabled = true;
+        boton.textContent = "⏳ Esperando a los demás...";
+      }
+      await supabaseClient.from("jugadores").update({ continuo: true })
+        .eq("nombre", jugadorSeleccionado.nombre);
+      await verificarTodosContinuaron();
+    }
+
+    async function verificarTodosContinuaron() {
+      const { data, error } = await supabaseClient.from("jugadores")
+        .select("nombre, continuo, conectado").eq("conectado", true);
+      if (error || !data || !data.length) return;
+      if (data.every(j => j.continuo === true)) await prepararSiguienteDesafio();
+    }
+
+    async function prepararSiguienteDesafio() {
+      await supabaseClient.from("jugadores").update({ respondio: false, continuo: false, respuesta_actual: null, puntaje: 0 }).eq("conectado", true);
+      await supabaseClient.from("respuestas").delete().eq("pregunta_id", preguntaActual.id);
+      await supabaseClient.from("partida").update({ estado: "esperando" }).eq("id", 1);
+      const boton = document.getElementById("botonContinuarResultado");
+      if (boton) boton.remove();
+      rondaCerrada = false; preguntaRespondida = false; retornoProgramado = false; continuarPresionado = false;
+      mostrarPantalla("pantallaSala");
     }
 
     async function actualizarPuntajeEquipo(equipo) {
