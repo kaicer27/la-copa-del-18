@@ -32,7 +32,7 @@
       background:
         linear-gradient(
           to bottom,
-          var(--azul) 0,
+          var(--azul) 0%,
           var(--azul) 34%,
           var(--blanco) 34%,
           var(--blanco) 67%,
@@ -57,7 +57,7 @@
     .escudo {
       width: 86px;
       height: 86px;
-      margin: 0 auto 10px;
+      margin: 0 auto 12px;
       border-radius: 50%;
       background: white;
       border: 7px solid var(--rojo);
@@ -66,7 +66,7 @@
       align-items: center;
       justify-content: center;
       color: var(--azul);
-      font-size: 42px;
+      font-size: 38px;
       font-weight: bold;
     }
 
@@ -83,7 +83,7 @@
 
     .pantalla {
       display: none;
-      background: rgba(255, 255, 255, .97);
+      background: rgba(255, 255, 255, .98);
       border-radius: 22px;
       padding: 26px;
       box-shadow: 0 12px 30px rgba(0, 0, 0, .2);
@@ -169,8 +169,7 @@
       font-weight: bold;
     }
 
-    input,
-    select {
+    input {
       width: 100%;
       padding: 13px;
       border: 2px solid var(--borde);
@@ -179,8 +178,7 @@
       outline: none;
     }
 
-    input:focus,
-    select:focus {
+    input:focus {
       border-color: var(--azul);
     }
 
@@ -199,7 +197,7 @@
       display: block;
     }
 
-    .exito {
+    .mensaje.exito {
       background: #edf9f0;
       color: var(--verde);
       border-color: #b8e1c3;
@@ -273,11 +271,6 @@
       transform: translateY(-3px);
     }
 
-    .tarjeta-desafio.inactivo {
-      opacity: .5;
-      cursor: not-allowed;
-    }
-
     .tarjeta-desafio strong {
       display: block;
       color: var(--azul);
@@ -290,12 +283,6 @@
       margin-top: 5px;
       color: #5d687b;
       font-size: 14px;
-    }
-
-    .separador {
-      height: 1px;
-      background: var(--borde);
-      margin: 24px 0;
     }
 
     .pie {
@@ -381,6 +368,7 @@
           <label for="fechaNacimientoCrear">
             Tu fecha de nacimiento
           </label>
+
           <input
             id="fechaNacimientoCrear"
             type="date"
@@ -390,24 +378,32 @@
         <div id="mensajeCrear" class="mensaje"></div>
 
         <div class="botones">
-          <button class="btn-rojo" onclick="crearSala()">
+          <button
+            id="btnCrearSala"
+            class="btn-rojo"
+            onclick="crearSala()"
+          >
             Crear sala
           </button>
 
-          <button class="btn-blanco" onclick="mostrarPantalla('inicio')">
+          <button
+            class="btn-blanco"
+            onclick="mostrarPantalla('inicio')"
+          >
             Volver
           </button>
         </div>
       </div>
     </section>
 
-    <!-- UNIRSE -->
+    <!-- UNIRSE A SALA -->
     <section id="pantallaUnirse" class="pantalla">
       <h2>Unirse a una sala</h2>
 
       <div class="formulario">
         <div class="campo">
           <label for="codigoUnirse">Código de sala</label>
+
           <input
             id="codigoUnirse"
             type="text"
@@ -418,6 +414,7 @@
 
         <div class="campo">
           <label for="nombreUnirse">Tu nombre</label>
+
           <input
             id="nombreUnirse"
             type="text"
@@ -430,6 +427,7 @@
           <label for="fechaNacimientoUnirse">
             Tu fecha de nacimiento
           </label>
+
           <input
             id="fechaNacimientoUnirse"
             type="date"
@@ -439,11 +437,18 @@
         <div id="mensajeUnirse" class="mensaje"></div>
 
         <div class="botones">
-          <button class="btn-azul" onclick="unirseSala()">
+          <button
+            id="btnUnirseSala"
+            class="btn-azul"
+            onclick="unirseSala()"
+          >
             Unirse
           </button>
 
-          <button class="btn-blanco" onclick="mostrarPantalla('inicio')">
+          <button
+            class="btn-blanco"
+            onclick="mostrarPantalla('inicio')"
+          >
             Volver
           </button>
         </div>
@@ -459,11 +464,12 @@
         <strong id="codigoSalaMostrar">----</strong>
       </div>
 
-      <p class="estado" id="estadoSala">
+      <p id="estadoSala" class="estado">
         Esperando jugadores...
       </p>
 
       <h3>Jugadores conectados</h3>
+
       <div id="listaJugadores" class="jugadores"></div>
 
       <div id="mensajeEspera" class="mensaje"></div>
@@ -473,12 +479,15 @@
           id="btnIniciarPartida"
           class="btn-rojo"
           onclick="iniciarPartida()"
-          style="display:none;"
+          style="display: none;"
         >
           Iniciar partida
         </button>
 
-        <button class="btn-blanco" onclick="salirDeSala()">
+        <button
+          class="btn-blanco"
+          onclick="salirDeSala()"
+        >
           Salir de la sala
         </button>
       </div>
@@ -497,7 +506,10 @@
       <div id="mensajeDesafios" class="mensaje"></div>
 
       <div class="botones">
-        <button class="btn-blanco" onclick="volverAEspera()">
+        <button
+          class="btn-blanco"
+          onclick="volverAEspera()"
+        >
           Volver a la sala
         </button>
       </div>
@@ -510,9 +522,9 @@
 
   <script>
     /*
-      ============================================================
-      CONFIGURACIÓN DE SUPABASE
-      ============================================================
+    ============================================================
+    CONFIGURACIÓN DE SUPABASE
+    ============================================================
     */
 
     const SUPABASE_URL =
@@ -527,22 +539,21 @@
     );
 
     /*
-      ============================================================
-      VARIABLES DEL JUEGO
-      ============================================================
+    ============================================================
+    VARIABLES DEL JUEGO
+    ============================================================
     */
 
     let salaActualId = null;
     let codigoSalaActual = null;
     let jugadorActualId = null;
     let esAnfitrion = false;
-
     let canalSala = null;
 
     /*
-      ============================================================
-      NAVEGACIÓN
-      ============================================================
+    ============================================================
+    NAVEGACIÓN
+    ============================================================
     */
 
     function mostrarPantalla(nombre) {
@@ -555,7 +566,9 @@
       };
 
       Object.values(pantallas).forEach(id => {
-        document.getElementById(id).classList.remove("activa");
+        document
+          .getElementById(id)
+          .classList.remove("activa");
       });
 
       document
@@ -566,14 +579,14 @@
     }
 
     function limpiarMensajes() {
-      document.querySelectorAll(".mensaje").forEach(mensaje => {
-        mensaje.textContent = "";
-        mensaje.classList.remove("visible", "exito");
+      document.querySelectorAll(".mensaje").forEach(elemento => {
+        elemento.textContent = "";
+        elemento.classList.remove("visible", "exito");
       });
     }
 
-    function mostrarMensaje(texto, elementoId, exito = false) {
-      const elemento = document.getElementById(elementoId);
+    function mostrarMensaje(texto, idElemento, exito = false) {
+      const elemento = document.getElementById(idElemento);
 
       if (!elemento) {
         alert(texto);
@@ -595,9 +608,9 @@
     }
 
     /*
-      ============================================================
-      CREAR SALA
-      ============================================================
+    ============================================================
+    CREAR SALA
+    ============================================================
     */
 
     async function crearSala() {
@@ -609,6 +622,8 @@
       const fechaNacimiento = document
         .getElementById("fechaNacimientoCrear")
         .value;
+
+      const boton = document.getElementById("btnCrearSala");
 
       if (!nombre) {
         mostrarMensaje(
@@ -626,11 +641,8 @@
         return;
       }
 
-      mostrarMensaje(
-        "Creando sala...",
-        "mensajeCrear",
-        true
-      );
+      boton.disabled = true;
+      boton.textContent = "Creando sala...";
 
       const { data, error } = await supabaseClient.rpc(
         "crear_sala",
@@ -648,6 +660,8 @@
           "mensajeCrear"
         );
 
+        boton.disabled = false;
+        boton.textContent = "Crear sala";
         return;
       }
 
@@ -658,6 +672,9 @@
           "Supabase no devolvió los datos de la sala.",
           "mensajeCrear"
         );
+
+        boton.disabled = false;
+        boton.textContent = "Crear sala";
         return;
       }
 
@@ -673,14 +690,17 @@
         "block";
 
       mostrarPantalla("espera");
-      cargarJugadores();
+      await cargarJugadores();
       suscribirseASala();
+
+      boton.disabled = false;
+      boton.textContent = "Crear sala";
     }
 
     /*
-      ============================================================
-      UNIRSE A UNA SALA
-      ============================================================
+    ============================================================
+    UNIRSE A UNA SALA
+    ============================================================
     */
 
     async function unirseSala() {
@@ -698,6 +718,8 @@
       const fechaNacimiento = document
         .getElementById("fechaNacimientoUnirse")
         .value;
+
+      const boton = document.getElementById("btnUnirseSala");
 
       if (!codigo) {
         mostrarMensaje(
@@ -723,11 +745,8 @@
         return;
       }
 
-      mostrarMensaje(
-        "Ingresando a la sala...",
-        "mensajeUnirse",
-        true
-      );
+      boton.disabled = true;
+      boton.textContent = "Ingresando...";
 
       const { data, error } = await supabaseClient.rpc(
         "unirse_a_sala",
@@ -746,6 +765,8 @@
           "mensajeUnirse"
         );
 
+        boton.disabled = false;
+        boton.textContent = "Unirse";
         return;
       }
 
@@ -756,6 +777,9 @@
           "Supabase no devolvió los datos del jugador.",
           "mensajeUnirse"
         );
+
+        boton.disabled = false;
+        boton.textContent = "Unirse";
         return;
       }
 
@@ -771,14 +795,17 @@
         "none";
 
       mostrarPantalla("espera");
-      cargarJugadores();
+      await cargarJugadores();
       suscribirseASala();
+
+      boton.disabled = false;
+      boton.textContent = "Unirse";
     }
 
     /*
-      ============================================================
-      CARGAR JUGADORES
-      ============================================================
+    ============================================================
+    CARGAR JUGADORES
+    ============================================================
     */
 
     async function cargarJugadores() {
@@ -812,6 +839,7 @@
             Aún no hay jugadores conectados.
           </div>
         `;
+
         return;
       }
 
@@ -835,9 +863,9 @@
     }
 
     /*
-      ============================================================
-      SUSCRIPCIÓN EN TIEMPO REAL
-      ============================================================
+    ============================================================
+    ACTUALIZACIÓN EN TIEMPO REAL
+    ============================================================
     */
 
     function suscribirseASala() {
@@ -849,6 +877,7 @@
 
       canalSala = supabaseClient
         .channel("sala-" + salaActualId)
+
         .on(
           "postgres_changes",
           {
@@ -861,6 +890,7 @@
             cargarJugadores();
           }
         )
+
         .on(
           "postgres_changes",
           {
@@ -873,6 +903,7 @@
             procesarCambioSala(payload.new);
           }
         )
+
         .subscribe();
     }
 
@@ -886,9 +917,9 @@
     }
 
     /*
-      ============================================================
-      INICIAR PARTIDA
-      ============================================================
+    ============================================================
+    INICIAR PARTIDA
+    ============================================================
     */
 
     async function iniciarPartida() {
@@ -909,6 +940,7 @@
       }
 
       const boton = document.getElementById("btnIniciarPartida");
+
       boton.disabled = true;
       boton.textContent = "Iniciando...";
 
@@ -939,14 +971,14 @@
         true
       );
 
-      cargarDesafios();
+      await cargarDesafios();
       mostrarPantalla("desafios");
     }
 
     /*
-      ============================================================
-      CARGAR DESAFÍOS
-      ============================================================
+    ============================================================
+    CARGAR DESAFÍOS
+    ============================================================
     */
 
     async function cargarDesafios() {
@@ -978,6 +1010,7 @@
             No hay desafíos activos.
           </div>
         `;
+
         return;
       }
 
@@ -1006,9 +1039,9 @@
     }
 
     /*
-      ============================================================
-      COMENZAR DESAFÍO
-      ============================================================
+    ============================================================
+    COMENZAR DESAFÍO
+    ============================================================
     */
 
     async function seleccionarDesafio(desafio) {
@@ -1017,6 +1050,7 @@
           "Solo el anfitrión puede seleccionar el desafío.",
           "mensajeDesafios"
         );
+
         return;
       }
 
@@ -1052,7 +1086,7 @@
       );
 
       /*
-        En el siguiente paso conectaremos aquí:
+        En el siguiente paso conectaremos:
         - Las preguntas
         - El contador
         - Los videos de YouTube
@@ -1062,9 +1096,9 @@
     }
 
     /*
-      ============================================================
-      VOLVER / SALIR
-      ============================================================
+    ============================================================
+    SALIR DE LA SALA
+    ============================================================
     */
 
     function volverAEspera() {
@@ -1090,9 +1124,9 @@
     }
 
     /*
-      ============================================================
-      SEGURIDAD BÁSICA PARA MOSTRAR TEXTO
-      ============================================================
+    ============================================================
+    SEGURIDAD BÁSICA PARA MOSTRAR TEXTO
+    ============================================================
     */
 
     function escapeHTML(texto) {
@@ -1105,9 +1139,9 @@
     }
 
     /*
-      ============================================================
-      CARGA INICIAL
-      ============================================================
+    ============================================================
+    COMPROBAR CONEXIÓN
+    ============================================================
     */
 
     async function comprobarConexion() {
@@ -1118,7 +1152,7 @@
 
       if (error) {
         console.error(
-          "La conexión con Supabase presenta un problema:",
+          "Problema de conexión con Supabase:",
           error
         );
       } else {
