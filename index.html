@@ -574,6 +574,9 @@
   <main class="app">
 
     <!-- INICIO -->
+    <section id="pantallaConductor" class="pantalla">
+      <div class="encabezado"><h2>Panel del conductor</h2><p>Ingresa el código para administrar la partida.</p></div><div class="tarjeta"><input id="codigoConductor" type="password" placeholder="Código de conductor" maxlength="8"><button class="boton principal" onclick="validarConductor()">Ingresar como conductor</button><p id="errorConductor" class="error"></p></div></section>
+
     <section id="pantallaInicio" class="pantalla activa inicio">
       <div class="bandera">
         <span class="rojo"></span>
@@ -594,7 +597,8 @@
       <button class="boton principal" onclick="mostrarSeleccion()">
         Comenzar juego
       </button>
-    </section>
+    <div class="acciones"><button class="boton secundario" onclick="mostrarConductor()">Ingresar como conductor</button></div>
+      </section>
 
 
     <!-- SELECCIÓN -->
@@ -916,6 +920,22 @@
 
       document.getElementById(id).classList.add("activa");
     }
+
+    function mostrarConductor() { mostrarPantalla("pantallaConductor"); document.getElementById("codigoConductor").value=""; document.getElementById("errorConductor").textContent=""; }
+
+    function validarConductor() {
+      const codigo = document.getElementById("codigoConductor").value.trim();
+      if (codigo === "18092026") {
+        localStorage.setItem("esConductor", "true");
+        mostrarPantalla("pantallaSala");
+        document.querySelector("#pantallaSala .mensaje h3").textContent = "Panel del conductor";
+        document.querySelector("#pantallaSala .mensaje p").textContent = "Desde aquí puedes iniciar y controlar los desafíos.";
+        const boton = document.querySelector("#pantallaSala .acciones button");
+        if (boton) { boton.textContent = "Iniciar desafío"; boton.onclick = iniciarDesafioConductor; }
+      } else { document.getElementById("errorConductor").textContent = "Código incorrecto."; }
+    }
+
+    function iniciarDesafioConductor() { mostrarPantallaJuego(); }
 
     function mostrarInicio() {
       mostrarPantalla("pantallaInicio");
