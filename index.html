@@ -700,11 +700,15 @@
       <div class="acciones">
         <button
           class="boton principal"
-          onclick="mostrarPantallaJuego()"
+          id="botonComenzarDesafio"
+          class="boton principal"
+          onclick="marcarListoParaDesafio()"
         >
-          Iniciar pregunta de prueba
+          Comenzar desafío
         </button>
       </div>
+
+      <div id="estadoDesafio" class="mensaje-respuesta">Esperando que todos estén listos para comenzar el desafío 1.</div>
 
       <div class="lista-sala">
         <div class="grupo">
@@ -1116,6 +1120,7 @@
 
       iniciarActualizacionSala();
       cargarDatosSala();
+      verificarTodosListos();
     }
 
 
@@ -1201,6 +1206,29 @@
       ==========================================
     */
 
+
+    async function marcarListoParaDesafio() {
+      if (!jugadorSeleccionado) return;
+      const boton = document.getElementById("botonComenzarDesafio");
+      boton.disabled = true;
+      boton.textContent = "⏳ Esperando a los demás...";
+      await supabaseClient.from("jugadores").update({ listo: true, respondio: false, continuo: false })
+        .eq("nombre", jugadorSeleccionado.nombre);
+      await verificarTodosListos();
+    }
+
+    async function verificarTodosListos() {
+      const { data, error } = await supabaseClient.from("jugadores")
+        .select("nombre, listo, conectado").eq("conectado", true);
+      if (error || !data || !data.length) return;
+      const estado = document.getElementById("estadoDesafio");
+      const listos = data.filter(j => j.listo === true).length;
+      estado.textContent = `Listos: ${listos} de ${data.length}. Esperando a los demás...`;
+      if (data.every(j => j.listo === true)) {
+        await supabaseClient.from("partida").update({ estado: "jugando", pregunta_actual: 1 }).eq("id", 1);
+        mostrarPantallaJuego();
+      }
+    }
 
     function mostrarPantallaJuego() {
       mostrarPantalla("pantallaJuego");
@@ -1365,7 +1393,7 @@
     }
 
     async function prepararSiguienteDesafio() {
-      await supabaseClient.from("jugadores").update({ respondio: false, continuo: false, respuesta_actual: null, puntaje: 0 }).eq("conectado", true);
+      await supabaseClient.from("jugadores").update({ listo: false, respondio: false, continuo: false, respuesta_actual: null, puntaje: 0 }).eq("conectado", true);
       await supabaseClient.from("respuestas").delete().eq("pregunta_id", preguntaActual.id);
       await supabaseClient.from("partida").update({ estado: "esperando" }).eq("id", 1);
       const boton = document.getElementById("botonContinuarResultado");
