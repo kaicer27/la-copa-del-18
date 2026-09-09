@@ -566,7 +566,30 @@
         width: 100%;
       }
     }
-  </style>
+  
+    .boton-moderador {
+      display: block !important;
+      width: 100%;
+      max-width: 360px;
+      margin: 18px auto 0;
+      border: 2px solid var(--azul);
+      background: #ffffff;
+      color: var(--azul);
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .boton-moderador:hover {
+      background: #eef4fa;
+    }
+
+    .ayuda-moderador {
+      margin: 8px auto 0;
+      color: #66727d;
+      font-size: 0.82rem;
+      text-align: center;
+    }
+</style>
 </head>
 
 <body>
@@ -597,8 +620,13 @@
       <button class="boton principal" onclick="mostrarSeleccion()">
         Comenzar juego
       </button>
-    <div class="acciones"><button class="boton secundario" onclick="mostrarConductor()">Ingresar como conductor</button></div>
-      </section>
+
+      <button class="boton secundario boton-moderador" onclick="mostrarConductor()">
+        🔐 Ingresar como moderador
+      </button>
+
+      <p class="ayuda-moderador">Acceso exclusivo para quien dirige la partida</p>
+    </section>
 
 
     <!-- SELECCIÓN -->
