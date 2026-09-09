@@ -7,6 +7,19 @@
   <title>La Copa del 18</title>
 
   <style>
+    :root {
+      --rojo: #d52b1e;
+      --rojo-oscuro: #a91f16;
+      --azul: #0039a6;
+      --azul-oscuro: #00266f;
+      --blanco: #ffffff;
+      --fondo: #f4f6fb;
+      --texto: #172033;
+      --gris: #667085;
+      --borde: #d9deea;
+      --verde: #16803c;
+    }
+
     * {
       box-sizing: border-box;
     }
@@ -14,156 +27,951 @@
     body {
       margin: 0;
       min-height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      padding: 20px;
-      background: #101820;
-      color: white;
-      font-family: Arial, sans-serif;
+      font-family: Arial, Helvetica, sans-serif;
+      color: var(--texto);
+      background:
+        linear-gradient(
+          135deg,
+          #ffffff 0%,
+          #ffffff 48%,
+          #f2f4f8 48%,
+          #f2f4f8 100%
+        );
     }
 
-    .contenedor {
-      width: 100%;
-      max-width: 650px;
-      padding: 30px;
-      border-radius: 20px;
-      background: #1d2b36;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+    header {
+      position: relative;
+      overflow: hidden;
+      padding: 28px 20px 42px;
+      color: var(--blanco);
       text-align: center;
+      background: linear-gradient(
+        135deg,
+        var(--azul-oscuro),
+        var(--azul)
+      );
     }
 
-    h1 {
-      margin-top: 0;
-      color: #f5c542;
+    header::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 12px;
+      background: var(--rojo);
     }
 
-    .estado {
-      margin: 20px 0;
-      padding: 15px;
-      border-radius: 10px;
-      background: #263b49;
+    .escudo {
+      width: 82px;
+      height: 82px;
+      margin: 0 auto 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 4px solid var(--blanco);
+      border-radius: 50%;
+      background: var(--rojo);
+      font-size: 38px;
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: clamp(2rem, 7vw, 3.5rem);
+      letter-spacing: -1px;
+    }
+
+    header p {
+      margin: 10px 0 0;
+      font-size: 1rem;
+      opacity: 0.92;
+    }
+
+    main {
+      width: min(100% - 32px, 850px);
+      margin: -22px auto 40px;
+      position: relative;
+      z-index: 2;
+    }
+
+    .tarjeta {
+      margin-bottom: 20px;
+      padding: 24px;
+      border: 1px solid var(--borde);
+      border-radius: 20px;
+      background: var(--blanco);
+      box-shadow: 0 10px 28px rgba(22, 35, 66, 0.08);
+    }
+
+    .tarjeta h2 {
+      margin: 0 0 8px;
+      color: var(--azul-oscuro);
+      font-size: 1.35rem;
+    }
+
+    .subtitulo {
+      margin: 0 0 20px;
+      color: var(--gris);
       line-height: 1.5;
     }
 
-    .correcto {
-      color: #65e572;
+    .bandera {
+      display: flex;
+      height: 8px;
+      margin: 18px 0 24px;
+      overflow: hidden;
+      border-radius: 20px;
     }
 
-    .error {
-      color: #ff7777;
+    .bandera .azul {
+      flex: 1;
+      background: var(--azul);
+    }
+
+    .bandera .blanco {
+      flex: 1;
+      background: var(--blanco);
+      border-top: 1px solid var(--borde);
+      border-bottom: 1px solid var(--borde);
+    }
+
+    .bandera .rojo {
+      flex: 1;
+      background: var(--rojo);
+    }
+
+    .botones-inicio {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    button {
+      width: 100%;
+      min-height: 48px;
+      padding: 12px 18px;
+      border: 0;
+      border-radius: 12px;
+      color: white;
+      font-size: 1rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: transform 0.15s, filter 0.15s;
+    }
+
+    button:hover {
+      filter: brightness(1.08);
+      transform: translateY(-1px);
+    }
+
+    button:disabled {
+      cursor: not-allowed;
+      opacity: 0.55;
+      transform: none;
+    }
+
+    .btn-rojo {
+      background: var(--rojo);
+    }
+
+    .btn-azul {
+      background: var(--azul);
+    }
+
+    .btn-secundario {
+      background: #e9edf5;
+      color: var(--azul-oscuro);
+    }
+
+    .formulario {
+      display: grid;
+      gap: 14px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 6px;
+      color: var(--texto);
+      font-weight: bold;
+    }
+
+    input {
+      width: 100%;
+      min-height: 48px;
+      padding: 12px 14px;
+      border: 1px solid var(--borde);
+      border-radius: 10px;
+      outline: none;
+      color: var(--texto);
+      background: white;
+      font-size: 1rem;
+    }
+
+    input:focus {
+      border-color: var(--azul);
+      box-shadow: 0 0 0 3px rgba(0, 57, 166, 0.12);
+    }
+
+    .codigo-sala {
+      padding: 18px;
+      border-radius: 14px;
+      color: var(--azul-oscuro);
+      background: #eaf0ff;
+      text-align: center;
+    }
+
+    .codigo-sala strong {
+      display: block;
+      margin-top: 6px;
+      color: var(--rojo);
+      font-size: 2.5rem;
+      letter-spacing: 8px;
+    }
+
+    .mensaje {
+      display: none;
+      margin-bottom: 18px;
+      padding: 14px 16px;
+      border-radius: 10px;
+      line-height: 1.4;
+    }
+
+    .mensaje.visible {
+      display: block;
+    }
+
+    .mensaje.exito {
+      color: #0b5d2a;
+      background: #e6f6eb;
+      border: 1px solid #b8e5c6;
+    }
+
+    .mensaje.error {
+      color: #8a1710;
+      background: #fff0ee;
+      border: 1px solid #f2bbb5;
+    }
+
+    .mensaje.info {
+      color: #17427c;
+      background: #eaf2ff;
+      border: 1px solid #bfd5fa;
+    }
+
+    .oculto {
+      display: none !important;
+    }
+
+    .lista-jugadores {
+      display: grid;
+      gap: 10px;
+      margin: 18px 0;
+    }
+
+    .jugador {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 14px;
+      border-radius: 10px;
+      background: #f3f5f9;
+      font-weight: bold;
+    }
+
+    .jugador::before {
+      content: "🇨🇱";
+    }
+
+    .desafios {
+      display: grid;
+      gap: 10px;
     }
 
     .desafio {
       display: flex;
       justify-content: space-between;
-      gap: 10px;
-      padding: 12px;
-      margin-top: 10px;
-      border-radius: 8px;
-      background: #304957;
-      text-align: left;
+      align-items: center;
+      gap: 12px;
+      padding: 14px;
+      border: 1px solid var(--borde);
+      border-left: 5px solid var(--rojo);
+      border-radius: 10px;
+      background: #fafbfe;
     }
 
-    .cargando {
-      color: #f5c542;
+    .desafio-nombre {
+      font-weight: bold;
+    }
+
+    .desafio-puntos {
+      flex-shrink: 0;
+      color: var(--azul);
+      font-size: 0.9rem;
+      font-weight: bold;
+    }
+
+    .pie {
+      padding: 10px 0;
+      color: var(--gris);
+      font-size: 0.85rem;
+      text-align: center;
+    }
+
+    @media (max-width: 600px) {
+      main {
+        width: min(100% - 20px, 850px);
+        margin-top: -18px;
+      }
+
+      .tarjeta {
+        padding: 18px;
+        border-radius: 16px;
+      }
+
+      .botones-inicio {
+        grid-template-columns: 1fr;
+      }
+
+      .desafio {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .desafio-puntos {
+        align-self: flex-start;
+      }
     }
   </style>
 </head>
 
 <body>
 
-  <main class="contenedor">
-    <h1>🇨🇱 La Copa del 18</h1>
+  <header>
+    <div class="escudo">🇨🇱</div>
+    <h1>La Copa del 18</h1>
+    <p>La gran competencia de cultura, música y tradiciones chilenas</p>
+  </header>
 
-    <p>Prueba de conexión con Supabase</p>
+  <main>
 
-    <div id="estado" class="estado cargando">
-      Conectando con la base de datos...
-    </div>
+    <div id="mensaje" class="mensaje"></div>
 
-    <section>
-      <h2>Desafíos activos</h2>
-      <div id="listaDesafios">
+    <!-- Pantalla inicial -->
+    <section id="pantallaInicio" class="tarjeta">
+      <h2>¡Bienvenidos a La Copa del 18!</h2>
+      <p class="subtitulo">
+        Reúne a tus amigos, crea una sala y demuestra cuánto sabes.
+      </p>
+
+      <div class="bandera">
+        <span class="azul"></span>
+        <span class="blanco"></span>
+        <span class="rojo"></span>
+      </div>
+
+      <div class="botones-inicio">
+        <button id="btnMostrarCrear" class="btn-rojo">
+          Crear sala
+        </button>
+
+        <button id="btnMostrarUnirse" class="btn-azul">
+          Unirse a una sala
+        </button>
+      </div>
+    </section>
+
+    <!-- Crear sala -->
+    <section id="pantallaCrear" class="tarjeta oculto">
+      <h2>Crear una sala</h2>
+      <p class="subtitulo">
+        Ingresa tu nombre para crear una nueva partida.
+      </p>
+
+      <form id="formCrearSala" class="formulario">
+        <div>
+          <label for="nombreCreador">Tu nombre</label>
+          <input
+            id="nombreCreador"
+            type="text"
+            maxlength="40"
+            placeholder="Ejemplo: Rodrigo"
+            required
+          >
+        </div>
+
+        <button type="submit" class="btn-rojo">
+          Crear sala
+        </button>
+
+        <button type="button" id="btnVolverInicio1" class="btn-secundario">
+          Volver
+        </button>
+      </form>
+    </section>
+
+    <!-- Unirse a sala -->
+    <section id="pantallaUnirse" class="tarjeta oculto">
+      <h2>Unirse a una sala</h2>
+      <p class="subtitulo">
+        Escribe el código que te entregó el creador de la partida.
+      </p>
+
+      <form id="formUnirseSala" class="formulario">
+        <div>
+          <label for="codigoSala">Código de sala</label>
+          <input
+            id="codigoSala"
+            type="text"
+            maxlength="4"
+            inputmode="numeric"
+            placeholder="Ejemplo: 2225"
+            required
+          >
+        </div>
+
+        <div>
+          <label for="nombreJugador">Tu nombre</label>
+          <input
+            id="nombreJugador"
+            type="text"
+            maxlength="40"
+            placeholder="Ejemplo: Camila"
+            required
+          >
+        </div>
+
+        <button type="submit" class="btn-azul">
+          Unirme a la sala
+        </button>
+
+        <button type="button" id="btnVolverInicio2" class="btn-secundario">
+          Volver
+        </button>
+      </form>
+    </section>
+
+    <!-- Sala de espera -->
+    <section id="pantallaSala" class="tarjeta oculto">
+      <h2>Sala de espera</h2>
+      <p class="subtitulo">
+        Comparte este código con los demás jugadores.
+      </p>
+
+      <div class="codigo-sala">
+        Código de sala
+        <strong id="codigoMostrado">----</strong>
+      </div>
+
+      <h3>Jugadores conectados</h3>
+
+      <div id="listaJugadores" class="lista-jugadores">
+        <p>Cargando jugadores...</p>
+      </div>
+
+      <button id="btnIniciarPartida" class="btn-rojo oculto">
+        Iniciar partida
+      </button>
+    </section>
+
+    <!-- Pantalla de desafíos -->
+    <section id="pantallaDesafios" class="tarjeta oculto">
+      <h2>Desafíos de la partida</h2>
+      <p class="subtitulo">
+        Estos son los cinco desafíos disponibles.
+      </p>
+
+      <div id="listaDesafios" class="desafios">
         Cargando desafíos...
       </div>
     </section>
+
+    <p class="pie">
+      🇨🇱 La Copa del 18 · ¡Que gane el mejor!
+    </p>
+
   </main>
 
   <!-- Librería oficial de Supabase -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <script>
-    // Datos de conexión del proyecto la-copa-18
+    /*
+      =====================================================
+      CONFIGURACIÓN DE SUPABASE
+      =====================================================
+    */
+
     const SUPABASE_URL =
       "https://urfeonehzrhaiimtdqhb.supabase.co";
 
     const SUPABASE_KEY =
       "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVyZmVvbmVoenJoYWlpbXRkcWhiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg5ODIwNjgsImV4cCI6MjEwNDU1ODA2OH0.YaShhjSJp1zKPaxuz3t_LbUcc9-HYqxt42ByPo4UcGI";
 
-    // Crear conexión
     const supabaseClient = window.supabase.createClient(
       SUPABASE_URL,
       SUPABASE_KEY
     );
 
-    const estado = document.getElementById("estado");
-    const listaDesafios = document.getElementById("listaDesafios");
+    /*
+      =====================================================
+      VARIABLES DEL JUEGO
+      =====================================================
+    */
 
-    async function probarConexion() {
+    let salaActual = null;
+    let jugadorActual = null;
+    let esCreador = false;
+    let canalJugadores = null;
+
+    /*
+      =====================================================
+      ELEMENTOS DE LA PANTALLA
+      =====================================================
+    */
+
+    const mensaje = document.getElementById("mensaje");
+
+    const pantallaInicio = document.getElementById("pantallaInicio");
+    const pantallaCrear = document.getElementById("pantallaCrear");
+    const pantallaUnirse = document.getElementById("pantallaUnirse");
+    const pantallaSala = document.getElementById("pantallaSala");
+    const pantallaDesafios = document.getElementById("pantallaDesafios");
+
+    const listaJugadores = document.getElementById("listaJugadores");
+    const codigoMostrado = document.getElementById("codigoMostrado");
+    const btnIniciarPartida = document.getElementById("btnIniciarPartida");
+
+    /*
+      =====================================================
+      FUNCIONES GENERALES
+      =====================================================
+    */
+
+    function mostrarMensaje(texto, tipo = "info") {
+      mensaje.textContent = texto;
+      mensaje.className = "mensaje visible " + tipo;
+    }
+
+    function ocultarMensaje() {
+      mensaje.className = "mensaje";
+      mensaje.textContent = "";
+    }
+
+    function mostrarPantalla(pantalla) {
+      [
+        pantallaInicio,
+        pantallaCrear,
+        pantallaUnirse,
+        pantallaSala,
+        pantallaDesafios
+      ].forEach(function(elemento) {
+        elemento.classList.add("oculto");
+      });
+
+      pantalla.classList.remove("oculto");
+      ocultarMensaje();
+    }
+
+    function limpiarTexto(texto) {
+      return String(texto)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    /*
+      =====================================================
+      CARGAR DESAFÍOS
+      =====================================================
+    */
+
+    async function cargarDesafios() {
+      const lista = document.getElementById("listaDesafios");
+
+      const { data, error } = await supabaseClient
+        .from("desafios")
+        .select("numero, nombre, tipo, puntaje_base, tiempo_respuesta")
+        .eq("activo", true)
+        .order("numero", { ascending: true });
+
+      if (error) {
+        console.error(error);
+        lista.innerHTML = "<p>No se pudieron cargar los desafíos.</p>";
+        return;
+      }
+
+      lista.innerHTML = "";
+
+      data.forEach(function(desafio) {
+        const elemento = document.createElement("div");
+        elemento.className = "desafio";
+
+        elemento.innerHTML = `
+          <span class="desafio-nombre">
+            ${desafio.numero}. ${limpiarTexto(desafio.nombre)}
+          </span>
+          <span class="desafio-puntos">
+            ${desafio.puntaje_base} punto(s) por pregunta
+          </span>
+        `;
+
+        lista.appendChild(elemento);
+      });
+    }
+
+    /*
+      =====================================================
+      CREAR SALA
+      =====================================================
+    */
+
+    document
+      .getElementById("formCrearSala")
+      .addEventListener("submit", async function(evento) {
+        evento.preventDefault();
+
+        const nombre = document
+          .getElementById("nombreCreador")
+          .value
+          .trim();
+
+        if (!nombre) {
+          mostrarMensaje("Debes ingresar tu nombre.", "error");
+          return;
+        }
+
+        const boton = evento.submitter;
+        boton.disabled = true;
+        boton.textContent = "Creando sala...";
+
+        try {
+          /*
+            Esta llamada utiliza la función crear_sala
+            creada previamente en Supabase.
+          */
+          const { data, error } = await supabaseClient.rpc(
+            "crear_sala",
+            {
+              p_nombre: nombre
+            }
+          );
+
+          if (error) {
+            throw error;
+          }
+
+          console.log("Resultado crear_sala:", data);
+
+          /*
+            Se admite tanto un objeto como una lista
+            dependiendo de cómo devuelva datos la función.
+          */
+          const resultado = Array.isArray(data) ? data[0] : data;
+
+          salaActual =
+            resultado.codigo ||
+            resultado.codigo_sala ||
+            resultado.sala_codigo;
+
+          jugadorActual =
+            resultado.jugador_id ||
+            resultado.id_jugador ||
+            resultado.jugador;
+
+          esCreador = true;
+
+          if (!salaActual) {
+            throw new Error(
+              "La sala fue creada, pero no se recibió su código."
+            );
+          }
+
+          codigoMostrado.textContent = salaActual;
+
+          mostrarPantalla(pantallaSala);
+          await cargarJugadores();
+
+          iniciarEscuchaJugadores();
+
+          btnIniciarPartida.classList.remove("oculto");
+
+          mostrarMensaje(
+            "Sala creada correctamente. Comparte el código con los demás jugadores.",
+            "exito"
+          );
+
+        } catch (error) {
+          console.error("Error al crear sala:", error);
+
+          mostrarMensaje(
+            "No se pudo crear la sala: " + error.message,
+            "error"
+          );
+        } finally {
+          boton.disabled = false;
+          boton.textContent = "Crear sala";
+        }
+      });
+
+    /*
+      =====================================================
+      UNIRSE A UNA SALA
+      =====================================================
+    */
+
+    document
+      .getElementById("formUnirseSala")
+      .addEventListener("submit", async function(evento) {
+        evento.preventDefault();
+
+        const codigo = document
+          .getElementById("codigoSala")
+          .value
+          .trim();
+
+        const nombre = document
+          .getElementById("nombreJugador")
+          .value
+          .trim();
+
+        if (!codigo || !nombre) {
+          mostrarMensaje(
+            "Debes ingresar el código y tu nombre.",
+            "error"
+          );
+          return;
+        }
+
+        const boton = evento.submitter;
+        boton.disabled = true;
+        boton.textContent = "Ingresando...";
+
+        try {
+          /*
+            Esta llamada utiliza la función unirse_a_sala
+            creada previamente en Supabase.
+          */
+          const { data, error } = await supabaseClient.rpc(
+            "unirse_a_sala",
+            {
+              p_codigo: codigo,
+              p_nombre: nombre
+            }
+          );
+
+          if (error) {
+            throw error;
+          }
+
+          console.log("Resultado unirse_a_sala:", data);
+
+          const resultado = Array.isArray(data) ? data[0] : data;
+
+          salaActual =
+            resultado.codigo ||
+            resultado.codigo_sala ||
+            codigo;
+
+          jugadorActual =
+            resultado.jugador_id ||
+            resultado.id_jugador ||
+            resultado.jugador;
+
+          esCreador = false;
+
+          codigoMostrado.textContent = salaActual;
+
+          mostrarPantalla(pantallaSala);
+          await cargarJugadores();
+
+          iniciarEscuchaJugadores();
+
+          mostrarMensaje(
+            "Te uniste correctamente a la sala.",
+            "exito"
+          );
+
+        } catch (error) {
+          console.error("Error al unirse:", error);
+
+          mostrarMensaje(
+            "No se pudo ingresar a la sala: " + error.message,
+            "error"
+          );
+        } finally {
+          boton.disabled = false;
+          boton.textContent = "Unirme a la sala";
+        }
+      });
+
+    /*
+      =====================================================
+      CARGAR JUGADORES
+      =====================================================
+    */
+
+    async function cargarJugadores() {
+      if (!salaActual) return;
+
+      const { data, error } = await supabaseClient
+        .from("jugadores")
+        .select("*")
+        .eq("codigo_sala", salaActual)
+        .order("creado_en", { ascending: true });
+
+      if (error) {
+        console.error("Error cargando jugadores:", error);
+
+        listaJugadores.innerHTML =
+          "<p>No se pudieron cargar los jugadores.</p>";
+
+        return;
+      }
+
+      listaJugadores.innerHTML = "";
+
+      if (!data || data.length === 0) {
+        listaJugadores.innerHTML =
+          "<p>Aún no hay jugadores conectados.</p>";
+        return;
+      }
+
+      data.forEach(function(jugador) {
+        const elemento = document.createElement("div");
+        elemento.className = "jugador";
+
+        const nombre =
+          jugador.nombre ||
+          jugador.nombre_jugador ||
+          jugador.alias ||
+          "Jugador";
+
+        elemento.textContent = nombre;
+        listaJugadores.appendChild(elemento);
+      });
+    }
+
+    /*
+      =====================================================
+      ACTUALIZACIÓN EN TIEMPO REAL
+      =====================================================
+    */
+
+    function iniciarEscuchaJugadores() {
+      if (!salaActual) return;
+
+      if (canalJugadores) {
+        supabaseClient.removeChannel(canalJugadores);
+      }
+
+      canalJugadores = supabaseClient
+        .channel("jugadores-sala-" + salaActual)
+        .on(
+          "postgres_changes",
+          {
+            event: "*",
+            schema: "public",
+            table: "jugadores"
+          },
+          function() {
+            cargarJugadores();
+          }
+        )
+        .subscribe();
+    }
+
+    /*
+      =====================================================
+      INICIAR PARTIDA
+      =====================================================
+    */
+
+    btnIniciarPartida.addEventListener("click", async function() {
+      if (!salaActual) {
+        mostrarMensaje("No hay una sala activa.", "error");
+        return;
+      }
+
+      btnIniciarPartida.disabled = true;
+      btnIniciarPartida.textContent = "Iniciando...";
+
       try {
-        const { data, error } = await supabaseClient
-          .from("desafios")
-          .select("numero, nombre, tipo, puntaje_base, tiempo_respuesta, activo")
-          .eq("activo", true)
-          .order("numero", { ascending: true });
+        const { data, error } = await supabaseClient.rpc(
+          "iniciar_partida",
+          {
+            p_codigo: salaActual
+          }
+        );
 
         if (error) {
           throw error;
         }
 
-        estado.className = "estado correcto";
-        estado.textContent =
-          "✅ Conexión correcta con Supabase. " +
-          "Desafíos activos encontrados: " + data.length;
+        console.log("Partida iniciada:", data);
 
-        listaDesafios.innerHTML = "";
+        mostrarPantalla(pantallaDesafios);
+        await cargarDesafios();
 
-        if (!data || data.length === 0) {
-          listaDesafios.innerHTML =
-            "<p>No hay desafíos activos.</p>";
-          return;
-        }
-
-        data.forEach(function(desafio) {
-          const elemento = document.createElement("div");
-          elemento.className = "desafio";
-
-          elemento.innerHTML = `
-            <strong>
-              ${desafio.numero}. ${desafio.nombre}
-            </strong>
-            <span>
-              ${desafio.puntaje_base} punto(s)
-            </span>
-          `;
-
-          listaDesafios.appendChild(elemento);
-        });
+        mostrarMensaje(
+          "La partida comenzó correctamente.",
+          "exito"
+        );
 
       } catch (error) {
-        console.error("Error de conexión:", error);
+        console.error("Error al iniciar partida:", error);
 
-        estado.className = "estado error";
-        estado.textContent =
-          "❌ Error al conectar con Supabase: " + error.message;
-
-        listaDesafios.innerHTML =
-          "<p>Revisa la URL, la clave pública y las políticas de acceso.</p>";
+        mostrarMensaje(
+          "No se pudo iniciar la partida: " + error.message,
+          "error"
+        );
+      } finally {
+        btnIniciarPartida.disabled = false;
+        btnIniciarPartida.textContent = "Iniciar partida";
       }
-    }
+    });
 
-    probarConexion();
+    /*
+      =====================================================
+      BOTONES DE NAVEGACIÓN
+      =====================================================
+    */
+
+    document
+      .getElementById("btnMostrarCrear")
+      .addEventListener("click", function() {
+        mostrarPantalla(pantallaCrear);
+      });
+
+    document
+      .getElementById("btnMostrarUnirse")
+      .addEventListener("click", function() {
+        mostrarPantalla(pantallaUnirse);
+      });
+
+    document
+      .getElementById("btnVolverInicio1")
+      .addEventListener("click", function() {
+        mostrarPantalla(pantallaInicio);
+      });
+
+    document
+      .getElementById("btnVolverInicio2")
+      .addEventListener("click", function() {
+        mostrarPantalla(pantallaInicio);
+      });
+
+    /*
+      =====================================================
+      INICIO
+      =====================================================
+    */
+
+    cargarDesafios();
+
+    console.log("La Copa del 18: Supabase conectado.");
   </script>
 
 </body>
