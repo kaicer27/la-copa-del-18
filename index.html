@@ -1,10 +1,11 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>La Copa del 18</title>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <style>
     :root {
@@ -13,10 +14,9 @@
       --azul: #0039a6;
       --azul-oscuro: #00266f;
       --blanco: #ffffff;
-      --fondo: #f4f6fb;
+      --gris: #f3f5f8;
       --texto: #172033;
-      --gris: #667085;
-      --borde: #d9deea;
+      --borde: #dfe4ec;
       --verde: #16803c;
     }
 
@@ -31,209 +31,167 @@
       color: var(--texto);
       background:
         linear-gradient(
-          135deg,
-          #ffffff 0%,
-          #ffffff 48%,
-          #f2f4f8 48%,
-          #f2f4f8 100%
+          to bottom,
+          var(--azul) 0,
+          var(--azul) 34%,
+          var(--blanco) 34%,
+          var(--blanco) 67%,
+          var(--rojo) 67%,
+          var(--rojo) 100%
         );
     }
 
-    header {
-      position: relative;
-      overflow: hidden;
-      padding: 28px 20px 42px;
-      color: var(--blanco);
-      text-align: center;
-      background: linear-gradient(
-        135deg,
-        var(--azul-oscuro),
-        var(--azul)
-      );
+    .contenedor {
+      width: min(100% - 32px, 900px);
+      margin: 0 auto;
+      padding: 24px 0 40px;
     }
 
-    header::after {
-      content: "";
-      position: absolute;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      height: 12px;
-      background: var(--rojo);
+    .encabezado {
+      text-align: center;
+      color: white;
+      margin-bottom: 22px;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, .25);
     }
 
     .escudo {
-      width: 82px;
-      height: 82px;
-      margin: 0 auto 14px;
+      width: 86px;
+      height: 86px;
+      margin: 0 auto 10px;
+      border-radius: 50%;
+      background: white;
+      border: 7px solid var(--rojo);
+      outline: 5px solid white;
       display: flex;
       align-items: center;
       justify-content: center;
-      border: 4px solid var(--blanco);
-      border-radius: 50%;
-      background: var(--rojo);
-      font-size: 38px;
-      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
+      color: var(--azul);
+      font-size: 42px;
+      font-weight: bold;
     }
 
-    header h1 {
+    h1 {
       margin: 0;
-      font-size: clamp(2rem, 7vw, 3.5rem);
-      letter-spacing: -1px;
-    }
-
-    header p {
-      margin: 10px 0 0;
-      font-size: 1rem;
-      opacity: 0.92;
-    }
-
-    main {
-      width: min(100% - 32px, 850px);
-      margin: -22px auto 40px;
-      position: relative;
-      z-index: 2;
-    }
-
-    .tarjeta {
-      margin-bottom: 20px;
-      padding: 24px;
-      border: 1px solid var(--borde);
-      border-radius: 20px;
-      background: var(--blanco);
-      box-shadow: 0 10px 28px rgba(22, 35, 66, 0.08);
-    }
-
-    .tarjeta h2 {
-      margin: 0 0 8px;
-      color: var(--azul-oscuro);
-      font-size: 1.35rem;
+      font-size: clamp(30px, 6vw, 52px);
     }
 
     .subtitulo {
-      margin: 0 0 20px;
-      color: var(--gris);
-      line-height: 1.5;
+      margin-top: 8px;
+      font-size: 17px;
+      font-weight: bold;
     }
 
-    .bandera {
+    .pantalla {
+      display: none;
+      background: rgba(255, 255, 255, .97);
+      border-radius: 22px;
+      padding: 26px;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, .2);
+      border-top: 8px solid var(--rojo);
+    }
+
+    .pantalla.activa {
+      display: block;
+    }
+
+    h2 {
+      margin-top: 0;
+      color: var(--azul);
+      text-align: center;
+    }
+
+    h3 {
+      color: var(--rojo);
+    }
+
+    .descripcion {
+      text-align: center;
+      line-height: 1.6;
+      margin-bottom: 24px;
+    }
+
+    .botones {
       display: flex;
-      height: 8px;
-      margin: 18px 0 24px;
-      overflow: hidden;
-      border-radius: 20px;
-    }
-
-    .bandera .azul {
-      flex: 1;
-      background: var(--azul);
-    }
-
-    .bandera .blanco {
-      flex: 1;
-      background: var(--blanco);
-      border-top: 1px solid var(--borde);
-      border-bottom: 1px solid var(--borde);
-    }
-
-    .bandera .rojo {
-      flex: 1;
-      background: var(--rojo);
-    }
-
-    .botones-inicio {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 14px;
+      flex-wrap: wrap;
+      gap: 12px;
+      justify-content: center;
     }
 
     button {
-      width: 100%;
-      min-height: 48px;
-      padding: 12px 18px;
       border: 0;
       border-radius: 12px;
-      color: white;
-      font-size: 1rem;
+      padding: 14px 20px;
+      font-size: 16px;
       font-weight: bold;
       cursor: pointer;
-      transition: transform 0.15s, filter 0.15s;
+      transition: .2s;
     }
 
     button:hover {
-      filter: brightness(1.08);
-      transform: translateY(-1px);
+      transform: translateY(-2px);
+      filter: brightness(1.05);
     }
 
     button:disabled {
       cursor: not-allowed;
-      opacity: 0.55;
+      opacity: .55;
       transform: none;
     }
 
     .btn-rojo {
       background: var(--rojo);
+      color: white;
     }
 
     .btn-azul {
       background: var(--azul);
+      color: white;
     }
 
-    .btn-secundario {
-      background: #e9edf5;
-      color: var(--azul-oscuro);
+    .btn-blanco {
+      background: white;
+      color: var(--azul);
+      border: 2px solid var(--azul);
     }
 
     .formulario {
-      display: grid;
-      gap: 14px;
+      max-width: 500px;
+      margin: 0 auto;
+    }
+
+    .campo {
+      margin-bottom: 16px;
     }
 
     label {
       display: block;
-      margin-bottom: 6px;
-      color: var(--texto);
+      margin-bottom: 7px;
       font-weight: bold;
     }
 
-    input {
+    input,
+    select {
       width: 100%;
-      min-height: 48px;
-      padding: 12px 14px;
-      border: 1px solid var(--borde);
+      padding: 13px;
+      border: 2px solid var(--borde);
       border-radius: 10px;
+      font-size: 16px;
       outline: none;
-      color: var(--texto);
-      background: white;
-      font-size: 1rem;
     }
 
-    input:focus {
+    input:focus,
+    select:focus {
       border-color: var(--azul);
-      box-shadow: 0 0 0 3px rgba(0, 57, 166, 0.12);
-    }
-
-    .codigo-sala {
-      padding: 18px;
-      border-radius: 14px;
-      color: var(--azul-oscuro);
-      background: #eaf0ff;
-      text-align: center;
-    }
-
-    .codigo-sala strong {
-      display: block;
-      margin-top: 6px;
-      color: var(--rojo);
-      font-size: 2.5rem;
-      letter-spacing: 8px;
     }
 
     .mensaje {
-      display: none;
-      margin-bottom: 18px;
-      padding: 14px 16px;
+      margin: 15px 0;
+      padding: 13px;
       border-radius: 10px;
+      background: #fff2f0;
+      color: #9c2017;
+      border: 1px solid #f2b7b1;
+      display: none;
       line-height: 1.4;
     }
 
@@ -241,272 +199,327 @@
       display: block;
     }
 
-    .mensaje.exito {
-      color: #0b5d2a;
-      background: #e6f6eb;
-      border: 1px solid #b8e5c6;
+    .exito {
+      background: #edf9f0;
+      color: var(--verde);
+      border-color: #b8e1c3;
     }
 
-    .mensaje.error {
-      color: #8a1710;
-      background: #fff0ee;
-      border: 1px solid #f2bbb5;
+    .codigo {
+      margin: 22px auto;
+      padding: 20px;
+      max-width: 340px;
+      text-align: center;
+      border-radius: 16px;
+      background: var(--azul);
+      color: white;
     }
 
-    .mensaje.info {
-      color: #17427c;
-      background: #eaf2ff;
-      border: 1px solid #bfd5fa;
+    .codigo small {
+      display: block;
+      margin-bottom: 8px;
     }
 
-    .oculto {
-      display: none !important;
+    .codigo strong {
+      font-size: 42px;
+      letter-spacing: 8px;
     }
 
-    .lista-jugadores {
+    .jugadores {
       display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
       gap: 10px;
       margin: 18px 0;
     }
 
     .jugador {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 12px 14px;
-      border-radius: 10px;
-      background: #f3f5f9;
-      font-weight: bold;
-    }
-
-    .jugador::before {
-      content: "🇨🇱";
-    }
-
-    .desafios {
-      display: grid;
-      gap: 10px;
-    }
-
-    .desafio {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 12px;
-      padding: 14px;
+      background: var(--gris);
       border: 1px solid var(--borde);
-      border-left: 5px solid var(--rojo);
-      border-radius: 10px;
-      background: #fafbfe;
-    }
-
-    .desafio-nombre {
+      border-radius: 12px;
+      padding: 12px;
       font-weight: bold;
     }
 
-    .desafio-puntos {
-      flex-shrink: 0;
+    .jugador small {
+      display: block;
+      margin-top: 5px;
+      color: #657086;
+      font-weight: normal;
+    }
+
+    .estado {
+      text-align: center;
+      font-weight: bold;
+      margin: 16px 0;
+    }
+
+    .tarjetas-desafios {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 14px;
+    }
+
+    .tarjeta-desafio {
+      padding: 18px;
+      border-radius: 15px;
+      background: var(--gris);
+      border: 2px solid var(--borde);
+      cursor: pointer;
+      transition: .2s;
+    }
+
+    .tarjeta-desafio:hover {
+      border-color: var(--rojo);
+      transform: translateY(-3px);
+    }
+
+    .tarjeta-desafio.inactivo {
+      opacity: .5;
+      cursor: not-allowed;
+    }
+
+    .tarjeta-desafio strong {
+      display: block;
       color: var(--azul);
-      font-size: 0.9rem;
-      font-weight: bold;
+      font-size: 19px;
+      margin-bottom: 8px;
+    }
+
+    .tarjeta-desafio span {
+      display: block;
+      margin-top: 5px;
+      color: #5d687b;
+      font-size: 14px;
+    }
+
+    .separador {
+      height: 1px;
+      background: var(--borde);
+      margin: 24px 0;
     }
 
     .pie {
-      padding: 10px 0;
-      color: var(--gris);
-      font-size: 0.85rem;
       text-align: center;
+      margin-top: 20px;
+      color: white;
+      font-weight: bold;
+      text-shadow: 0 1px 3px rgba(0, 0, 0, .3);
     }
 
     @media (max-width: 600px) {
-      main {
-        width: min(100% - 20px, 850px);
-        margin-top: -18px;
+      .contenedor {
+        width: min(100% - 20px, 900px);
+        padding-top: 14px;
       }
 
-      .tarjeta {
-        padding: 18px;
-        border-radius: 16px;
+      .pantalla {
+        padding: 20px 15px;
+        border-radius: 17px;
       }
 
-      .botones-inicio {
-        grid-template-columns: 1fr;
+      .codigo strong {
+        font-size: 32px;
+        letter-spacing: 5px;
       }
 
-      .desafio {
-        align-items: flex-start;
+      button {
+        width: 100%;
+      }
+
+      .botones {
         flex-direction: column;
-      }
-
-      .desafio-puntos {
-        align-self: flex-start;
       }
     }
   </style>
 </head>
 
 <body>
+  <main class="contenedor">
 
-  <header>
-    <div class="escudo">🇨🇱</div>
-    <h1>La Copa del 18</h1>
-    <p>La gran competencia de cultura, música y tradiciones chilenas</p>
-  </header>
+    <header class="encabezado">
+      <div class="escudo">18</div>
+      <h1>La Copa del 18</h1>
+      <div class="subtitulo">El desafío más chileno</div>
+    </header>
 
-  <main>
+    <!-- INICIO -->
+    <section id="pantallaInicio" class="pantalla activa">
+      <h2>¡Bienvenidos a la Copa!</h2>
 
-    <div id="mensaje" class="mensaje"></div>
-
-    <!-- Pantalla inicial -->
-    <section id="pantallaInicio" class="tarjeta">
-      <h2>¡Bienvenidos a La Copa del 18!</h2>
-      <p class="subtitulo">
-        Reúne a tus amigos, crea una sala y demuestra cuánto sabes.
+      <p class="descripcion">
+        Forma tu equipo, responde desafíos, demuestra cuánto sabes
+        y conviértete en el campeón de La Copa del 18.
       </p>
 
-      <div class="bandera">
-        <span class="azul"></span>
-        <span class="blanco"></span>
-        <span class="rojo"></span>
-      </div>
-
-      <div class="botones-inicio">
-        <button id="btnMostrarCrear" class="btn-rojo">
+      <div class="botones">
+        <button class="btn-rojo" onclick="mostrarPantalla('crear')">
           Crear sala
         </button>
 
-        <button id="btnMostrarUnirse" class="btn-azul">
+        <button class="btn-azul" onclick="mostrarPantalla('unirse')">
           Unirse a una sala
         </button>
       </div>
     </section>
 
-    <!-- Crear sala -->
-    <section id="pantallaCrear" class="tarjeta oculto">
+    <!-- CREAR SALA -->
+    <section id="pantallaCrear" class="pantalla">
       <h2>Crear una sala</h2>
-      <p class="subtitulo">
-        Ingresa tu nombre para crear una nueva partida.
-      </p>
 
-      <form id="formCrearSala" class="formulario">
-        <div>
-          <label for="nombreCreador">Tu nombre</label>
+      <div class="formulario">
+        <div class="campo">
+          <label for="nombreCrear">Tu nombre</label>
           <input
-            id="nombreCreador"
+            id="nombreCrear"
             type="text"
-            maxlength="40"
+            maxlength="60"
             placeholder="Ejemplo: Rodrigo"
-            required
-          >
+          />
         </div>
 
-        <button type="submit" class="btn-rojo">
-          Crear sala
-        </button>
-
-        <button type="button" id="btnVolverInicio1" class="btn-secundario">
-          Volver
-        </button>
-      </form>
-    </section>
-
-    <!-- Unirse a sala -->
-    <section id="pantallaUnirse" class="tarjeta oculto">
-      <h2>Unirse a una sala</h2>
-      <p class="subtitulo">
-        Escribe el código que te entregó el creador de la partida.
-      </p>
-
-      <form id="formUnirseSala" class="formulario">
-        <div>
-          <label for="codigoSala">Código de sala</label>
+        <div class="campo">
+          <label for="fechaNacimientoCrear">
+            Tu fecha de nacimiento
+          </label>
           <input
-            id="codigoSala"
-            type="text"
-            maxlength="4"
-            inputmode="numeric"
-            placeholder="Ejemplo: 2225"
-            required
-          >
+            id="fechaNacimientoCrear"
+            type="date"
+          />
         </div>
 
-        <div>
-          <label for="nombreJugador">Tu nombre</label>
-          <input
-            id="nombreJugador"
-            type="text"
-            maxlength="40"
-            placeholder="Ejemplo: Camila"
-            required
-          >
+        <div id="mensajeCrear" class="mensaje"></div>
+
+        <div class="botones">
+          <button class="btn-rojo" onclick="crearSala()">
+            Crear sala
+          </button>
+
+          <button class="btn-blanco" onclick="mostrarPantalla('inicio')">
+            Volver
+          </button>
         </div>
-
-        <button type="submit" class="btn-azul">
-          Unirme a la sala
-        </button>
-
-        <button type="button" id="btnVolverInicio2" class="btn-secundario">
-          Volver
-        </button>
-      </form>
-    </section>
-
-    <!-- Sala de espera -->
-    <section id="pantallaSala" class="tarjeta oculto">
-      <h2>Sala de espera</h2>
-      <p class="subtitulo">
-        Comparte este código con los demás jugadores.
-      </p>
-
-      <div class="codigo-sala">
-        Código de sala
-        <strong id="codigoMostrado">----</strong>
       </div>
+    </section>
+
+    <!-- UNIRSE -->
+    <section id="pantallaUnirse" class="pantalla">
+      <h2>Unirse a una sala</h2>
+
+      <div class="formulario">
+        <div class="campo">
+          <label for="codigoUnirse">Código de sala</label>
+          <input
+            id="codigoUnirse"
+            type="text"
+            maxlength="10"
+            placeholder="Ejemplo: 2225"
+          />
+        </div>
+
+        <div class="campo">
+          <label for="nombreUnirse">Tu nombre</label>
+          <input
+            id="nombreUnirse"
+            type="text"
+            maxlength="60"
+            placeholder="Ejemplo: Camila"
+          />
+        </div>
+
+        <div class="campo">
+          <label for="fechaNacimientoUnirse">
+            Tu fecha de nacimiento
+          </label>
+          <input
+            id="fechaNacimientoUnirse"
+            type="date"
+          />
+        </div>
+
+        <div id="mensajeUnirse" class="mensaje"></div>
+
+        <div class="botones">
+          <button class="btn-azul" onclick="unirseSala()">
+            Unirse
+          </button>
+
+          <button class="btn-blanco" onclick="mostrarPantalla('inicio')">
+            Volver
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- SALA DE ESPERA -->
+    <section id="pantallaEspera" class="pantalla">
+      <h2>Sala de espera</h2>
+
+      <div class="codigo">
+        <small>Código de sala</small>
+        <strong id="codigoSalaMostrar">----</strong>
+      </div>
+
+      <p class="estado" id="estadoSala">
+        Esperando jugadores...
+      </p>
 
       <h3>Jugadores conectados</h3>
+      <div id="listaJugadores" class="jugadores"></div>
 
-      <div id="listaJugadores" class="lista-jugadores">
-        <p>Cargando jugadores...</p>
+      <div id="mensajeEspera" class="mensaje"></div>
+
+      <div class="botones">
+        <button
+          id="btnIniciarPartida"
+          class="btn-rojo"
+          onclick="iniciarPartida()"
+          style="display:none;"
+        >
+          Iniciar partida
+        </button>
+
+        <button class="btn-blanco" onclick="salirDeSala()">
+          Salir de la sala
+        </button>
       </div>
-
-      <button id="btnIniciarPartida" class="btn-rojo oculto">
-        Iniciar partida
-      </button>
     </section>
 
-    <!-- Pantalla de desafíos -->
-    <section id="pantallaDesafios" class="tarjeta oculto">
-      <h2>Desafíos de la partida</h2>
-      <p class="subtitulo">
-        Estos son los cinco desafíos disponibles.
+    <!-- DESAFÍOS -->
+    <section id="pantallaDesafios" class="pantalla">
+      <h2>Selecciona un desafío</h2>
+
+      <p class="descripcion">
+        El anfitrión debe seleccionar el desafío que jugarán.
       </p>
 
-      <div id="listaDesafios" class="desafios">
-        Cargando desafíos...
+      <div id="listaDesafios" class="tarjetas-desafios"></div>
+
+      <div id="mensajeDesafios" class="mensaje"></div>
+
+      <div class="botones">
+        <button class="btn-blanco" onclick="volverAEspera()">
+          Volver a la sala
+        </button>
       </div>
     </section>
 
-    <p class="pie">
-      🇨🇱 La Copa del 18 · ¡Que gane el mejor!
-    </p>
-
+    <footer class="pie">
+      🇨🇱 ¡Que gane el mejor equipo! 🇨🇱
+    </footer>
   </main>
-
-  <!-- Librería oficial de Supabase -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <script>
     /*
-      =====================================================
+      ============================================================
       CONFIGURACIÓN DE SUPABASE
-      =====================================================
+      ============================================================
     */
 
     const SUPABASE_URL =
       "https://urfeonehzrhaiimtdqhb.supabase.co";
 
     const SUPABASE_KEY =
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVyZmVvbmVoenJoYWlpbXRkcWhiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg5ODIwNjgsImV4cCI6MjEwNDU1ODA2OH0.YaShhjSJp1zKPaxuz3t_LbUcc9-HYqxt42ByPo4UcGI";
+      "PEGA_AQUI_TU_CLAVE_PUBLICA";
 
     const supabaseClient = window.supabase.createClient(
       SUPABASE_URL,
@@ -514,67 +527,576 @@
     );
 
     /*
-      =====================================================
+      ============================================================
       VARIABLES DEL JUEGO
-      =====================================================
+      ============================================================
     */
 
-    let salaActual = null;
-    let jugadorActual = null;
-    let esCreador = false;
-    let canalJugadores = null;
+    let salaActualId = null;
+    let codigoSalaActual = null;
+    let jugadorActualId = null;
+    let esAnfitrion = false;
+
+    let canalSala = null;
 
     /*
-      =====================================================
-      ELEMENTOS DE LA PANTALLA
-      =====================================================
+      ============================================================
+      NAVEGACIÓN
+      ============================================================
     */
 
-    const mensaje = document.getElementById("mensaje");
+    function mostrarPantalla(nombre) {
+      const pantallas = {
+        inicio: "pantallaInicio",
+        crear: "pantallaCrear",
+        unirse: "pantallaUnirse",
+        espera: "pantallaEspera",
+        desafios: "pantallaDesafios"
+      };
 
-    const pantallaInicio = document.getElementById("pantallaInicio");
-    const pantallaCrear = document.getElementById("pantallaCrear");
-    const pantallaUnirse = document.getElementById("pantallaUnirse");
-    const pantallaSala = document.getElementById("pantallaSala");
-    const pantallaDesafios = document.getElementById("pantallaDesafios");
-
-    const listaJugadores = document.getElementById("listaJugadores");
-    const codigoMostrado = document.getElementById("codigoMostrado");
-    const btnIniciarPartida = document.getElementById("btnIniciarPartida");
-
-    /*
-      =====================================================
-      FUNCIONES GENERALES
-      =====================================================
-    */
-
-    function mostrarMensaje(texto, tipo = "info") {
-      mensaje.textContent = texto;
-      mensaje.className = "mensaje visible " + tipo;
-    }
-
-    function ocultarMensaje() {
-      mensaje.className = "mensaje";
-      mensaje.textContent = "";
-    }
-
-    function mostrarPantalla(pantalla) {
-      [
-        pantallaInicio,
-        pantallaCrear,
-        pantallaUnirse,
-        pantallaSala,
-        pantallaDesafios
-      ].forEach(function(elemento) {
-        elemento.classList.add("oculto");
+      Object.values(pantallas).forEach(id => {
+        document.getElementById(id).classList.remove("activa");
       });
 
-      pantalla.classList.remove("oculto");
-      ocultarMensaje();
+      document
+        .getElementById(pantallas[nombre])
+        .classList.add("activa");
+
+      limpiarMensajes();
     }
 
-    function limpiarTexto(texto) {
-      return String(texto)
+    function limpiarMensajes() {
+      document.querySelectorAll(".mensaje").forEach(mensaje => {
+        mensaje.textContent = "";
+        mensaje.classList.remove("visible", "exito");
+      });
+    }
+
+    function mostrarMensaje(texto, elementoId, exito = false) {
+      const elemento = document.getElementById(elementoId);
+
+      if (!elemento) {
+        alert(texto);
+        return;
+      }
+
+      elemento.textContent = texto;
+      elemento.classList.add("visible");
+
+      if (exito) {
+        elemento.classList.add("exito");
+      } else {
+        elemento.classList.remove("exito");
+      }
+    }
+
+    function obtenerResultado(data) {
+      return Array.isArray(data) ? data[0] : data;
+    }
+
+    /*
+      ============================================================
+      CREAR SALA
+      ============================================================
+    */
+
+    async function crearSala() {
+      const nombre = document
+        .getElementById("nombreCrear")
+        .value
+        .trim();
+
+      const fechaNacimiento = document
+        .getElementById("fechaNacimientoCrear")
+        .value;
+
+      if (!nombre) {
+        mostrarMensaje(
+          "Debes ingresar tu nombre.",
+          "mensajeCrear"
+        );
+        return;
+      }
+
+      if (!fechaNacimiento) {
+        mostrarMensaje(
+          "Debes ingresar tu fecha de nacimiento.",
+          "mensajeCrear"
+        );
+        return;
+      }
+
+      mostrarMensaje(
+        "Creando sala...",
+        "mensajeCrear",
+        true
+      );
+
+      const { data, error } = await supabaseClient.rpc(
+        "crear_sala",
+        {
+          p_nombre: nombre,
+          p_fecha_nacimiento: fechaNacimiento
+        }
+      );
+
+      if (error) {
+        console.error("Error al crear sala:", error);
+
+        mostrarMensaje(
+          "No se pudo crear la sala: " + error.message,
+          "mensajeCrear"
+        );
+
+        return;
+      }
+
+      const resultado = obtenerResultado(data);
+
+      if (!resultado) {
+        mostrarMensaje(
+          "Supabase no devolvió los datos de la sala.",
+          "mensajeCrear"
+        );
+        return;
+      }
+
+      salaActualId = resultado.sala_id;
+      codigoSalaActual = resultado.codigo_sala;
+      jugadorActualId = resultado.jugador_id;
+      esAnfitrion = true;
+
+      document.getElementById("codigoSalaMostrar").textContent =
+        codigoSalaActual;
+
+      document.getElementById("btnIniciarPartida").style.display =
+        "block";
+
+      mostrarPantalla("espera");
+      cargarJugadores();
+      suscribirseASala();
+    }
+
+    /*
+      ============================================================
+      UNIRSE A UNA SALA
+      ============================================================
+    */
+
+    async function unirseSala() {
+      const codigo = document
+        .getElementById("codigoUnirse")
+        .value
+        .trim()
+        .toUpperCase();
+
+      const nombre = document
+        .getElementById("nombreUnirse")
+        .value
+        .trim();
+
+      const fechaNacimiento = document
+        .getElementById("fechaNacimientoUnirse")
+        .value;
+
+      if (!codigo) {
+        mostrarMensaje(
+          "Debes ingresar el código de la sala.",
+          "mensajeUnirse"
+        );
+        return;
+      }
+
+      if (!nombre) {
+        mostrarMensaje(
+          "Debes ingresar tu nombre.",
+          "mensajeUnirse"
+        );
+        return;
+      }
+
+      if (!fechaNacimiento) {
+        mostrarMensaje(
+          "Debes ingresar tu fecha de nacimiento.",
+          "mensajeUnirse"
+        );
+        return;
+      }
+
+      mostrarMensaje(
+        "Ingresando a la sala...",
+        "mensajeUnirse",
+        true
+      );
+
+      const { data, error } = await supabaseClient.rpc(
+        "unirse_a_sala",
+        {
+          p_codigo_sala: codigo,
+          p_nombre: nombre,
+          p_fecha_nacimiento: fechaNacimiento
+        }
+      );
+
+      if (error) {
+        console.error("Error al unirse:", error);
+
+        mostrarMensaje(
+          "No se pudo ingresar a la sala: " + error.message,
+          "mensajeUnirse"
+        );
+
+        return;
+      }
+
+      const resultado = obtenerResultado(data);
+
+      if (!resultado) {
+        mostrarMensaje(
+          "Supabase no devolvió los datos del jugador.",
+          "mensajeUnirse"
+        );
+        return;
+      }
+
+      salaActualId = resultado.sala_id;
+      jugadorActualId = resultado.jugador_id;
+      codigoSalaActual = codigo;
+      esAnfitrion = false;
+
+      document.getElementById("codigoSalaMostrar").textContent =
+        codigoSalaActual;
+
+      document.getElementById("btnIniciarPartida").style.display =
+        "none";
+
+      mostrarPantalla("espera");
+      cargarJugadores();
+      suscribirseASala();
+    }
+
+    /*
+      ============================================================
+      CARGAR JUGADORES
+      ============================================================
+    */
+
+    async function cargarJugadores() {
+      if (!salaActualId) return;
+
+      const { data, error } = await supabaseClient
+        .from("jugadores")
+        .select("*")
+        .eq("sala_id", salaActualId)
+        .order("orden_ingreso", {
+          ascending: true
+        });
+
+      if (error) {
+        console.error("Error al cargar jugadores:", error);
+
+        mostrarMensaje(
+          "No se pudieron cargar los jugadores: " + error.message,
+          "mensajeEspera"
+        );
+
+        return;
+      }
+
+      const lista = document.getElementById("listaJugadores");
+      lista.innerHTML = "";
+
+      if (!data || data.length === 0) {
+        lista.innerHTML = `
+          <div class="jugador">
+            Aún no hay jugadores conectados.
+          </div>
+        `;
+        return;
+      }
+
+      data.forEach(jugador => {
+        const tarjeta = document.createElement("div");
+        tarjeta.className = "jugador";
+
+        const nombre = jugador.nombre || "Jugador";
+        const equipo = jugador.equipo || "Sin equipo";
+
+        tarjeta.innerHTML = `
+          ${escapeHTML(nombre)}
+          <small>${escapeHTML(equipo)}</small>
+        `;
+
+        lista.appendChild(tarjeta);
+      });
+
+      document.getElementById("estadoSala").textContent =
+        `${data.length} jugador(es) conectado(s)`;
+    }
+
+    /*
+      ============================================================
+      SUSCRIPCIÓN EN TIEMPO REAL
+      ============================================================
+    */
+
+    function suscribirseASala() {
+      if (!salaActualId) return;
+
+      if (canalSala) {
+        supabaseClient.removeChannel(canalSala);
+      }
+
+      canalSala = supabaseClient
+        .channel("sala-" + salaActualId)
+        .on(
+          "postgres_changes",
+          {
+            event: "*",
+            schema: "public",
+            table: "jugadores",
+            filter: "sala_id=eq." + salaActualId
+          },
+          () => {
+            cargarJugadores();
+          }
+        )
+        .on(
+          "postgres_changes",
+          {
+            event: "UPDATE",
+            schema: "public",
+            table: "salas",
+            filter: "id=eq." + salaActualId
+          },
+          payload => {
+            procesarCambioSala(payload.new);
+          }
+        )
+        .subscribe();
+    }
+
+    function procesarCambioSala(sala) {
+      if (!sala) return;
+
+      if (sala.estado === "en_juego") {
+        cargarDesafios();
+        mostrarPantalla("desafios");
+      }
+    }
+
+    /*
+      ============================================================
+      INICIAR PARTIDA
+      ============================================================
+    */
+
+    async function iniciarPartida() {
+      if (!salaActualId || !jugadorActualId) {
+        mostrarMensaje(
+          "No se encontró la información de la sala.",
+          "mensajeEspera"
+        );
+        return;
+      }
+
+      if (!esAnfitrion) {
+        mostrarMensaje(
+          "Solo el anfitrión puede iniciar la partida.",
+          "mensajeEspera"
+        );
+        return;
+      }
+
+      const boton = document.getElementById("btnIniciarPartida");
+      boton.disabled = true;
+      boton.textContent = "Iniciando...";
+
+      const { data, error } = await supabaseClient.rpc(
+        "iniciar_partida",
+        {
+          p_sala_id: salaActualId,
+          p_anfitrion_id: jugadorActualId
+        }
+      );
+
+      if (error) {
+        console.error("Error al iniciar partida:", error);
+
+        mostrarMensaje(
+          "No se pudo iniciar la partida: " + error.message,
+          "mensajeEspera"
+        );
+
+        boton.disabled = false;
+        boton.textContent = "Iniciar partida";
+        return;
+      }
+
+      mostrarMensaje(
+        "La partida comenzó correctamente.",
+        "mensajeEspera",
+        true
+      );
+
+      cargarDesafios();
+      mostrarPantalla("desafios");
+    }
+
+    /*
+      ============================================================
+      CARGAR DESAFÍOS
+      ============================================================
+    */
+
+    async function cargarDesafios() {
+      const { data, error } = await supabaseClient
+        .from("desafios")
+        .select("*")
+        .eq("activo", true)
+        .order("numero", {
+          ascending: true
+        });
+
+      if (error) {
+        console.error("Error al cargar desafíos:", error);
+
+        mostrarMensaje(
+          "No se pudieron cargar los desafíos: " + error.message,
+          "mensajeDesafios"
+        );
+
+        return;
+      }
+
+      const lista = document.getElementById("listaDesafios");
+      lista.innerHTML = "";
+
+      if (!data || data.length === 0) {
+        lista.innerHTML = `
+          <div class="tarjeta-desafio">
+            No hay desafíos activos.
+          </div>
+        `;
+        return;
+      }
+
+      data.forEach(desafio => {
+        const tarjeta = document.createElement("div");
+        tarjeta.className = "tarjeta-desafio";
+
+        tarjeta.innerHTML = `
+          <strong>Desafío ${desafio.numero}</strong>
+          <div>${escapeHTML(desafio.nombre)}</div>
+          <span>Tipo: ${escapeHTML(desafio.tipo || "General")}</span>
+          <span>
+            ${desafio.puntaje_base} punto(s) por pregunta
+          </span>
+          <span>
+            Tiempo: ${desafio.tiempo_respuesta || 30} segundos
+          </span>
+        `;
+
+        tarjeta.addEventListener("click", () => {
+          seleccionarDesafio(desafio);
+        });
+
+        lista.appendChild(tarjeta);
+      });
+    }
+
+    /*
+      ============================================================
+      COMENZAR DESAFÍO
+      ============================================================
+    */
+
+    async function seleccionarDesafio(desafio) {
+      if (!esAnfitrion) {
+        mostrarMensaje(
+          "Solo el anfitrión puede seleccionar el desafío.",
+          "mensajeDesafios"
+        );
+        return;
+      }
+
+      const confirmar = confirm(
+        `¿Comenzar el desafío ${desafio.numero}: ${desafio.nombre}?`
+      );
+
+      if (!confirmar) return;
+
+      const { data, error } = await supabaseClient.rpc(
+        "comenzar_desafio",
+        {
+          p_sala_id: salaActualId,
+          p_anfitrion_id: jugadorActualId
+        }
+      );
+
+      if (error) {
+        console.error("Error al comenzar desafío:", error);
+
+        mostrarMensaje(
+          "No se pudo comenzar el desafío: " + error.message,
+          "mensajeDesafios"
+        );
+
+        return;
+      }
+
+      mostrarMensaje(
+        "El desafío comenzó correctamente.",
+        "mensajeDesafios",
+        true
+      );
+
+      /*
+        En el siguiente paso conectaremos aquí:
+        - Las preguntas
+        - El contador
+        - Los videos de YouTube
+        - Las respuestas
+        - Los puntajes
+      */
+    }
+
+    /*
+      ============================================================
+      VOLVER / SALIR
+      ============================================================
+    */
+
+    function volverAEspera() {
+      mostrarPantalla("espera");
+      cargarJugadores();
+    }
+
+    function salirDeSala() {
+      if (canalSala) {
+        supabaseClient.removeChannel(canalSala);
+        canalSala = null;
+      }
+
+      salaActualId = null;
+      codigoSalaActual = null;
+      jugadorActualId = null;
+      esAnfitrion = false;
+
+      document.getElementById("listaJugadores").innerHTML = "";
+      document.getElementById("codigoSalaMostrar").textContent = "----";
+
+      mostrarPantalla("inicio");
+    }
+
+    /*
+      ============================================================
+      SEGURIDAD BÁSICA PARA MOSTRAR TEXTO
+      ============================================================
+    */
+
+    function escapeHTML(texto) {
+      return String(texto ?? "")
         .replaceAll("&", "&amp;")
         .replaceAll("<", "&lt;")
         .replaceAll(">", "&gt;")
@@ -583,396 +1105,28 @@
     }
 
     /*
-      =====================================================
-      CARGAR DESAFÍOS
-      =====================================================
+      ============================================================
+      CARGA INICIAL
+      ============================================================
     */
 
-    async function cargarDesafios() {
-      const lista = document.getElementById("listaDesafios");
-
-      const { data, error } = await supabaseClient
+    async function comprobarConexion() {
+      const { error } = await supabaseClient
         .from("desafios")
-        .select("numero, nombre, tipo, puntaje_base, tiempo_respuesta")
-        .eq("activo", true)
-        .order("numero", { ascending: true });
+        .select("numero")
+        .limit(1);
 
       if (error) {
-        console.error(error);
-        lista.innerHTML = "<p>No se pudieron cargar los desafíos.</p>";
-        return;
+        console.error(
+          "La conexión con Supabase presenta un problema:",
+          error
+        );
+      } else {
+        console.log("Conexión con Supabase correcta.");
       }
-
-      lista.innerHTML = "";
-
-      data.forEach(function(desafio) {
-        const elemento = document.createElement("div");
-        elemento.className = "desafio";
-
-        elemento.innerHTML = `
-          <span class="desafio-nombre">
-            ${desafio.numero}. ${limpiarTexto(desafio.nombre)}
-          </span>
-          <span class="desafio-puntos">
-            ${desafio.puntaje_base} punto(s) por pregunta
-          </span>
-        `;
-
-        lista.appendChild(elemento);
-      });
     }
 
-    /*
-      =====================================================
-      CREAR SALA
-      =====================================================
-    */
-
-    document
-      .getElementById("formCrearSala")
-      .addEventListener("submit", async function(evento) {
-        evento.preventDefault();
-
-        const nombre = document
-          .getElementById("nombreCreador")
-          .value
-          .trim();
-
-        if (!nombre) {
-          mostrarMensaje("Debes ingresar tu nombre.", "error");
-          return;
-        }
-
-        const boton = evento.submitter;
-        boton.disabled = true;
-        boton.textContent = "Creando sala...";
-
-        try {
-          /*
-            Esta llamada utiliza la función crear_sala
-            creada previamente en Supabase.
-          */
-          const { data, error } = await supabaseClient.rpc(
-            "crear_sala",
-            {
-              p_nombre: nombre
-            }
-          );
-
-          if (error) {
-            throw error;
-          }
-
-          console.log("Resultado crear_sala:", data);
-
-          /*
-            Se admite tanto un objeto como una lista
-            dependiendo de cómo devuelva datos la función.
-          */
-          const resultado = Array.isArray(data) ? data[0] : data;
-
-          salaActual =
-            resultado.codigo ||
-            resultado.codigo_sala ||
-            resultado.sala_codigo;
-
-          jugadorActual =
-            resultado.jugador_id ||
-            resultado.id_jugador ||
-            resultado.jugador;
-
-          esCreador = true;
-
-          if (!salaActual) {
-            throw new Error(
-              "La sala fue creada, pero no se recibió su código."
-            );
-          }
-
-          codigoMostrado.textContent = salaActual;
-
-          mostrarPantalla(pantallaSala);
-          await cargarJugadores();
-
-          iniciarEscuchaJugadores();
-
-          btnIniciarPartida.classList.remove("oculto");
-
-          mostrarMensaje(
-            "Sala creada correctamente. Comparte el código con los demás jugadores.",
-            "exito"
-          );
-
-        } catch (error) {
-          console.error("Error al crear sala:", error);
-
-          mostrarMensaje(
-            "No se pudo crear la sala: " + error.message,
-            "error"
-          );
-        } finally {
-          boton.disabled = false;
-          boton.textContent = "Crear sala";
-        }
-      });
-
-    /*
-      =====================================================
-      UNIRSE A UNA SALA
-      =====================================================
-    */
-
-    document
-      .getElementById("formUnirseSala")
-      .addEventListener("submit", async function(evento) {
-        evento.preventDefault();
-
-        const codigo = document
-          .getElementById("codigoSala")
-          .value
-          .trim();
-
-        const nombre = document
-          .getElementById("nombreJugador")
-          .value
-          .trim();
-
-        if (!codigo || !nombre) {
-          mostrarMensaje(
-            "Debes ingresar el código y tu nombre.",
-            "error"
-          );
-          return;
-        }
-
-        const boton = evento.submitter;
-        boton.disabled = true;
-        boton.textContent = "Ingresando...";
-
-        try {
-          /*
-            Esta llamada utiliza la función unirse_a_sala
-            creada previamente en Supabase.
-          */
-          const { data, error } = await supabaseClient.rpc(
-            "unirse_a_sala",
-            {
-              p_codigo: codigo,
-              p_nombre: nombre
-            }
-          );
-
-          if (error) {
-            throw error;
-          }
-
-          console.log("Resultado unirse_a_sala:", data);
-
-          const resultado = Array.isArray(data) ? data[0] : data;
-
-          salaActual =
-            resultado.codigo ||
-            resultado.codigo_sala ||
-            codigo;
-
-          jugadorActual =
-            resultado.jugador_id ||
-            resultado.id_jugador ||
-            resultado.jugador;
-
-          esCreador = false;
-
-          codigoMostrado.textContent = salaActual;
-
-          mostrarPantalla(pantallaSala);
-          await cargarJugadores();
-
-          iniciarEscuchaJugadores();
-
-          mostrarMensaje(
-            "Te uniste correctamente a la sala.",
-            "exito"
-          );
-
-        } catch (error) {
-          console.error("Error al unirse:", error);
-
-          mostrarMensaje(
-            "No se pudo ingresar a la sala: " + error.message,
-            "error"
-          );
-        } finally {
-          boton.disabled = false;
-          boton.textContent = "Unirme a la sala";
-        }
-      });
-
-    /*
-      =====================================================
-      CARGAR JUGADORES
-      =====================================================
-    */
-
-    async function cargarJugadores() {
-      if (!salaActual) return;
-
-      const { data, error } = await supabaseClient
-        .from("jugadores")
-        .select("*")
-        .eq("codigo_sala", salaActual)
-        .order("creado_en", { ascending: true });
-
-      if (error) {
-        console.error("Error cargando jugadores:", error);
-
-        listaJugadores.innerHTML =
-          "<p>No se pudieron cargar los jugadores.</p>";
-
-        return;
-      }
-
-      listaJugadores.innerHTML = "";
-
-      if (!data || data.length === 0) {
-        listaJugadores.innerHTML =
-          "<p>Aún no hay jugadores conectados.</p>";
-        return;
-      }
-
-      data.forEach(function(jugador) {
-        const elemento = document.createElement("div");
-        elemento.className = "jugador";
-
-        const nombre =
-          jugador.nombre ||
-          jugador.nombre_jugador ||
-          jugador.alias ||
-          "Jugador";
-
-        elemento.textContent = nombre;
-        listaJugadores.appendChild(elemento);
-      });
-    }
-
-    /*
-      =====================================================
-      ACTUALIZACIÓN EN TIEMPO REAL
-      =====================================================
-    */
-
-    function iniciarEscuchaJugadores() {
-      if (!salaActual) return;
-
-      if (canalJugadores) {
-        supabaseClient.removeChannel(canalJugadores);
-      }
-
-      canalJugadores = supabaseClient
-        .channel("jugadores-sala-" + salaActual)
-        .on(
-          "postgres_changes",
-          {
-            event: "*",
-            schema: "public",
-            table: "jugadores"
-          },
-          function() {
-            cargarJugadores();
-          }
-        )
-        .subscribe();
-    }
-
-    /*
-      =====================================================
-      INICIAR PARTIDA
-      =====================================================
-    */
-
-    btnIniciarPartida.addEventListener("click", async function() {
-      if (!salaActual) {
-        mostrarMensaje("No hay una sala activa.", "error");
-        return;
-      }
-
-      btnIniciarPartida.disabled = true;
-      btnIniciarPartida.textContent = "Iniciando...";
-
-      try {
-        const { data, error } = await supabaseClient.rpc(
-          "iniciar_partida",
-          {
-            p_codigo: salaActual
-          }
-        );
-
-        if (error) {
-          throw error;
-        }
-
-        console.log("Partida iniciada:", data);
-
-        mostrarPantalla(pantallaDesafios);
-        await cargarDesafios();
-
-        mostrarMensaje(
-          "La partida comenzó correctamente.",
-          "exito"
-        );
-
-      } catch (error) {
-        console.error("Error al iniciar partida:", error);
-
-        mostrarMensaje(
-          "No se pudo iniciar la partida: " + error.message,
-          "error"
-        );
-      } finally {
-        btnIniciarPartida.disabled = false;
-        btnIniciarPartida.textContent = "Iniciar partida";
-      }
-    });
-
-    /*
-      =====================================================
-      BOTONES DE NAVEGACIÓN
-      =====================================================
-    */
-
-    document
-      .getElementById("btnMostrarCrear")
-      .addEventListener("click", function() {
-        mostrarPantalla(pantallaCrear);
-      });
-
-    document
-      .getElementById("btnMostrarUnirse")
-      .addEventListener("click", function() {
-        mostrarPantalla(pantallaUnirse);
-      });
-
-    document
-      .getElementById("btnVolverInicio1")
-      .addEventListener("click", function() {
-        mostrarPantalla(pantallaInicio);
-      });
-
-    document
-      .getElementById("btnVolverInicio2")
-      .addEventListener("click", function() {
-        mostrarPantalla(pantallaInicio);
-      });
-
-    /*
-      =====================================================
-      INICIO
-      =====================================================
-    */
-
-    cargarDesafios();
-
-    console.log("La Copa del 18: Supabase conectado.");
+    comprobarConexion();
   </script>
-
 </body>
 </html>
