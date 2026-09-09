@@ -12,11 +12,11 @@
       --rojo-oscuro: #a4161a;
       --azul: #12355b;
       --azul-claro: #1d5d9b;
+      --verde: #16803c;
       --blanco: #ffffff;
       --gris: #f3f5f7;
       --texto: #20252b;
-      --verde: #16803c;
-      --amarillo: #f5b700;
+      --borde: #dfe5eb;
     }
 
     * {
@@ -26,33 +26,32 @@
     body {
       margin: 0;
       min-height: 100vh;
+      padding: 20px;
       font-family: Arial, Helvetica, sans-serif;
       color: var(--texto);
       background:
         linear-gradient(
           135deg,
-          rgba(214, 40, 40, 0.96) 0%,
-          rgba(214, 40, 40, 0.96) 33%,
+          #d62828 0%,
+          #d62828 33%,
           #ffffff 33%,
           #ffffff 66%,
-          rgba(18, 53, 91, 0.97) 66%,
-          rgba(18, 53, 91, 0.97) 100%
+          #12355b 66%,
+          #12355b 100%
         );
       display: flex;
       justify-content: center;
       align-items: center;
-      padding: 24px;
     }
 
     .app {
       width: 100%;
       max-width: 950px;
       min-height: 650px;
-      background: rgba(255, 255, 255, 0.97);
-      border-radius: 28px;
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
       overflow: hidden;
-      position: relative;
+      background: rgba(255, 255, 255, 0.98);
+      border-radius: 26px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
     }
 
     .pantalla {
@@ -70,20 +69,15 @@
       justify-content: center;
       align-items: center;
       text-align: center;
-      background:
-        radial-gradient(circle at top right, #fff4d6 0%, transparent 35%),
-        radial-gradient(circle at bottom left, #e8f1ff 0%, transparent 35%),
-        #ffffff;
     }
 
     .bandera {
       display: flex;
       width: 210px;
       height: 18px;
+      overflow: hidden;
       margin-bottom: 25px;
       border-radius: 20px;
-      overflow: hidden;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
     }
 
     .bandera span {
@@ -95,7 +89,7 @@
     }
 
     .bandera .blanco {
-      background: #ffffff;
+      background: white;
       border-top: 1px solid #ddd;
       border-bottom: 1px solid #ddd;
     }
@@ -108,23 +102,21 @@
       width: 110px;
       height: 110px;
       display: flex;
-      align-items: center;
       justify-content: center;
-      background: var(--rojo);
+      align-items: center;
+      margin-bottom: 20px;
       border: 8px solid var(--azul);
       border-radius: 50%;
-      color: white;
+      background: var(--rojo);
       font-size: 48px;
-      margin-bottom: 20px;
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
     }
 
     h1 {
       margin: 0;
       color: var(--azul);
-      font-size: clamp(2.2rem, 6vw, 4.5rem);
-      line-height: 1;
+      font-size: clamp(2.3rem, 7vw, 4.5rem);
       font-weight: 900;
+      line-height: 1;
     }
 
     .subtitulo {
@@ -137,46 +129,11 @@
     .frase {
       margin: 0 0 35px;
       color: #555;
-      font-size: 1.05rem;
-    }
-
-    .boton {
-      border: none;
-      border-radius: 14px;
-      padding: 15px 28px;
-      font-size: 1rem;
-      font-weight: 800;
-      cursor: pointer;
-      transition: transform 0.2s, box-shadow 0.2s, background 0.2s;
-    }
-
-    .boton:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 18px rgba(0, 0, 0, 0.18);
-    }
-
-    .boton-principal {
-      color: white;
-      background: var(--rojo);
-    }
-
-    .boton-principal:hover {
-      background: var(--rojo-oscuro);
-    }
-
-    .boton-secundario {
-      color: var(--azul);
-      background: #e8eef5;
-    }
-
-    .boton-verde {
-      color: white;
-      background: var(--verde);
     }
 
     .encabezado {
-      text-align: center;
       margin-bottom: 25px;
+      text-align: center;
     }
 
     .encabezado h2 {
@@ -190,53 +147,87 @@
       color: #666;
     }
 
-    .contenido-centrado {
+    .contenido {
       width: 100%;
-      max-width: 680px;
+      max-width: 700px;
       margin: 0 auto;
+    }
+
+    .boton {
+      border: none;
+      border-radius: 14px;
+      padding: 15px 25px;
+      font-size: 1rem;
+      font-weight: 800;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .boton:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 7px 18px rgba(0, 0, 0, 0.15);
+    }
+
+    .boton:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .principal {
+      color: white;
+      background: var(--rojo);
+    }
+
+    .secundario {
+      color: var(--azul);
+      background: #e7edf4;
+    }
+
+    .verde {
+      color: white;
+      background: var(--verde);
     }
 
     .buscador {
       width: 100%;
-      padding: 16px 18px;
-      border: 2px solid #dce2e8;
+      margin-bottom: 18px;
+      padding: 16px;
+      border: 2px solid var(--borde);
       border-radius: 14px;
       font-size: 1rem;
       outline: none;
-      margin-bottom: 18px;
     }
 
     .buscador:focus {
       border-color: var(--azul-claro);
-      box-shadow: 0 0 0 4px rgba(29, 93, 155, 0.12);
     }
 
     .lista-jugadores {
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 12px;
-      max-height: 330px;
+      max-height: 340px;
       overflow-y: auto;
-      padding: 4px;
+      padding: 3px;
     }
 
     .jugador {
       display: flex;
       align-items: center;
       gap: 12px;
-      padding: 15px;
-      border: 2px solid #e4e8ed;
-      background: white;
+      padding: 14px;
+      border: 2px solid var(--borde);
       border-radius: 14px;
-      cursor: pointer;
+      background: white;
       text-align: left;
-      transition: border 0.2s, background 0.2s, transform 0.2s;
+      cursor: pointer;
     }
 
     .jugador:hover {
       border-color: var(--azul-claro);
       background: #f5f9ff;
-      transform: translateY(-2px);
     }
 
     .jugador.seleccionado {
@@ -249,24 +240,25 @@
       height: 42px;
       flex-shrink: 0;
       display: flex;
-      align-items: center;
       justify-content: center;
+      align-items: center;
+      border-radius: 50%;
       color: white;
       background: var(--azul);
-      border-radius: 50%;
+      font-size: 0.85rem;
       font-weight: 900;
     }
 
     .jugador-info strong {
       display: block;
-      font-size: 0.98rem;
+      font-size: 0.95rem;
     }
 
     .jugador-info small {
       display: block;
       margin-top: 4px;
       color: #777;
-      font-size: 0.78rem;
+      font-size: 0.75rem;
     }
 
     .acciones {
@@ -277,63 +269,59 @@
       margin-top: 25px;
     }
 
-    .confirmacion {
+    .tarjeta {
       width: 100%;
       max-width: 560px;
       margin: 0 auto;
+      padding: 30px;
+      border: 2px solid var(--borde);
+      border-radius: 22px;
+      background: linear-gradient(135deg, #f8fbff, #edf2f7);
       text-align: center;
     }
 
-    .tarjeta-jugador {
-      padding: 30px;
-      border-radius: 22px;
-      margin: 20px 0;
-      background: linear-gradient(135deg, #f7faff, #eef3f8);
-      border: 2px solid #e0e7ef;
-    }
-
-    .tarjeta-jugador .avatar-grande {
+    .avatar-grande {
       width: 85px;
       height: 85px;
-      margin: 0 auto 15px;
       display: flex;
       justify-content: center;
       align-items: center;
+      margin: 0 auto 15px;
       border-radius: 50%;
-      background: var(--azul);
       color: white;
-      font-size: 2rem;
+      background: var(--azul);
+      font-size: 1.8rem;
       font-weight: 900;
     }
 
-    .tarjeta-jugador h3 {
-      margin: 0 0 8px;
+    .tarjeta h3 {
+      margin: 0 0 12px;
       color: var(--azul);
       font-size: 1.7rem;
     }
 
-    .equipo-etiqueta {
+    .etiqueta {
       display: inline-block;
-      padding: 8px 14px;
+      padding: 8px 15px;
       border-radius: 30px;
       color: white;
-      font-weight: 800;
       font-size: 0.9rem;
+      font-weight: 800;
     }
 
-    .equipo-jovenes {
+    .etiqueta-jovenes {
       background: var(--rojo);
     }
 
-    .equipo-veteranos {
+    .etiqueta-veteranos {
       background: var(--azul);
     }
 
     .sala {
       background:
-        radial-gradient(circle at top left, #fff1f1 0%, transparent 35%),
-        radial-gradient(circle at bottom right, #eaf2ff 0%, transparent 35%),
-        #ffffff;
+        radial-gradient(circle at top left, #fff1f1, transparent 35%),
+        radial-gradient(circle at bottom right, #eaf2ff, transparent 35%),
+        white;
     }
 
     .sala-cabecera {
@@ -341,8 +329,8 @@
       justify-content: space-between;
       align-items: center;
       gap: 15px;
-      margin-bottom: 30px;
       flex-wrap: wrap;
+      margin-bottom: 25px;
     }
 
     .sala-cabecera h2 {
@@ -351,32 +339,41 @@
       font-size: 2rem;
     }
 
-    .codigo-sala {
-      background: var(--azul);
-      color: white;
-      border-radius: 12px;
+    .codigo {
       padding: 10px 16px;
-      font-weight: 800;
+      border-radius: 12px;
+      color: white;
+      background: var(--azul);
+      font-weight: 900;
       letter-spacing: 2px;
     }
 
-    .mensaje-espera {
+    .estado-conexion {
+      margin-bottom: 25px;
+      padding: 12px;
+      border-radius: 12px;
+      background: #edfff3;
+      color: var(--verde);
       text-align: center;
-      margin-bottom: 30px;
+      font-weight: 700;
     }
 
-    .mensaje-espera .icono {
-      font-size: 4rem;
-      margin-bottom: 10px;
+    .mensaje {
+      text-align: center;
+      margin-bottom: 25px;
     }
 
-    .mensaje-espera h3 {
-      margin: 0 0 10px;
+    .mensaje .icono {
+      font-size: 3.5rem;
+    }
+
+    .mensaje h3 {
+      margin: 8px 0;
       color: var(--azul);
-      font-size: 1.8rem;
+      font-size: 1.7rem;
     }
 
-    .mensaje-espera p {
+    .mensaje p {
       margin: 0;
       color: #666;
     }
@@ -385,27 +382,16 @@
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 20px;
-      margin-bottom: 30px;
+      margin-bottom: 25px;
     }
 
     .marcador {
+      position: relative;
+      overflow: hidden;
       padding: 25px;
       border-radius: 20px;
       color: white;
       text-align: center;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .marcador::after {
-      content: "";
-      position: absolute;
-      width: 130px;
-      height: 130px;
-      border-radius: 50%;
-      right: -45px;
-      bottom: -55px;
-      background: rgba(255, 255, 255, 0.12);
     }
 
     .marcador.jovenes {
@@ -418,30 +404,48 @@
 
     .marcador h3 {
       margin: 0 0 12px;
-      font-size: 1.2rem;
+      font-size: 1.1rem;
     }
 
     .puntaje {
       font-size: 3rem;
       font-weight: 900;
-      line-height: 1;
     }
 
-    .jugador-confirmado {
-      text-align: center;
-      padding: 20px;
+    .lista-sala {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 18px;
+      margin-top: 25px;
+    }
+
+    .grupo {
+      padding: 18px;
+      border: 1px solid var(--borde);
       border-radius: 16px;
-      background: #edfff3;
-      border: 1px solid #b8e8c8;
-      color: var(--verde);
-      margin-bottom: 25px;
+      background: white;
+    }
+
+    .grupo h4 {
+      margin: 0 0 12px;
+      color: var(--azul);
+    }
+
+    .grupo ul {
+      margin: 0;
+      padding-left: 20px;
+    }
+
+    .grupo li {
+      margin-bottom: 6px;
+      font-size: 0.9rem;
     }
 
     .nota {
-      text-align: center;
-      color: #777;
-      font-size: 0.9rem;
       margin-top: 20px;
+      color: #777;
+      text-align: center;
+      font-size: 0.85rem;
     }
 
     .oculto {
@@ -459,15 +463,12 @@
 
       .pantalla {
         min-height: 680px;
-        padding: 22px 16px;
+        padding: 24px 16px;
       }
 
-      .lista-jugadores {
-        grid-template-columns: 1fr;
-        max-height: 360px;
-      }
-
-      .marcadores {
+      .lista-jugadores,
+      .marcadores,
+      .lista-sala {
         grid-template-columns: 1fr;
       }
 
@@ -487,7 +488,7 @@
 
   <main class="app">
 
-    <!-- PANTALLA DE INICIO -->
+    <!-- INICIO -->
     <section id="pantallaInicio" class="pantalla activa inicio">
       <div class="bandera">
         <span class="rojo"></span>
@@ -505,20 +506,20 @@
         Dos generaciones. Diez desafíos. Un solo campeón.
       </p>
 
-      <button class="boton boton-principal" onclick="mostrarSeleccion()">
+      <button class="boton principal" onclick="mostrarSeleccion()">
         Comenzar juego
       </button>
     </section>
 
 
-    <!-- SELECCIÓN DE JUGADOR -->
+    <!-- SELECCIÓN -->
     <section id="pantallaSeleccion" class="pantalla">
       <div class="encabezado">
         <h2>Selecciona tu nombre</h2>
-        <p>Busca tu nombre y confirma tu participación.</p>
+        <p>Busca tu nombre y selecciona el jugador correcto.</p>
       </div>
 
-      <div class="contenido-centrado">
+      <div class="contenido">
         <input
           id="buscador"
           class="buscador"
@@ -530,13 +531,13 @@
         <div id="listaJugadores" class="lista-jugadores"></div>
 
         <div class="acciones">
-          <button class="boton boton-secundario" onclick="volverInicio()">
+          <button class="boton secundario" onclick="mostrarInicio()">
             Volver
           </button>
 
           <button
             id="botonContinuar"
-            class="boton boton-principal"
+            class="boton principal"
             onclick="mostrarConfirmacion()"
             disabled
           >
@@ -550,30 +551,28 @@
     <!-- CONFIRMACIÓN -->
     <section id="pantallaConfirmacion" class="pantalla">
       <div class="encabezado">
-        <h2>Confirma tu equipo</h2>
-        <p>Revisa que tu nombre y equipo sean correctos.</p>
+        <h2>Confirma tu participación</h2>
+        <p>Revisa tu nombre y equipo.</p>
       </div>
 
-      <div class="confirmacion">
-        <div class="tarjeta-jugador">
-          <div id="avatarConfirmacion" class="avatar-grande">?</div>
+      <div class="tarjeta">
+        <div id="avatarConfirmacion" class="avatar-grande">?</div>
 
-          <h3 id="nombreConfirmacion">Jugador</h3>
+        <h3 id="nombreConfirmacion">Jugador</h3>
 
-          <span id="equipoConfirmacion" class="equipo-etiqueta">
-            Equipo
-          </span>
-        </div>
+        <span id="equipoConfirmacion" class="etiqueta">
+          Equipo
+        </span>
+      </div>
 
-        <div class="acciones">
-          <button class="boton boton-secundario" onclick="volverSeleccion()">
-            Cambiar jugador
-          </button>
+      <div class="acciones">
+        <button class="boton secundario" onclick="mostrarSeleccion()">
+          Cambiar jugador
+        </button>
 
-          <button class="boton boton-verde" onclick="entrarSala()">
-            Confirmar participación
-          </button>
-        </div>
+        <button class="boton verde" onclick="entrarSala()">
+          Confirmar participación
+        </button>
       </div>
     </section>
 
@@ -582,16 +581,14 @@
     <section id="pantallaSala" class="pantalla sala">
       <div class="sala-cabecera">
         <h2>Sala de espera</h2>
-        <div class="codigo-sala">SALA 18</div>
+        <div class="codigo">SALA 18</div>
       </div>
 
-      <div class="jugador-confirmado">
-        <strong id="mensajeJugadorSala">
-          Has ingresado correctamente.
-        </strong>
+      <div id="estadoConexion" class="estado-conexion">
+        Conectando con la partida...
       </div>
 
-      <div class="mensaje-espera">
+      <div class="mensaje">
         <div class="icono">🎉</div>
         <h3>¡Ya estás dentro!</h3>
         <p>
@@ -604,30 +601,66 @@
         <div class="marcador jovenes">
           <h3>🇨🇱 Los Cabros del 2000</h3>
           <div id="puntajeJovenes" class="puntaje">0</div>
-          <p>puntos</p>
+          <div>puntos</div>
         </div>
 
         <div class="marcador veteranos">
           <h3>🏆 Los Clásicos de Colección</h3>
           <div id="puntajeVeteranos" class="puntaje">0</div>
-          <p>puntos</p>
+          <div>puntos</div>
+        </div>
+      </div>
+
+      <div class="lista-sala">
+        <div class="grupo">
+          <h4>Los Cabros del 2000</h4>
+          <ul id="listaJovenes">
+            <li>Esperando jugadores...</li>
+          </ul>
+        </div>
+
+        <div class="grupo">
+          <h4>Los Clásicos de Colección</h4>
+          <ul id="listaVeteranos">
+            <li>Esperando jugadores...</li>
+          </ul>
         </div>
       </div>
 
       <p class="nota">
-        En la siguiente parte agregaremos el panel del conductor,
-        las preguntas y el cronómetro.
+        Los jugadores que ingresen desde otros celulares aparecerán aquí.
       </p>
     </section>
 
   </main>
 
 
+  <!-- Librería oficial de Supabase -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
   <script>
     /*
-      Lista oficial de participantes.
-      La fecha se utiliza para determinar los 10 más jóvenes
-      y los 10 más viejos.
+      ==========================================
+      CONFIGURACIÓN DE SUPABASE
+      ==========================================
+    */
+
+    const SUPABASE_URL =
+      "https://ytyoznwhpjqfjfsyhwsx.supabase.co";
+
+    const SUPABASE_ANON_KEY =
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl0eW96bndocGpxZmpmc3lod3N4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg5Njk1NzQsImV4cCI6MjEwNDU0NTU3NH0.gwJROv-eogFYl2Ycb8KPq3U0vDWwfysuWZvbGF9Rrwc";
+
+    const supabaseClient = window.supabase.createClient(
+      SUPABASE_URL,
+      SUPABASE_ANON_KEY
+    );
+
+
+    /*
+      ==========================================
+      LISTA DE PARTICIPANTES
+      ==========================================
     */
 
     const jugadores = [
@@ -714,14 +747,18 @@
     ];
 
     let jugadorSeleccionado = null;
+    let canalJugadores = null;
 
-    /*
-      Los primeros 10 corresponden a los más jóvenes.
-      Los últimos 10 corresponden a los más viejos.
-    */
     jugadores.forEach((jugador, indice) => {
       jugador.equipo = indice < 10 ? "jovenes" : "veteranos";
     });
+
+
+    /*
+      ==========================================
+      FUNCIONES DE NAVEGACIÓN
+      ==========================================
+    */
 
     function mostrarPantalla(id) {
       document.querySelectorAll(".pantalla").forEach((pantalla) => {
@@ -739,9 +776,9 @@
       mostrarPantalla("pantallaSeleccion");
 
       document.getElementById("buscador").value = "";
-      jugadorSeleccionado = null;
-
       document.getElementById("botonContinuar").disabled = true;
+
+      jugadorSeleccionado = null;
 
       renderizarJugadores(jugadores);
 
@@ -750,12 +787,45 @@
       }, 100);
     }
 
-    function volverInicio() {
-      mostrarInicio();
+    function mostrarConfirmacion() {
+      if (!jugadorSeleccionado) {
+        return;
+      }
+
+      document.getElementById("nombreConfirmacion").textContent =
+        jugadorSeleccionado.nombre;
+
+      document.getElementById("avatarConfirmacion").textContent =
+        obtenerIniciales(jugadorSeleccionado.nombre);
+
+      const etiqueta =
+        document.getElementById("equipoConfirmacion");
+
+      if (jugadorSeleccionado.equipo === "jovenes") {
+        etiqueta.textContent = "Los Cabros del 2000";
+        etiqueta.className = "etiqueta etiqueta-jovenes";
+      } else {
+        etiqueta.textContent = "Los Clásicos de Colección";
+        etiqueta.className = "etiqueta etiqueta-veteranos";
+      }
+
+      mostrarPantalla("pantallaConfirmacion");
     }
 
-    function volverSeleccion() {
-      mostrarSeleccion();
+
+    /*
+      ==========================================
+      FUNCIONES DE SELECCIÓN
+      ==========================================
+    */
+
+    function obtenerIniciales(nombre) {
+      const partes = nombre.split(" ");
+
+      return (
+        partes[0].substring(0, 1) +
+        partes[1].substring(0, 1)
+      ).toUpperCase();
     }
 
     function filtrarJugadores() {
@@ -772,27 +842,15 @@
       renderizarJugadores(resultados);
     }
 
-    function obtenerIniciales(nombre) {
-      const partes = nombre.split(" ");
-
-      if (partes.length === 1) {
-        return partes[0].substring(0, 2).toUpperCase();
-      }
-
-      return (
-        partes[0].substring(0, 1) +
-        partes[1].substring(0, 1)
-      ).toUpperCase();
-    }
-
     function renderizarJugadores(lista) {
-      const contenedor = document.getElementById("listaJugadores");
+      const contenedor =
+        document.getElementById("listaJugadores");
 
       contenedor.innerHTML = "";
 
       if (lista.length === 0) {
         contenedor.innerHTML = `
-          <p style="grid-column: 1 / -1; text-align: center; color: #777;">
+          <p style="grid-column: 1 / -1; text-align: center;">
             No encontramos ese nombre.
           </p>
         `;
@@ -831,72 +889,197 @@
         `;
 
         tarjeta.addEventListener("click", () => {
-          seleccionarJugador(jugador);
+          jugadorSeleccionado = jugador;
+
+          document.getElementById("botonContinuar").disabled = false;
+
+          renderizarJugadores(lista);
         });
 
         contenedor.appendChild(tarjeta);
       });
     }
 
-    function seleccionarJugador(jugador) {
-      jugadorSeleccionado = jugador;
 
-      document.getElementById("botonContinuar").disabled = false;
+    /*
+      ==========================================
+      REGISTRO EN SUPABASE
+      ==========================================
+    */
 
-      const listaFiltrada = jugadores.filter((elemento) => {
-        const texto = document
-          .getElementById("buscador")
-          .value
-          .toLowerCase()
-          .trim();
-
-        return elemento.nombre.toLowerCase().includes(texto);
-      });
-
-      renderizarJugadores(listaFiltrada);
-    }
-
-    function mostrarConfirmacion() {
+    async function entrarSala() {
       if (!jugadorSeleccionado) {
         return;
       }
 
-      document.getElementById("nombreConfirmacion").textContent =
-        jugadorSeleccionado.nombre;
+      const estadoConexion =
+        document.getElementById("estadoConexion");
 
-      document.getElementById("avatarConfirmacion").textContent =
-        obtenerIniciales(jugadorSeleccionado.nombre);
+      estadoConexion.textContent =
+        "Registrando tu participación...";
 
-      const etiquetaEquipo =
-        document.getElementById("equipoConfirmacion");
+      estadoConexion.style.background = "#fff8df";
+      estadoConexion.style.color = "#8a6500";
 
-      if (jugadorSeleccionado.equipo === "jovenes") {
-        etiquetaEquipo.textContent = "Los Cabros del 2000";
-        etiquetaEquipo.className =
-          "equipo-etiqueta equipo-jovenes";
-      } else {
-        etiquetaEquipo.textContent = "Los Clásicos de Colección";
-        etiquetaEquipo.className =
-          "equipo-etiqueta equipo-veteranos";
-      }
+      const { error } = await supabaseClient
+        .from("jugadores")
+        .upsert(
+          {
+            nombre: jugadorSeleccionado.nombre,
+            fecha_nacimiento: jugadorSeleccionado.fecha,
+            equipo: jugadorSeleccionado.equipo,
+            conectado: true,
+            puntaje: 0,
+            respondio: false
+          },
+          {
+            onConflict: "nombre"
+          }
+        );
 
-      mostrarPantalla("pantallaConfirmacion");
-    }
+      if (error) {
+        console.error(error);
 
-    function entrarSala() {
-      if (!jugadorSeleccionado) {
+        estadoConexion.textContent =
+          "No fue posible conectar con Supabase.";
+
+        estadoConexion.style.background = "#fff0f0";
+        estadoConexion.style.color = "#b00020";
+
+        alert(
+          "Ocurrió un error al registrar al jugador. Revisa la URL y la clave de Supabase."
+        );
+
         return;
       }
-
-      const nombreEquipo =
-        jugadorSeleccionado.equipo === "jovenes"
-          ? "Los Cabros del 2000"
-          : "Los Clásicos de Colección";
-
-      document.getElementById("mensajeJugadorSala").textContent =
-        `${jugadorSeleccionado.nombre}, estás participando por ${nombreEquipo}.`;
 
       mostrarPantalla("pantallaSala");
+
+      estadoConexion.textContent =
+        "Conectado correctamente a la partida.";
+
+      estadoConexion.style.background = "#edfff3";
+      estadoConexion.style.color = "#16803c";
+
+      iniciarActualizacionSala();
+      cargarDatosSala();
+    }
+
+
+    /*
+      ==========================================
+      CARGAR JUGADORES Y PUNTAJES
+      ==========================================
+    */
+
+    async function cargarDatosSala() {
+      const { data: partida, error: errorPartida } =
+        await supabaseClient
+          .from("partida")
+          .select("*")
+          .eq("id", 1)
+          .single();
+
+      if (!errorPartida && partida) {
+        document.getElementById("puntajeJovenes").textContent =
+          partida.puntaje_jovenes;
+
+        document.getElementById("puntajeVeteranos").textContent =
+          partida.puntaje_veteranos;
+      }
+
+      const { data: lista, error: errorJugadores } =
+        await supabaseClient
+          .from("jugadores")
+          .select("*")
+          .eq("conectado", true)
+          .order("nombre");
+
+      if (errorJugadores) {
+        console.error(errorJugadores);
+        return;
+      }
+
+      const jovenes = lista.filter(
+        (jugador) => jugador.equipo === "jovenes"
+      );
+
+      const veteranos = lista.filter(
+        (jugador) => jugador.equipo === "veteranos"
+      );
+
+      mostrarListaEquipo(
+        "listaJovenes",
+        jovenes
+      );
+
+      mostrarListaEquipo(
+        "listaVeteranos",
+        veteranos
+      );
+    }
+
+    function mostrarListaEquipo(id, lista) {
+      const contenedor = document.getElementById(id);
+
+      contenedor.innerHTML = "";
+
+      if (lista.length === 0) {
+        contenedor.innerHTML =
+          "<li>Esperando jugadores...</li>";
+
+        return;
+      }
+
+      lista.forEach((jugador) => {
+        const elemento = document.createElement("li");
+
+        elemento.textContent =
+          `${jugador.nombre} — ${jugador.puntaje} pts.`;
+
+        contenedor.appendChild(elemento);
+      });
+    }
+
+
+    /*
+      ==========================================
+      ACTUALIZACIÓN EN TIEMPO REAL
+      ==========================================
+    */
+
+    function iniciarActualizacionSala() {
+      if (canalJugadores) {
+        return;
+      }
+
+      canalJugadores = supabaseClient
+        .channel("sala-copa-del-18")
+        .on(
+          "postgres_changes",
+          {
+            event: "*",
+            schema: "public",
+            table: "jugadores"
+          },
+          () => {
+            cargarDatosSala();
+          }
+        )
+        .on(
+          "postgres_changes",
+          {
+            event: "*",
+            schema: "public",
+            table: "partida"
+          },
+          () => {
+            cargarDatosSala();
+          }
+        )
+        .subscribe();
+
+      setInterval(cargarDatosSala, 5000);
     }
   </script>
 
