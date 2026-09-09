@@ -1247,7 +1247,7 @@
       mensaje.className = "mensaje-respuesta";
 
       const { error } = await supabaseClient.from("jugadores").update({
-        puntaje: correcta ? 1 : 0, respuesta_actual: respuesta, respondio: true
+        puntaje: 0, respuesta_actual: respuesta, respondio: true
       }).eq("nombre", jugadorSeleccionado.nombre);
       if (error) console.error(error);
 
@@ -1256,7 +1256,8 @@
         respuesta, correcta
       });
       if (errorRespuesta) console.error(errorRespuesta);
-      await actualizarPuntajeEquipo(jugadorSeleccionado.equipo);
+      // La respuesta queda registrada, pero el punto NO se suma todavía.
+      // El puntaje se aplica únicamente cuando la ronda se cierra.
       await verificarTodosRespondieron();
       await cargarPuntajesJuego();
     }
@@ -1276,8 +1277,45 @@
       const mensaje = document.getElementById("mensajeRespuesta");
       mensaje.textContent = mensajeBase;
       mensaje.className = "mensaje-respuesta";
+      // Aplicar los puntos recién ahora: todos respondieron o terminó el tiempo.
+      await aplicarPuntajesRonda();
       await supabaseClient.from("partida").update({ estado: "resultado" }).eq("id", 1);
       mostrarResultadoAutomatico();
+    }
+
+    async function aplicarPuntajesRonda() {
+      const { data: respuestas, error } = await supabaseClient
+        .from("respuestas")
+        .select("jugador, correcta")
+        .eq("pregunta_id", preguntaActual.id);
+
+      if (error) {
+        console.error("No se pudieron aplicar los puntos de la ronda:", error);
+        return;
+      }
+
+      for (const respuesta of respuestas || []) {
+        await supabaseClient.from("jugadores").update({
+          puntaje: respuesta.correcta ? 1 : 0
+        }).eq("nombre", respuesta.jugador);
+      }
+
+      const { data: participantes } = await supabaseClient
+        .from("jugadores")
+        .select("nombre, equipo, puntaje")
+        .eq("conectado", true);
+
+      const jovenes = (participantes || [])
+        .filter(j => j.equipo === "jovenes")
+        .reduce((total, j) => total + Number(j.puntaje || 0), 0);
+      const veteranos = (participantes || [])
+        .filter(j => j.equipo === "veteranos")
+        .reduce((total, j) => total + Number(j.puntaje || 0), 0);
+
+      await supabaseClient.from("partida").update({
+        puntaje_jovenes: jovenes,
+        puntaje_veteranos: veteranos
+      }).eq("id", 1);
     }
 
     async function mostrarResultadoAutomatico() {
