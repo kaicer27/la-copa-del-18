@@ -1,1 +1,5265 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>La Copa del 18 🇨🇱</title>
 
+<!-- =========================================================
+     LA COPA DEL 18
+     Etapa 8 - index.html completo
+     Todo el proyecto funciona dentro de este único archivo.
+     ========================================================= -->
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+/* =========================================================
+   VARIABLES Y BASE
+   ========================================================= */
+
+:root {
+    --azul: #0b1f4d;
+    --azul2: #163b80;
+    --rojo: #d52b2b;
+    --rojo2: #b51f28;
+    --blanco: #ffffff;
+    --gris: #f4f6fa;
+    --gris2: #dfe4ec;
+    --texto: #172033;
+    --verde: #1f9d55;
+    --amarillo: #f4c542;
+    --sombra: 0 12px 30px rgba(11,31,77,.13);
+    --radio: 22px;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    margin: 0;
+    padding: 0;
+    min-height: 100%;
+    font-family:
+        Inter,
+        system-ui,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        sans-serif;
+    color: var(--texto);
+    background:
+        radial-gradient(circle at 10% 10%, rgba(213,43,43,.08), transparent 25%),
+        radial-gradient(circle at 90% 20%, rgba(11,31,77,.08), transparent 25%),
+        #f4f6fa;
+}
+
+body {
+    min-height: 100vh;
+}
+
+/* =========================================================
+   DECORACIÓN CHILENA
+   ========================================================= */
+
+body::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 7px;
+    background:
+        linear-gradient(
+            to right,
+            var(--azul) 0 33.33%,
+            var(--blanco) 33.33% 66.66%,
+            var(--rojo) 66.66% 100%
+        );
+    z-index: 9999;
+}
+
+.guirnalda {
+    position: fixed;
+    top: 7px;
+    left: 0;
+    right: 0;
+    height: 35px;
+    pointer-events: none;
+    z-index: 0;
+    opacity: .7;
+}
+
+.guirnalda::before {
+    content: "★  ◆  ★  ◆  ★  ◆  ★  ◆  ★  ◆  ★  ◆  ★  ◆  ★";
+    display: block;
+    text-align: center;
+    color: var(--rojo);
+    font-size: 18px;
+    letter-spacing: 12px;
+}
+
+.app {
+    position: relative;
+    z-index: 1;
+    min-height: 100vh;
+}
+
+/* =========================================================
+   PANTALLAS
+   ========================================================= */
+
+.screen {
+    display: none;
+    min-height: 100vh;
+    padding: 55px 18px 35px;
+}
+
+.screen.active {
+    display: block;
+}
+
+.container {
+    width: min(1100px, 100%);
+    margin: 0 auto;
+}
+
+/* =========================================================
+   HERO / INICIO
+   ========================================================= */
+
+.hero {
+    text-align: center;
+    padding: 45px 20px 30px;
+}
+
+.bandera {
+    width: 100px;
+    height: 64px;
+    margin: 0 auto 25px;
+    position: relative;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: var(--sombra);
+    background:
+        linear-gradient(
+            to bottom,
+            var(--blanco) 0 50%,
+            var(--rojo) 50% 100%
+        );
+}
+
+.bandera::before {
+    content: "★";
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 43%;
+    height: 50%;
+    background: var(--azul);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+}
+
+.hero h1 {
+    margin: 0;
+    color: var(--azul);
+    font-size: clamp(42px, 8vw, 82px);
+    line-height: .95;
+    font-weight: 950;
+    letter-spacing: -3px;
+}
+
+.hero h1 span {
+    color: var(--rojo);
+}
+
+.hero-subtitle {
+    margin: 18px auto 35px;
+    max-width: 650px;
+    font-size: clamp(17px, 3vw, 22px);
+    color: #556074;
+}
+
+.hero-phrase {
+    display: inline-block;
+    background: var(--azul);
+    color: white;
+    padding: 11px 20px;
+    border-radius: 999px;
+    font-weight: 800;
+    margin-bottom: 35px;
+}
+
+/* =========================================================
+   CARDS
+   ========================================================= */
+
+.card {
+    background: rgba(255,255,255,.96);
+    border: 1px solid rgba(11,31,77,.07);
+    border-radius: var(--radio);
+    box-shadow: var(--sombra);
+    padding: 28px;
+}
+
+.card-title {
+    margin: 0 0 8px;
+    font-size: 25px;
+    font-weight: 900;
+    color: var(--azul);
+}
+
+.card-subtitle {
+    color: #687286;
+    margin: 0 0 25px;
+}
+
+/* =========================================================
+   BOTONES
+   ========================================================= */
+
+.btn {
+    appearance: none;
+    border: none;
+    border-radius: 15px;
+    min-height: 52px;
+    padding: 13px 22px;
+    font-size: 16px;
+    font-weight: 850;
+    cursor: pointer;
+    transition:
+        transform .15s ease,
+        box-shadow .15s ease,
+        opacity .15s ease;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+}
+
+.btn:active {
+    transform: translateY(0);
+}
+
+.btn:disabled {
+    opacity: .45;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.btn-primary {
+    background: var(--azul);
+    color: white;
+    box-shadow: 0 8px 18px rgba(11,31,77,.20);
+}
+
+.btn-red {
+    background: var(--rojo);
+    color: white;
+    box-shadow: 0 8px 18px rgba(213,43,43,.20);
+}
+
+.btn-green {
+    background: var(--verde);
+    color: white;
+}
+
+.btn-light {
+    background: #edf1f7;
+    color: var(--azul);
+}
+
+.btn-yellow {
+    background: var(--amarillo);
+    color: #3c2c00;
+}
+
+.btn-large {
+    width: 100%;
+    min-height: 58px;
+    font-size: 18px;
+}
+
+/* =========================================================
+   INICIO
+   ========================================================= */
+
+.home-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+    max-width: 720px;
+    margin: 0 auto;
+}
+
+.action-card {
+    border-radius: 22px;
+    padding: 30px 25px;
+    background: white;
+    box-shadow: var(--sombra);
+    text-align: left;
+    border-top: 6px solid var(--azul);
+}
+
+.action-card.red {
+    border-top-color: var(--rojo);
+}
+
+.action-icon {
+    font-size: 42px;
+    margin-bottom: 10px;
+}
+
+.action-card h3 {
+    margin: 0 0 7px;
+    color: var(--azul);
+}
+
+.action-card p {
+    color: #687286;
+    min-height: 45px;
+}
+
+.home-footer {
+    text-align: center;
+    margin-top: 35px;
+    color: #7b8494;
+    font-size: 14px;
+}
+
+/* =========================================================
+   FORMULARIOS
+   ========================================================= */
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+}
+
+.field {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+}
+
+.field.full {
+    grid-column: 1 / -1;
+}
+
+.field label {
+    font-weight: 800;
+    color: var(--azul);
+}
+
+.field input {
+    width: 100%;
+    border: 2px solid #dfe4ec;
+    border-radius: 13px;
+    padding: 14px;
+    min-height: 50px;
+    font-size: 16px;
+    outline: none;
+    background: white;
+}
+
+.field input:focus {
+    border-color: var(--azul2);
+    box-shadow: 0 0 0 4px rgba(22,59,128,.08);
+}
+
+.form-actions {
+    margin-top: 25px;
+    display: flex;
+    gap: 12px;
+}
+
+.form-actions .btn {
+    flex: 1;
+}
+
+/* =========================================================
+   SALA / LOBBY
+   ========================================================= */
+
+.room-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 22px;
+}
+
+.room-code {
+    background: var(--azul);
+    color: white;
+    border-radius: 18px;
+    padding: 18px 25px;
+    text-align: center;
+    min-width: 190px;
+}
+
+.room-code small {
+    display: block;
+    opacity: .7;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+.room-code strong {
+    display: block;
+    font-size: 32px;
+    letter-spacing: 5px;
+    margin-top: 3px;
+}
+
+.players-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 15px;
+    margin-top: 18px;
+}
+
+.player-card {
+    border-radius: 17px;
+    padding: 17px;
+    background: white;
+    border: 2px solid #e7ebf2;
+    position: relative;
+}
+
+.player-card.host {
+    border-color: var(--amarillo);
+}
+
+.player-name {
+    font-weight: 900;
+    font-size: 17px;
+}
+
+.player-meta {
+    color: #7a8496;
+    font-size: 13px;
+    margin-top: 5px;
+}
+
+.host-badge {
+    position: absolute;
+    right: 12px;
+    top: 12px;
+    font-size: 12px;
+    font-weight: 800;
+    background: #fff3c4;
+    color: #755d00;
+    padding: 5px 8px;
+    border-radius: 999px;
+}
+
+.teams-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.team-card {
+    border-radius: 20px;
+    overflow: hidden;
+    background: white;
+    box-shadow: 0 6px 20px rgba(0,0,0,.07);
+}
+
+.team-header {
+    padding: 16px;
+    color: white;
+    font-weight: 900;
+}
+
+.team-viejitos .team-header {
+    background: var(--rojo);
+}
+
+.team-ni .team-header {
+    background: #d3a900;
+    color: #2d2500;
+}
+
+.team-cabros .team-header {
+    background: var(--azul);
+}
+
+.team-members {
+    padding: 14px;
+}
+
+.team-member {
+    padding: 9px 5px;
+    border-bottom: 1px solid #edf0f4;
+    font-weight: 700;
+}
+
+.team-member:last-child {
+    border-bottom: none;
+}
+
+/* =========================================================
+   ESTADO / ALERTAS
+   ========================================================= */
+
+.alert {
+    border-radius: 14px;
+    padding: 14px 16px;
+    margin-bottom: 18px;
+    font-weight: 700;
+}
+
+.alert-info {
+    background: #e9f1ff;
+    color: #173d82;
+}
+
+.alert-success {
+    background: #e6f7ed;
+    color: #176b3c;
+}
+
+.alert-error {
+    background: #ffe8e8;
+    color: #9e2020;
+}
+
+.alert-warning {
+    background: #fff5d7;
+    color: #745900;
+}
+
+/* =========================================================
+   DESAFÍO
+   ========================================================= */
+
+.game-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.challenge-number {
+    color: var(--rojo);
+    font-weight: 900;
+    text-transform: uppercase;
+    font-size: 13px;
+    letter-spacing: 1.5px;
+}
+
+.challenge-title {
+    margin: 4px 0 0;
+    color: var(--azul);
+    font-size: clamp(25px, 5vw, 40px);
+    font-weight: 950;
+}
+
+.timer {
+    min-width: 90px;
+    min-height: 90px;
+    border-radius: 50%;
+    background: var(--azul);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 30px;
+    font-weight: 950;
+    box-shadow: var(--sombra);
+}
+
+.timer.warning {
+    background: var(--rojo);
+    animation: pulse .7s infinite alternate;
+}
+
+@keyframes pulse {
+    from { transform: scale(1); }
+    to { transform: scale(1.06); }
+}
+
+.progress-wrap {
+    background: #e7ebf2;
+    border-radius: 999px;
+    height: 10px;
+    overflow: hidden;
+    margin-bottom: 22px;
+}
+
+.progress-bar {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, var(--azul), var(--rojo));
+    transition: width .25s ease;
+}
+
+.question-card {
+    background: white;
+    border-radius: 24px;
+    box-shadow: var(--sombra);
+    padding: clamp(22px, 5vw, 42px);
+}
+
+.question-counter {
+    color: #727c8d;
+    font-weight: 800;
+    margin-bottom: 15px;
+}
+
+.question-text {
+    font-size: clamp(23px, 4vw, 35px);
+    line-height: 1.2;
+    color: var(--azul);
+    font-weight: 900;
+    margin-bottom: 25px;
+}
+
+.question-image {
+    width: 100%;
+    max-height: 350px;
+    object-fit: contain;
+    border-radius: 18px;
+    margin-bottom: 20px;
+}
+
+.answers {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 13px;
+}
+
+.answer {
+    border: 2px solid #dfe4ec;
+    background: #fafbfc;
+    border-radius: 17px;
+    padding: 17px;
+    min-height: 72px;
+    text-align: left;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 750;
+    transition: .15s ease;
+}
+
+.answer:hover {
+    border-color: var(--azul);
+    transform: translateY(-2px);
+}
+
+.answer .letter {
+    display: inline-flex;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: var(--azul);
+    color: white;
+    align-items: center;
+    justify-content: center;
+    margin-right: 8px;
+    font-weight: 950;
+}
+
+.answer.selected {
+    border-color: var(--azul);
+    background: #eaf0ff;
+}
+
+.answer.correct {
+    border-color: var(--verde);
+    background: #e7f8ee;
+}
+
+.answer.incorrect {
+    border-color: var(--rojo);
+    background: #ffebeb;
+}
+
+.answer:disabled {
+    cursor: not-allowed;
+}
+
+.question-status {
+    margin-top: 20px;
+    min-height: 25px;
+    font-weight: 850;
+}
+
+.game-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 18px;
+}
+
+.ready-status {
+    flex: 1;
+    background: #f0f3f8;
+    border-radius: 14px;
+    padding: 13px 16px;
+    font-weight: 800;
+    color: #586275;
+}
+
+.youtube-box {
+    margin: 20px 0;
+    border-radius: 18px;
+    overflow: hidden;
+    background: #111;
+    aspect-ratio: 16 / 9;
+}
+
+.youtube-box iframe {
+    width: 100%;
+    height: 100%;
+    border: 0;
+}
+
+/* =========================================================
+   RESULTADOS
+   ========================================================= */
+
+.results-hero {
+    text-align: center;
+    padding: 20px 0 25px;
+}
+
+.results-hero .emoji {
+    font-size: 55px;
+}
+
+.results-hero h2 {
+    color: var(--azul);
+    font-size: clamp(32px, 7vw, 52px);
+    margin: 8px 0;
+    font-weight: 950;
+}
+
+.results-hero p {
+    color: #667185;
+}
+
+.scoreboard {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 15px;
+    margin-bottom: 22px;
+}
+
+.score-card {
+    border-radius: 20px;
+    padding: 22px;
+    background: white;
+    box-shadow: var(--sombra);
+    text-align: center;
+}
+
+.score-card h3 {
+    margin: 0 0 10px;
+    color: #6d7687;
+    font-size: 14px;
+    text-transform: uppercase;
+}
+
+.score-value {
+    font-size: 38px;
+    font-weight: 950;
+    color: var(--azul);
+}
+
+.ranking {
+    background: white;
+    border-radius: 22px;
+    box-shadow: var(--sombra);
+    overflow: hidden;
+}
+
+.ranking-header {
+    padding: 20px 22px;
+    background: var(--azul);
+    color: white;
+}
+
+.ranking-header h3 {
+    margin: 0;
+}
+
+.rank-row {
+    display: grid;
+    grid-template-columns: 60px 1fr 160px 100px 120px;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 20px;
+    border-bottom: 1px solid #edf0f4;
+}
+
+.rank-row:last-child {
+    border-bottom: none;
+}
+
+.rank-position {
+    font-size: 23px;
+    font-weight: 950;
+    color: var(--rojo);
+}
+
+.rank-name {
+    font-weight: 900;
+}
+
+.rank-team {
+    font-size: 13px;
+    color: #747e90;
+}
+
+.rank-score {
+    font-weight: 900;
+    text-align: right;
+}
+
+.summary-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 14px;
+    margin-top: 20px;
+}
+
+.summary-card {
+    background: white;
+    border-radius: 18px;
+    padding: 18px;
+    box-shadow: 0 5px 17px rgba(0,0,0,.07);
+}
+
+.summary-card strong {
+    display: block;
+    color: var(--azul);
+    font-size: 25px;
+}
+
+.summary-card span {
+    font-size: 13px;
+    color: #747e90;
+}
+
+/* =========================================================
+   FINAL
+   ========================================================= */
+
+.final-winner {
+    background:
+        linear-gradient(135deg, var(--azul), #173c80);
+    color: white;
+    border-radius: 28px;
+    padding: 38px 25px;
+    text-align: center;
+    box-shadow: var(--sombra);
+    margin-bottom: 25px;
+}
+
+.final-winner .cup {
+    font-size: 70px;
+}
+
+.final-winner h2 {
+    margin: 8px 0;
+    font-size: clamp(32px, 7vw, 55px);
+}
+
+.final-winner .winner-name {
+    font-size: 24px;
+    font-weight: 900;
+    color: #ffe28a;
+}
+
+/* =========================================================
+   TOAST
+   ========================================================= */
+
+.toast {
+    position: fixed;
+    left: 50%;
+    bottom: 22px;
+    transform: translateX(-50%) translateY(100px);
+    background: var(--azul);
+    color: white;
+    padding: 14px 20px;
+    border-radius: 999px;
+    font-weight: 800;
+    box-shadow: var(--sombra);
+    z-index: 10000;
+    opacity: 0;
+    transition: .25s ease;
+    pointer-events: none;
+    max-width: calc(100vw - 30px);
+    text-align: center;
+}
+
+.toast.show {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+}
+
+/* =========================================================
+   LOADING
+   ========================================================= */
+
+.loading {
+    position: fixed;
+    inset: 0;
+    background: rgba(11,31,77,.85);
+    z-index: 9998;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.loading.active {
+    display: flex;
+}
+
+.loading-card {
+    background: white;
+    border-radius: 25px;
+    padding: 35px;
+    text-align: center;
+    max-width: 360px;
+    box-shadow: var(--sombra);
+}
+
+.spinner {
+    width: 45px;
+    height: 45px;
+    border: 5px solid #dce3f0;
+    border-top-color: var(--rojo);
+    border-radius: 50%;
+    animation: spin .8s linear infinite;
+    margin: 0 auto 18px;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 800px) {
+
+    .home-actions,
+    .form-grid,
+    .players-grid,
+    .teams-grid,
+    .scoreboard,
+    .summary-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .answers {
+        grid-template-columns: 1fr;
+    }
+
+    .room-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .room-code {
+        width: 100%;
+    }
+
+    .game-top {
+        align-items: flex-start;
+    }
+
+    .timer {
+        min-width: 75px;
+        min-height: 75px;
+        font-size: 25px;
+    }
+
+    .rank-row {
+        grid-template-columns: 45px 1fr 80px;
+    }
+
+    .rank-team,
+    .rank-row .rank-correct {
+        display: none;
+    }
+
+    .rank-score {
+        text-align: right;
+    }
+
+    .game-actions {
+        flex-direction: column;
+    }
+}
+
+@media (max-width: 500px) {
+
+    .screen {
+        padding: 42px 11px 25px;
+    }
+
+    .card,
+    .question-card {
+        padding: 20px;
+        border-radius: 18px;
+    }
+
+    .hero {
+        padding-top: 35px;
+    }
+
+    .hero h1 {
+        letter-spacing: -2px;
+    }
+
+    .form-actions {
+        flex-direction: column;
+    }
+
+    .team-card {
+        border-radius: 16px;
+    }
+
+    .question-text {
+        font-size: 23px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="guirnalda"></div>
+
+<div class="app">
+
+<!-- =========================================================
+     PANTALLA INICIAL
+     ========================================================= -->
+
+<section id="screen-home" class="screen active">
+    <div class="container">
+
+        <div class="hero">
+
+            <div class="bandera"></div>
+
+            <h1>
+                La Copa <span>del 18</span>
+            </h1>
+
+            <p class="hero-subtitle">
+                El gran desafío familiar de Fiestas Patrias.
+                Cultura, música, televisión, historia y puro conocimiento chileno.
+            </p>
+
+            <div class="hero-phrase">
+                🇨🇱 ¡Que comience la competencia!
+            </div>
+
+        </div>
+
+        <div class="home-actions">
+
+            <div class="action-card">
+                <div class="action-icon">🏆</div>
+                <h3>Crear una sala</h3>
+                <p>
+                    Crea una partida y comparte el código con tu familia y amigos.
+                </p>
+                <button class="btn btn-primary btn-large"
+                        onclick="showCreateScreen()">
+                    Crear sala
+                </button>
+            </div>
+
+            <div class="action-card red">
+                <div class="action-icon">🎉</div>
+                <h3>Unirse a una sala</h3>
+                <p>
+                    Ingresa el código de la partida para comenzar a competir.
+                </p>
+                <button class="btn btn-red btn-large"
+                        onclick="showJoinScreen()">
+                    Unirse a sala
+                </button>
+            </div>
+
+        </div>
+
+        <div class="home-footer">
+            🇨🇱 La Copa del 18 · Juego familiar · ¡Viva Chile!
+        </div>
+
+    </div>
+</section>
+
+
+<!-- =========================================================
+     CREAR SALA
+     ========================================================= -->
+
+<section id="screen-create" class="screen">
+    <div class="container">
+
+        <div class="card">
+
+            <h2 class="card-title">🏆 Crear una sala</h2>
+
+            <p class="card-subtitle">
+                Serás el anfitrión de la sala. No eres moderador:
+                solamente tendrás la opción de iniciar la partida.
+            </p>
+
+            <div id="create-error"></div>
+
+            <div class="form-grid">
+
+                <div class="field full">
+                    <label for="create-name">Tu nombre</label>
+                    <input
+                        id="create-name"
+                        type="text"
+                        maxlength="40"
+                        autocomplete="off"
+                        placeholder="Ej: Rodrigo">
+                </div>
+
+                <div class="field full">
+                    <label for="create-birth">
+                        Tu fecha de nacimiento
+                    </label>
+                    <input
+                        id="create-birth"
+                        type="date">
+                </div>
+
+            </div>
+
+            <div class="form-actions">
+
+                <button class="btn btn-light"
+                        onclick="showScreen('screen-home')">
+                    ← Volver
+                </button>
+
+                <button class="btn btn-primary"
+                        onclick="createRoom()">
+                    Crear sala 🇨🇱
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+</section>
+
+
+<!-- =========================================================
+     UNIRSE
+     ========================================================= -->
+
+<section id="screen-join" class="screen">
+    <div class="container">
+
+        <div class="card">
+
+            <h2 class="card-title">🎉 Unirse a una sala</h2>
+
+            <p class="card-subtitle">
+                Ingresa el código que te entregó el anfitrión.
+            </p>
+
+            <div id="join-error"></div>
+
+            <div class="form-grid">
+
+                <div class="field full">
+                    <label for="join-code">Código de sala</label>
+                    <input
+                        id="join-code"
+                        type="text"
+                        maxlength="6"
+                        autocomplete="off"
+                        placeholder="Ej: ABC123"
+                        style="text-transform:uppercase">
+                </div>
+
+                <div class="field full">
+                    <label for="join-name">Tu nombre</label>
+                    <input
+                        id="join-name"
+                        type="text"
+                        maxlength="40"
+                        autocomplete="off"
+                        placeholder="Ej: Camila">
+                </div>
+
+                <div class="field full">
+                    <label for="join-birth">
+                        Tu fecha de nacimiento
+                    </label>
+                    <input
+                        id="join-birth"
+                        type="date">
+                </div>
+
+            </div>
+
+            <div class="form-actions">
+
+                <button class="btn btn-light"
+                        onclick="showScreen('screen-home')">
+                    ← Volver
+                </button>
+
+                <button class="btn btn-red"
+                        onclick="joinRoom()">
+                    Entrar a la sala
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+</section>
+
+
+<!-- =========================================================
+     LOBBY
+     ========================================================= -->
+
+<section id="screen-lobby" class="screen">
+    <div class="container">
+
+        <div class="room-header">
+
+            <div>
+                <div class="challenge-number">
+                    🇨🇱 Sala de juego
+                </div>
+
+                <h2 class="challenge-title">
+                    ¡Bienvenidos a La Copa del 18!
+                </h2>
+            </div>
+
+            <div class="room-code">
+                <small>Código de sala</small>
+                <strong id="lobby-code">------</strong>
+            </div>
+
+        </div>
+
+        <div id="lobby-message"></div>
+
+        <div class="card">
+
+            <h3 class="card-title">
+                👥 Participantes
+            </h3>
+
+            <p class="card-subtitle">
+                Esperando a que se incorporen todos los competidores.
+            </p>
+
+            <div id="players-list"
+                 class="players-grid">
+            </div>
+
+        </div>
+
+        <div class="card" style="margin-top:20px">
+
+            <h3 class="card-title">
+                🏳️ Equipos
+            </h3>
+
+            <p class="card-subtitle">
+                La distribución se realiza automáticamente según la edad,
+                desde la generación mayor hasta la menor.
+            </p>
+
+            <div id="teams-list"
+                 class="teams-grid">
+            </div>
+
+        </div>
+
+        <div class="card" style="margin-top:20px">
+
+            <div id="host-start-area"></div>
+
+        </div>
+
+    </div>
+</section>
+
+
+<!-- =========================================================
+     JUEGO
+     ========================================================= -->
+
+<section id="screen-game" class="screen">
+    <div class="container">
+
+        <div class="game-top">
+
+            <div>
+                <div class="challenge-number"
+                     id="game-challenge-number">
+                    DESAFÍO 1
+                </div>
+
+                <h2 class="challenge-title"
+                    id="game-challenge-title">
+                    Cultura general chilena
+                </h2>
+            </div>
+
+            <div class="timer"
+                 id="timer">
+                30
+            </div>
+
+        </div>
+
+        <div class="progress-wrap">
+            <div class="progress-bar"
+                 id="question-progress">
+            </div>
+        </div>
+
+        <div class="question-card">
+
+            <div class="question-counter"
+                 id="question-counter">
+                Pregunta 1 de 10
+            </div>
+
+            <div id="youtube-container"></div>
+
+            <img id="question-image"
+                 class="question-image"
+                 style="display:none"
+                 alt="Imagen de la pregunta">
+
+            <div class="question-text"
+                 id="question-text">
+                Cargando pregunta...
+            </div>
+
+            <div class="answers"
+                 id="answers">
+            </div>
+
+            <div class="question-status"
+                 id="question-status">
+            </div>
+
+            <div class="game-actions">
+
+                <div class="ready-status"
+                     id="ready-status">
+                    Esperando tu respuesta...
+                </div>
+
+                <button id="ready-button"
+                        class="btn btn-primary"
+                        onclick="markReady()"
+                        disabled>
+                    Estoy listo para avanzar
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+</section>
+
+
+<!-- =========================================================
+     RESULTADOS DESAFÍO
+     ========================================================= -->
+
+<section id="screen-results" class="screen">
+    <div class="container">
+
+        <div class="results-hero">
+
+            <div class="emoji">🏆</div>
+
+            <h2 id="results-title">
+                Resultados del desafío
+            </h2>
+
+            <p id="results-subtitle">
+                ¡Tenemos un nuevo líder!
+            </p>
+
+        </div>
+
+        <div class="scoreboard">
+
+            <div class="score-card">
+                <h3>🟥 Viejitos Cracks</h3>
+                <div class="score-value"
+                     id="score-viejitos">
+                    0
+                </div>
+            </div>
+
+            <div class="score-card">
+                <h3>🟨 Ni Fu Ni Fa</h3>
+                <div class="score-value"
+                     id="score-ni">
+                    0
+                </div>
+            </div>
+
+            <div class="score-card">
+                <h3>🟦 Cabros Chicos</h3>
+                <div class="score-value"
+                     id="score-cabros">
+                    0
+                </div>
+            </div>
+
+        </div>
+
+        <div class="card">
+
+            <h3 class="card-title">
+                📊 Resumen del desafío
+            </h3>
+
+            <div class="summary-grid">
+
+                <div class="summary-card">
+                    <strong id="summary-answered">0</strong>
+                    <span>Respondidas</span>
+                </div>
+
+                <div class="summary-card">
+                    <strong id="summary-correct">0</strong>
+                    <span>Correctas</span>
+                </div>
+
+                <div class="summary-card">
+                    <strong id="summary-incorrect">0</strong>
+                    <span>Incorrectas</span>
+                </div>
+
+                <div class="summary-card">
+                    <strong id="summary-unanswered">0</strong>
+                    <span>Sin responder</span>
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="ranking"
+             style="margin-top:20px">
+
+            <div class="ranking-header">
+                <h3>🥇 Ranking individual</h3>
+            </div>
+
+            <div id="challenge-ranking"></div>
+
+        </div>
+
+        <div id="next-challenge-area"
+             class="card"
+             style="margin-top:20px">
+        </div>
+
+    </div>
+</section>
+
+
+<!-- =========================================================
+     FINAL
+     ========================================================= -->
+
+<section id="screen-final" class="screen">
+    <div class="container">
+
+        <div class="final-winner">
+
+            <div class="cup">🏆</div>
+
+            <h2 id="final-title">
+                ¡La Copa del 18 tiene campeón!
+            </h2>
+
+            <div class="winner-name"
+                 id="final-winner">
+                -
+            </div>
+
+        </div>
+
+        <div class="scoreboard">
+
+            <div class="score-card">
+                <h3>🟥 Viejitos Cracks</h3>
+                <div class="score-value"
+                     id="final-score-viejitos">
+                    0
+                </div>
+            </div>
+
+            <div class="score-card">
+                <h3>🟨 Ni Fu Ni Fa</h3>
+                <div class="score-value"
+                     id="final-score-ni">
+                    0
+                </div>
+            </div>
+
+            <div class="score-card">
+                <h3>🟦 Cabros Chicos</h3>
+                <div class="score-value"
+                     id="final-score-cabros">
+                    0
+                </div>
+            </div>
+
+        </div>
+
+        <div id="final-highlights"></div>
+
+        <div class="ranking"
+             style="margin-top:20px">
+
+            <div class="ranking-header">
+                <h3>👑 Ranking final</h3>
+            </div>
+
+            <div id="final-ranking"></div>
+
+        </div>
+
+        <div class="card"
+             style="margin-top:20px">
+
+            <h3 class="card-title">
+                📚 Resumen de la partida
+            </h3>
+
+            <div id="final-summary"></div>
+
+        </div>
+
+        <div class="form-actions"
+             style="margin-top:20px">
+
+            <button class="btn btn-light"
+                    onclick="resetGame()">
+                🏠 Volver al inicio
+            </button>
+
+            <button class="btn btn-primary"
+                    onclick="showCreateScreen()">
+                🏆 Crear nueva sala
+            </button>
+
+        </div>
+
+    </div>
+</section>
+
+</div>
+
+
+<!-- =========================================================
+     LOADING
+     ========================================================= -->
+
+<div class="loading"
+     id="loading">
+
+    <div class="loading-card">
+
+        <div class="spinner"></div>
+
+        <strong id="loading-text">
+            Conectando...
+        </strong>
+
+    </div>
+
+</div>
+
+
+<div class="toast"
+     id="toast">
+</div>
+
+
+<script>
+/* =========================================================
+   LA COPA DEL 18
+   JAVASCRIPT PRINCIPAL
+   ========================================================= */
+
+
+/* =========================================================
+   1. CONFIGURACIÓN SUPABASE
+   ========================================================= */
+
+const SUPABASE_URL = "https://fimjzdbhsyaxjecfpvxr.supabase.co";
+
+/*
+   PEGA AQUÍ TU ANON/PUBLISHABLE KEY.
+
+   IMPORTANTE:
+   - NO utilizar service_role.
+   - Esta clave puede estar en GitHub Pages.
+*/
+const SUPABASE_ANON_KEY = "PEGA_AQUI_TU_ANON_KEY";
+
+
+const { createClient } = supabase;
+
+const sb = createClient(
+    SUPABASE_URL,
+    SUPABASE_ANON_KEY
+);
+
+
+/* =========================================================
+   2. ESTADO LOCAL DEL JUEGO
+   ========================================================= */
+
+const state = {
+
+    sala: null,
+
+    jugador: null,
+
+    jugadores: [],
+
+    desafios: [],
+
+    pregunta: null,
+
+    respuestas: [],
+
+    resultados: [],
+
+    resultadoEquipos: [],
+
+    final: null,
+
+    realtimeChannel: null,
+
+    timerInterval: null,
+
+    heartbeatInterval: null,
+
+    questionLocked: false,
+
+    readyClicked: false,
+
+    lastQuestionKey: null,
+
+    lastChallengeResult: null,
+
+    youtubePlayer: null,
+
+    youtubeReady: false
+
+};
+
+
+/* =========================================================
+   3. CONFIGURACIÓN GENERAL
+   ========================================================= */
+
+const TEAM_INFO = {
+
+    viejitos_cracks: {
+        name: "Los Viejitos Cracks",
+        short: "Viejitos Cracks",
+        emoji: "🟥",
+        css: "team-viejitos"
+    },
+
+    ni_fu_ni_fa: {
+        name: "Los Ni Fu Ni Fa",
+        short: "Ni Fu Ni Fa",
+        emoji: "🟨",
+        css: "team-ni"
+    },
+
+    cabros_chicos: {
+        name: "Los Cabros Chicos",
+        short: "Cabros Chicos",
+        emoji: "🟦",
+        css: "team-cabros"
+    }
+
+};
+
+
+/* =========================================================
+   4. UTILIDADES
+   ========================================================= */
+
+function $(id) {
+    return document.getElementById(id);
+}
+
+
+function showScreen(id) {
+
+    document
+        .querySelectorAll(".screen")
+        .forEach(screen => {
+            screen.classList.remove("active");
+        });
+
+    const target = $(id);
+
+    if (target) {
+        target.classList.add("active");
+    }
+
+    window.scrollTo({
+        top: 0,
+        behavior: "smooth"
+    });
+}
+
+
+function showCreateScreen() {
+
+    showScreen("screen-create");
+
+    $("create-error").innerHTML = "";
+
+}
+
+
+function showJoinScreen() {
+
+    showScreen("screen-join");
+
+    $("join-error").innerHTML = "";
+
+}
+
+
+function setLoading(active, text = "Procesando...") {
+
+    $("loading-text").textContent = text;
+
+    $("loading").classList.toggle(
+        "active",
+        active
+    );
+
+}
+
+
+function toast(message) {
+
+    const el = $("toast");
+
+    el.textContent = message;
+
+    el.classList.add("show");
+
+    clearTimeout(toast._timer);
+
+    toast._timer = setTimeout(() => {
+        el.classList.remove("show");
+    }, 3000);
+
+}
+
+
+function showError(containerId, message) {
+
+    $(containerId).innerHTML = `
+        <div class="alert alert-error">
+            ❌ ${escapeHtml(message)}
+        </div>
+    `;
+
+}
+
+
+function showInfo(containerId, message) {
+
+    $(containerId).innerHTML = `
+        <div class="alert alert-info">
+            ℹ️ ${escapeHtml(message)}
+        </div>
+    `;
+
+}
+
+
+function escapeHtml(value) {
+
+    if (value === null || value === undefined) {
+        return "";
+    }
+
+    return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+}
+
+
+function normalizeCode(code) {
+
+    return String(code || "")
+        .trim()
+        .toUpperCase();
+}
+
+
+function formatTeam(team) {
+
+    const info = TEAM_INFO[team];
+
+    if (!info) {
+        return team || "Sin equipo";
+    }
+
+    return `${info.emoji} ${info.name}`;
+}
+
+
+function formatDate(date) {
+
+    if (!date) {
+        return "";
+    }
+
+    const d = new Date(date + "T00:00:00");
+
+    if (Number.isNaN(d.getTime())) {
+        return "";
+    }
+
+    return d.toLocaleDateString("es-CL", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric"
+    });
+}
+
+
+/* =========================================================
+   5. RPC GENERAL
+   ========================================================= */
+
+async function callRPC(functionName, params = {}) {
+
+    const { data, error } = await sb.rpc(
+        functionName,
+        params
+    );
+
+    if (error) {
+        console.error(
+            `RPC ${functionName}:`,
+            error
+        );
+
+        throw new Error(
+            error.message || `Error ejecutando ${functionName}`
+        );
+    }
+
+    return data;
+}
+
+
+/* =========================================================
+   6. CREAR SALA
+   ========================================================= */
+
+async function createRoom() {
+
+    const name =
+        $("create-name").value.trim();
+
+    const birth =
+        $("create-birth").value;
+
+    $("create-error").innerHTML = "";
+
+    if (!name) {
+
+        showError(
+            "create-error",
+            "Debes ingresar tu nombre."
+        );
+
+        return;
+    }
+
+    if (!birth) {
+
+        showError(
+            "create-error",
+            "Debes ingresar tu fecha de nacimiento."
+        );
+
+        return;
+    }
+
+    if (new Date(birth) > new Date()) {
+
+        showError(
+            "create-error",
+            "La fecha de nacimiento no puede ser futura."
+        );
+
+        return;
+    }
+
+    try {
+
+        setLoading(
+            true,
+            "Creando tu sala..."
+        );
+
+        const data = await callRPC(
+            "crear_sala",
+            {
+                p_nombre: name,
+                p_fecha_nacimiento: birth
+            }
+        );
+
+        await processRoomRPCResult(
+            data,
+            name,
+            birth,
+            true
+        );
+
+        toast("¡Sala creada!");
+
+    } catch (error) {
+
+        console.error(error);
+
+        showError(
+            "create-error",
+            error.message
+        );
+
+    } finally {
+
+        setLoading(false);
+
+    }
+
+}
+
+
+/* =========================================================
+   7. UNIRSE A SALA
+   ========================================================= */
+
+async function joinRoom() {
+
+    const code =
+        normalizeCode(
+            $("join-code").value
+        );
+
+    const name =
+        $("join-name").value.trim();
+
+    const birth =
+        $("join-birth").value;
+
+    $("join-error").innerHTML = "";
+
+    if (code.length !== 6) {
+
+        showError(
+            "join-error",
+            "El código debe tener 6 caracteres."
+        );
+
+        return;
+    }
+
+    if (!name) {
+
+        showError(
+            "join-error",
+            "Debes ingresar tu nombre."
+        );
+
+        return;
+    }
+
+    if (!birth) {
+
+        showError(
+            "join-error",
+            "Debes ingresar tu fecha de nacimiento."
+        );
+
+        return;
+    }
+
+    try {
+
+        setLoading(
+            true,
+            "Entrando a la sala..."
+        );
+
+        const data = await callRPC(
+            "unirse_sala",
+            {
+                p_codigo: code,
+                p_nombre: name,
+                p_fecha_nacimiento: birth
+            }
+        );
+
+        await processRoomRPCResult(
+            data,
+            name,
+            birth,
+            false
+        );
+
+        toast("¡Te has unido a la sala!");
+
+    } catch (error) {
+
+        console.error(error);
+
+        showError(
+            "join-error",
+            error.message
+        );
+
+    } finally {
+
+        setLoading(false);
+
+    }
+
+}
+
+
+/* =========================================================
+   8. PROCESAR RESPUESTA DE CREACIÓN / INGRESO
+   ========================================================= */
+
+async function processRoomRPCResult(
+    data,
+    name,
+    birth,
+    isHost
+) {
+
+    /*
+       Las funciones SQL pueden devolver un UUID,
+       un objeto o una fila.
+
+       Se intenta detectar automáticamente
+       la información disponible.
+    */
+
+    let salaId = null;
+    let jugadorId = null;
+    let codigo = null;
+
+    if (typeof data === "string") {
+
+        /*
+           Puede ser directamente el ID de la sala
+           o del jugador.
+        */
+
+        if (
+            /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(data)
+        ) {
+
+            salaId = data;
+
+        }
+
+    }
+
+    if (Array.isArray(data) && data.length) {
+
+        const first = data[0];
+
+        salaId =
+            first.sala_id ||
+            first.id_sala ||
+            first.id ||
+            salaId;
+
+        jugadorId =
+            first.jugador_id ||
+            first.id_jugador ||
+            jugadorId;
+
+        codigo =
+            first.codigo ||
+            first.codigo_sala ||
+            codigo;
+    }
+
+    if (
+        data &&
+        typeof data === "object" &&
+        !Array.isArray(data)
+    ) {
+
+        salaId =
+            data.sala_id ||
+            data.id_sala ||
+            data.id ||
+            salaId;
+
+        jugadorId =
+            data.jugador_id ||
+            data.id_jugador ||
+            jugadorId;
+
+        codigo =
+            data.codigo ||
+            data.codigo_sala ||
+            codigo;
+    }
+
+
+    /*
+       Si tenemos ID de sala, obtenemos sus datos.
+    */
+
+    if (salaId) {
+
+        const { data: sala, error } =
+            await sb
+                .from("salas")
+                .select("*")
+                .eq("id", salaId)
+                .single();
+
+        if (error) {
+            throw error;
+        }
+
+        state.sala = sala;
+    }
+
+
+    /*
+       Si no encontramos sala directamente,
+       buscamos por código.
+    */
+
+    if (!state.sala && codigo) {
+
+        const { data: sala, error } =
+            await sb
+                .from("salas")
+                .select("*")
+                .eq(
+                    "codigo",
+                    normalizeCode(codigo)
+                )
+                .single();
+
+        if (error) {
+            throw error;
+        }
+
+        state.sala = sala;
+    }
+
+
+    /*
+       Si todavía no tenemos la sala,
+       buscamos la sala más reciente en la que
+       aparece el jugador.
+    */
+
+    if (!state.sala) {
+
+        const { data: players, error } =
+            await sb
+                .from("jugadores")
+                .select("*")
+                .eq("nombre", name)
+                .eq("fecha_nacimiento", birth)
+                .order(
+                    "fecha_ingreso",
+                    {
+                        ascending: false
+                    }
+                )
+                .limit(1);
+
+        if (error) {
+            throw error;
+        }
+
+        if (!players || !players.length) {
+
+            throw new Error(
+                "La sala fue creada, pero no se pudo recuperar su información."
+            );
+
+        }
+
+        const player = players[0];
+
+        jugadorId = player.id;
+
+        const { data: sala, error: roomError } =
+            await sb
+                .from("salas")
+                .select("*")
+                .eq("id", player.sala_id)
+                .single();
+
+        if (roomError) {
+            throw roomError;
+        }
+
+        state.sala = sala;
+    }
+
+
+    /*
+       Recuperar jugador.
+    */
+
+    if (jugadorId) {
+
+        const { data: player, error } =
+            await sb
+                .from("jugadores")
+                .select("*")
+                .eq("id", jugadorId)
+                .single();
+
+        if (!error) {
+            state.jugador = player;
+        }
+    }
+
+
+    /*
+       Si no encontramos el jugador por ID,
+       lo buscamos dentro de la sala.
+    */
+
+    if (!state.jugador && state.sala) {
+
+        const { data: players, error } =
+            await sb
+                .from("jugadores")
+                .select("*")
+                .eq("sala_id", state.sala.id)
+                .eq("nombre", name)
+                .eq("fecha_nacimiento", birth)
+                .order(
+                    "fecha_ingreso",
+                    {
+                        ascending: false
+                    }
+                )
+                .limit(1);
+
+        if (error) {
+            throw error;
+        }
+
+        if (players && players.length) {
+            state.jugador = players[0];
+        }
+    }
+
+
+    if (!state.sala || !state.jugador) {
+
+        throw new Error(
+            "No se pudo recuperar la sala o el jugador."
+        );
+
+    }
+
+
+    /*
+       El anfitrión puede requerir la asignación
+       de equipos inmediatamente.
+    */
+
+    if (isHost) {
+
+        try {
+
+            await callRPC(
+                "asignar_equipos",
+                {
+                    p_sala_id: state.sala.id
+                }
+            );
+
+        } catch (error) {
+
+            console.warn(
+                "Asignación inicial:",
+                error.message
+            );
+
+        }
+
+    }
+
+
+    await enterLobby();
+
+}
+
+
+/* =========================================================
+   9. ENTRAR AL LOBBY
+   ========================================================= */
+
+async function enterLobby() {
+
+    if (!state.sala) {
+        return;
+    }
+
+    showScreen("screen-lobby");
+
+    $("lobby-code").textContent =
+        state.sala.codigo;
+
+    await refreshLobby();
+
+    subscribeRealtime();
+
+    startHeartbeat();
+
+}
+
+
+/* =========================================================
+   10. CARGAR LOBBY
+   ========================================================= */
+
+async function refreshLobby() {
+
+    if (!state.sala) {
+        return;
+    }
+
+    try {
+
+        const { data: players, error } =
+            await sb
+                .from("jugadores")
+                .select("*")
+                .eq("sala_id", state.sala.id)
+                .order(
+                    "orden_edad",
+                    {
+                        ascending: true,
+                        nullsFirst: false
+                    }
+                )
+                .order(
+                    "orden_ingreso",
+                    {
+                        ascending: true
+                    }
+                );
+
+        if (error) {
+            throw error;
+        }
+
+        state.jugadores =
+            players || [];
+
+        renderPlayers();
+        renderTeams();
+        renderHostControls();
+
+    } catch (error) {
+
+        console.error(
+            "Lobby:",
+            error
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   11. MOSTRAR JUGADORES
+   ========================================================= */
+
+function renderPlayers() {
+
+    const container =
+        $("players-list");
+
+    if (!state.jugadores.length) {
+
+        container.innerHTML = `
+            <div class="alert alert-info"
+                 style="grid-column:1/-1">
+                Esperando jugadores...
+            </div>
+        `;
+
+        return;
+    }
+
+    container.innerHTML =
+        state.jugadores
+            .map(player => {
+
+                const isHost =
+                    state.sala &&
+                    player.id ===
+                    state.sala.id_anfitrion;
+
+                const connected =
+                    player.estado_conexion ===
+                    "conectado";
+
+                return `
+                    <div class="player-card ${isHost ? "host" : ""}">
+
+                        ${
+                            isHost
+                            ? `<div class="host-badge">👑 Anfitrión</div>`
+                            : ""
+                        }
+
+                        <div class="player-name">
+                            ${escapeHtml(player.nombre)}
+                        </div>
+
+                        <div class="player-meta">
+                            ${
+                                connected
+                                ? "🟢 Conectado"
+                                : "⚪ Desconectado"
+                            }
+                        </div>
+
+                        ${
+                            player.equipo
+                            ? `
+                                <div class="player-meta"
+                                     style="margin-top:8px;font-weight:800">
+                                    ${escapeHtml(formatTeam(player.equipo))}
+                                </div>
+                            `
+                            : ""
+                        }
+
+                    </div>
+                `;
+
+            })
+            .join("");
+
+}
+
+
+/* =========================================================
+   12. EQUIPOS
+   ========================================================= */
+
+function renderTeams() {
+
+    const teams = {
+
+        viejitos_cracks: [],
+
+        ni_fu_ni_fa: [],
+
+        cabros_chicos: []
+
+    };
+
+    state.jugadores.forEach(player => {
+
+        if (teams[player.equipo]) {
+            teams[player.equipo].push(player);
+        }
+
+    });
+
+
+    const definitions = [
+        "viejitos_cracks",
+        "ni_fu_ni_fa",
+        "cabros_chicos"
+    ];
+
+
+    $("teams-list").innerHTML =
+        definitions
+            .map(team => {
+
+                const info =
+                    TEAM_INFO[team];
+
+                const members =
+                    teams[team] || [];
+
+                return `
+                    <div class="team-card ${info.css}">
+
+                        <div class="team-header">
+                            ${info.emoji} ${info.name}
+                        </div>
+
+                        <div class="team-members">
+
+                            ${
+                                members.length
+                                ? members
+                                    .map(player => `
+                                        <div class="team-member">
+                                            ${escapeHtml(player.nombre)}
+                                        </div>
+                                    `)
+                                    .join("")
+                                : `
+                                    <div class="team-member"
+                                         style="color:#9aa2b0">
+                                        Esperando jugadores
+                                    </div>
+                                `
+                            }
+
+                        </div>
+
+                    </div>
+                `;
+
+            })
+            .join("");
+
+}
+
+
+/* =========================================================
+   13. CONTROL DEL ANFITRIÓN
+   ========================================================= */
+
+function renderHostControls() {
+
+    const area =
+        $("host-start-area");
+
+    if (!state.jugador || !state.sala) {
+        return;
+    }
+
+    const isHost =
+        state.jugador.id ===
+        state.sala.id_anfitrion;
+
+
+    if (!isHost) {
+
+        area.innerHTML = `
+            <div class="alert alert-info">
+                ⏳ El anfitrión todavía no ha iniciado la partida.
+                Cuando todos estén listos comenzará el desafío.
+            </div>
+        `;
+
+        return;
+    }
+
+
+    const connected =
+        state.jugadores.filter(
+            p => p.estado_conexion === "conectado"
+        );
+
+
+    const canStart =
+        connected.length >= 3;
+
+
+    area.innerHTML = `
+
+        <div class="alert ${canStart ? "alert-success" : "alert-warning"}">
+
+            ${
+                canStart
+                ? `🎉 Hay ${connected.length} jugadores conectados. ¡La competencia puede comenzar!`
+                : `Se necesitan al menos 3 jugadores conectados para comenzar. Actualmente hay ${connected.length}.`
+            }
+
+        </div>
+
+        <button
+            class="btn btn-red btn-large"
+            onclick="startGame()"
+            ${canStart ? "" : "disabled"}>
+
+            🇨🇱 Iniciar partida
+
+        </button>
+
+    `;
+
+}
+
+
+/* =========================================================
+   14. INICIAR PARTIDA
+   ========================================================= */
+
+async function startGame() {
+
+    if (!state.sala || !state.jugador) {
+        return;
+    }
+
+    try {
+
+        setLoading(
+            true,
+            "Preparando la competencia..."
+        );
+
+
+        await callRPC(
+            "asignar_equipos",
+            {
+                p_sala_id: state.sala.id
+            }
+        );
+
+
+        await callRPC(
+            "iniciar_partida",
+            {
+                p_sala_id: state.sala.id,
+                p_jugador_id: state.jugador.id
+            }
+        );
+
+
+        await refreshRoom();
+
+        toast(
+            "🇨🇱 ¡Que comience la competencia!"
+        );
+
+
+    } catch (error) {
+
+        console.error(error);
+
+        toast(
+            "No se pudo iniciar: " +
+            error.message
+        );
+
+    } finally {
+
+        setLoading(false);
+
+    }
+
+}
+
+
+/* =========================================================
+   15. RECUPERAR SALA
+   ========================================================= */
+
+async function refreshRoom() {
+
+    if (!state.sala) {
+        return;
+    }
+
+    const { data: room, error } =
+        await sb
+            .from("salas")
+            .select("*")
+            .eq("id", state.sala.id)
+            .single();
+
+    if (error) {
+
+        console.error(error);
+
+        return;
+    }
+
+    state.sala = room;
+
+
+    if (room.estado === "esperando") {
+
+        await refreshLobby();
+
+        showScreen("screen-lobby");
+
+        return;
+    }
+
+
+    if (room.estado === "jugando") {
+
+        await loadCurrentQuestion();
+
+        return;
+    }
+
+
+    if (room.estado === "resultados") {
+
+        await showChallengeResults();
+
+        return;
+    }
+
+
+    if (room.estado === "finalizada") {
+
+        await showFinalResults();
+
+        return;
+    }
+
+}
+
+
+/* =========================================================
+   16. CARGAR DESAFÍOS
+   ========================================================= */
+
+async function loadChallenges() {
+
+    const { data, error } =
+        await sb
+            .from("desafios")
+            .select("*")
+            .eq("activo", true)
+            .order(
+                "numero",
+                {
+                    ascending: true
+                }
+            );
+
+    if (error) {
+        throw error;
+    }
+
+    state.desafios =
+        data || [];
+
+}
+
+
+/* =========================================================
+   17. OBTENER DESAFÍO ACTUAL
+   ========================================================= */
+
+function currentChallenge() {
+
+    return state.desafios.find(
+        challenge =>
+            Number(challenge.numero) ===
+            Number(state.sala.desafio_actual)
+    );
+
+}
+
+
+/* =========================================================
+   18. CARGAR PREGUNTA ACTUAL
+   ========================================================= */
+
+async function loadCurrentQuestion() {
+
+    if (!state.sala) {
+        return;
+    }
+
+
+    if (!state.desafios.length) {
+
+        try {
+            await loadChallenges();
+        } catch (error) {
+
+            console.error(error);
+
+            toast(
+                "No se pudieron cargar los desafíos."
+            );
+
+            return;
+        }
+
+    }
+
+
+    const challenge =
+        currentChallenge();
+
+
+    /*
+       Si por alguna razón no existe el desafío,
+       mostramos información clara.
+    */
+
+    if (!challenge) {
+
+        $("game-challenge-number")
+            .textContent =
+            `DESAFÍO ${state.sala.desafio_actual}`;
+
+        $("game-challenge-title")
+            .textContent =
+            "Desafío en preparación";
+
+        return;
+    }
+
+
+    $("game-challenge-number")
+        .textContent =
+        `DESAFÍO ${challenge.numero}`;
+
+
+    $("game-challenge-title")
+        .textContent =
+        challenge.nombre;
+
+
+    /*
+       Obtener pregunta sin depender
+       de la respuesta correcta.
+    */
+
+    const { data: question, error } =
+        await sb
+            .from("preguntas")
+            .select(`
+                id,
+                desafio_id,
+                numero_pregunta,
+                texto,
+                alternativa_a,
+                alternativa_b,
+                alternativa_c,
+                alternativa_d,
+                imagen_url,
+                video_url,
+                segundo_inicio,
+                segundo_termino
+            `)
+            .eq(
+                "desafio_id",
+                challenge.id
+            )
+            .eq(
+                "numero_pregunta",
+                state.sala.pregunta_actual
+            )
+            .single();
+
+
+    if (error) {
+
+        console.error(error);
+
+        toast(
+            "No se pudo cargar la pregunta."
+        );
+
+        return;
+    }
+
+
+    state.pregunta =
+        question;
+
+    state.questionLocked = false;
+    state.readyClicked = false;
+
+
+    renderQuestion(
+        question,
+        challenge
+    );
+
+
+    startSynchronizedTimer();
+
+}
+
+
+/* =========================================================
+   19. RENDER PREGUNTA
+   ========================================================= */
+
+function renderQuestion(
+    question,
+    challenge
+) {
+
+    const questionNumber =
+        Number(question.numero_pregunta);
+
+    $("question-counter")
+        .textContent =
+        `Pregunta ${questionNumber} de 10`;
+
+
+    $("question-progress")
+        .style.width =
+        `${(questionNumber / 10) * 100}%`;
+
+
+    $("question-text")
+        .textContent =
+        question.texto;
+
+
+    const image =
+        $("question-image");
+
+
+    if (question.imagen_url) {
+
+        image.src =
+            question.imagen_url;
+
+        image.style.display =
+            "block";
+
+    } else {
+
+        image.removeAttribute("src");
+
+        image.style.display =
+            "none";
+    }
+
+
+    renderYoutube(question);
+
+
+    const answers = [
+
+        ["A", question.alternativa_a],
+        ["B", question.alternativa_b],
+        ["C", question.alternativa_c],
+        ["D", question.alternativa_d]
+
+    ];
+
+
+    $("answers").innerHTML =
+        answers
+            .map(([letter, text]) => {
+
+                return `
+                    <button
+                        class="answer"
+                        data-answer="${letter}"
+                        onclick="selectAnswer('${letter}')">
+
+                        <span class="letter">
+                            ${letter}
+                        </span>
+
+                        ${escapeHtml(text)}
+
+                    </button>
+                `;
+
+            })
+            .join("");
+
+
+    $("question-status")
+        .textContent =
+        "Selecciona una alternativa.";
+
+
+    $("question-status")
+        .style.color =
+        "#687286";
+
+
+    $("ready-status")
+        .textContent =
+        "Esperando tu respuesta...";
+
+
+    $("ready-button")
+        .disabled = true;
+
+
+    showScreen("screen-game");
+
+}
+
+
+/* =========================================================
+   20. YOUTUBE
+   ========================================================= */
+
+function extractYoutubeId(url) {
+
+    if (!url) {
+        return null;
+    }
+
+    const patterns = [
+
+        /youtube\.com\/watch\?v=([^&]+)/i,
+
+        /youtu\.be\/([^?&]+)/i,
+
+        /youtube\.com\/embed\/([^?&]+)/i,
+
+        /youtube\.com\/shorts\/([^?&]+)/i
+
+    ];
+
+
+    for (const pattern of patterns) {
+
+        const match =
+            String(url).match(pattern);
+
+        if (match) {
+            return match[1];
+        }
+
+    }
+
+    return null;
+
+}
+
+
+function renderYoutube(question) {
+
+    const container =
+        $("youtube-container");
+
+    container.innerHTML = "";
+
+    state.youtubePlayer = null;
+    state.youtubeReady = false;
+
+
+    if (!question.video_url) {
+        return;
+    }
+
+
+    const videoId =
+        extractYoutubeId(
+            question.video_url
+        );
+
+
+    if (!videoId) {
+
+        container.innerHTML = `
+            <div class="alert alert-warning">
+                ⚠️ No se pudo reconocer el video de YouTube.
+            </div>
+        `;
+
+        return;
+    }
+
+
+    const start =
+        Number(question.segundo_inicio || 0);
+
+
+    const end =
+        Number(question.segundo_termino || 0);
+
+
+    const endParam =
+        end > start
+        ? `&end=${end}`
+        : "";
+
+
+    container.innerHTML = `
+        <div class="youtube-box">
+
+            <iframe
+                src="https://www.youtube.com/embed/${encodeURIComponent(videoId)}?enablejsapi=1&start=${start}${endParam}&playsinline=1&rel=0"
+                title="Fragmento musical"
+                allow="autoplay; encrypted-media; picture-in-picture"
+                allowfullscreen>
+            </iframe>
+
+        </div>
+
+        <div class="alert alert-info">
+            🎵 Si el navegador bloquea la reproducción automática,
+            utiliza la interacción del desafío para reproducir el fragmento.
+        </div>
+    `;
+
+}
+
+
+/* =========================================================
+   21. TIMER SINCRONIZADO
+   ========================================================= */
+
+function startSynchronizedTimer() {
+
+    clearInterval(
+        state.timerInterval
+    );
+
+
+    if (!state.sala) {
+        return;
+    }
+
+
+    const duration =
+        Number(
+            currentChallenge()?.tiempo_respuesta ||
+            30
+        );
+
+
+    function updateTimer() {
+
+        if (!state.sala) {
+            return;
+        }
+
+
+        if (!state.sala.inicio_pregunta) {
+
+            $("timer")
+                .textContent =
+                duration;
+
+            return;
+        }
+
+
+        const started =
+            new Date(
+                state.sala.inicio_pregunta
+            ).getTime();
+
+
+        const now =
+            Date.now();
+
+
+        const elapsed =
+            Math.floor(
+                (now - started) / 1000
+            );
+
+
+        const remaining =
+            Math.max(
+                0,
+                duration - elapsed
+            );
+
+
+        $("timer")
+            .textContent =
+            remaining;
+
+
+        $("timer")
+            .classList.toggle(
+                "warning",
+                remaining <= 10
+            );
+
+
+        if (
+            remaining <= 0 &&
+            !state.questionLocked
+        ) {
+
+            handleTimeExpired();
+
+        }
+
+    }
+
+
+    updateTimer();
+
+
+    state.timerInterval =
+        setInterval(
+            updateTimer,
+            250
+        );
+
+}
+
+
+/* =========================================================
+   22. TIEMPO TERMINADO
+   ========================================================= */
+
+async function handleTimeExpired() {
+
+    if (state.questionLocked) {
+        return;
+    }
+
+    state.questionLocked = true;
+
+
+    clearInterval(
+        state.timerInterval
+    );
+
+
+    disableAnswers();
+
+
+    $("question-status")
+        .textContent =
+        "⏰ ¡Se acabó el tiempo!";
+
+    $("question-status")
+        .style.color =
+        "var(--rojo)";
+
+
+    $("ready-status")
+        .textContent =
+        "Tiempo terminado. Marcando tu turno...";
+
+
+    try {
+
+        await markReady(true);
+
+    } catch (error) {
+
+        console.error(
+            "Timeout:",
+            error
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   23. RESPONDER
+   ========================================================= */
+
+async function selectAnswer(letter) {
+
+    if (
+        state.questionLocked ||
+        !state.pregunta ||
+        !state.jugador ||
+        !state.sala
+    ) {
+        return;
+    }
+
+
+    state.questionLocked = true;
+
+
+    clearInterval(
+        state.timerInterval
+    );
+
+
+    disableAnswers();
+
+
+    document
+        .querySelectorAll(".answer")
+        .forEach(button => {
+
+            if (
+                button.dataset.answer ===
+                letter
+            ) {
+
+                button.classList.add(
+                    "selected"
+                );
+
+            }
+
+        });
+
+
+    try {
+
+        const result =
+            await callRPC(
+                "registrar_respuesta",
+                {
+                    p_sala_id:
+                        state.sala.id,
+
+                    p_jugador_id:
+                        state.jugador.id,
+
+                    p_pregunta_id:
+                        state.pregunta.id,
+
+                    p_respuesta:
+                        letter
+                }
+            );
+
+
+        showAnswerResult(
+            result
+        );
+
+
+        $("ready-button")
+            .disabled = false;
+
+
+        $("ready-status")
+            .textContent =
+            "Respuesta registrada. Puedes avanzar cuando estés listo.";
+
+
+    } catch (error) {
+
+        console.error(error);
+
+        state.questionLocked = false;
+
+        $("question-status")
+            .textContent =
+            "❌ " + error.message;
+
+        $("question-status")
+            .style.color =
+            "var(--rojo)";
+
+    }
+
+}
+
+
+/* =========================================================
+   24. MOSTRAR RESULTADO RESPUESTA
+   ========================================================= */
+
+function showAnswerResult(result) {
+
+    let correct = null;
+    let score = null;
+
+
+    if (Array.isArray(result) && result.length) {
+
+        correct =
+            result[0].correcta;
+
+        score =
+            result[0].puntaje;
+
+    } else if (
+        result &&
+        typeof result === "object"
+    ) {
+
+        correct =
+            result.correcta;
+
+        score =
+            result.puntaje;
+    }
+
+
+    if (correct === true) {
+
+        $("question-status")
+            .textContent =
+            `🎉 ¡Respuesta correcta! +${score ?? ""} puntos`;
+
+        $("question-status")
+            .style.color =
+            "var(--verde)";
+
+    } else {
+
+        $("question-status")
+            .textContent =
+            "❌ Respuesta incorrecta.";
+
+        $("question-status")
+            .style.color =
+            "var(--rojo)";
+
+    }
+
+}
+
+
+/* =========================================================
+   25. DESACTIVAR RESPUESTAS
+   ========================================================= */
+
+function disableAnswers() {
+
+    document
+        .querySelectorAll(".answer")
+        .forEach(button => {
+
+            button.disabled = true;
+
+        });
+
+}
+
+
+/* =========================================================
+   26. MARCAR LISTO
+   ========================================================= */
+
+async function markReady(fromTimeout = false) {
+
+    if (
+        !state.sala ||
+        !state.jugador
+    ) {
+        return;
+    }
+
+
+    if (
+        state.readyClicked &&
+        !fromTimeout
+    ) {
+        return;
+    }
+
+
+    state.readyClicked = true;
+
+
+    $("ready-button")
+        .disabled = true;
+
+
+    $("ready-status")
+        .textContent =
+        "✅ Estás listo. Esperando a los demás...";
+
+
+    try {
+
+        await callRPC(
+            "marcar_listo",
+            {
+                p_sala_id:
+                    state.sala.id,
+
+                p_jugador_id:
+                    state.jugador.id
+            }
+        );
+
+
+        await tryAdvanceGame();
+
+
+    } catch (error) {
+
+        console.error(error);
+
+        $("ready-status")
+            .textContent =
+            "⚠️ " + error.message;
+
+    }
+
+}
+
+
+/* =========================================================
+   27. INTENTAR AVANZAR
+   ========================================================= */
+
+async function tryAdvanceGame() {
+
+    if (!state.sala) {
+        return;
+    }
+
+
+    try {
+
+        const ready =
+            await callRPC(
+                "todos_jugadores_listos",
+                {
+                    p_sala_id:
+                        state.sala.id
+                }
+            );
+
+
+        let allReady = false;
+
+
+        if (typeof ready === "boolean") {
+
+            allReady = ready;
+
+        } else if (
+            Array.isArray(ready) &&
+            ready.length
+        ) {
+
+            allReady =
+                Boolean(
+                    ready[0].todos_listos ??
+                    ready[0].all_ready ??
+                    ready[0].todos_jugadores_listos ??
+                    ready[0].resultado
+                );
+
+        } else if (
+            ready &&
+            typeof ready === "object"
+        ) {
+
+            allReady =
+                Boolean(
+                    ready.todos_listos ??
+                    ready.all_ready ??
+                    ready.todos_jugadores_listos ??
+                    ready.resultado
+                );
+
+        }
+
+
+        if (!allReady) {
+            return;
+        }
+
+
+        await callRPC(
+            "avanzar_juego",
+            {
+                p_sala_id:
+                    state.sala.id
+            }
+        );
+
+
+        await refreshRoom();
+
+
+    } catch (error) {
+
+        console.error(
+            "Avance:",
+            error
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   28. REALTIME
+   ========================================================= */
+
+function subscribeRealtime() {
+
+    if (!state.sala) {
+        return;
+    }
+
+
+    if (state.realtimeChannel) {
+
+        sb.removeChannel(
+            state.realtimeChannel
+        );
+
+    }
+
+
+    const salaId =
+        state.sala.id;
+
+
+    state.realtimeChannel =
+        sb.channel(
+            `copa18-${salaId}`
+        );
+
+
+    state.realtimeChannel
+
+        .on(
+            "postgres_changes",
+            {
+                event: "*",
+                schema: "public",
+                table: "salas",
+                filter:
+                    `id=eq.${salaId}`
+            },
+            async payload => {
+
+                console.log(
+                    "Realtime sala:",
+                    payload
+                );
+
+
+                if (
+                    payload.eventType ===
+                    "UPDATE"
+                ) {
+
+                    state.sala =
+                        payload.new;
+
+
+                    await handleRoomChange();
+
+                }
+
+            }
+        )
+
+        .on(
+            "postgres_changes",
+            {
+                event: "*",
+                schema: "public",
+                table: "jugadores",
+                filter:
+                    `sala_id=eq.${salaId}`
+            },
+            async () => {
+
+                await refreshLobby();
+
+            }
+        )
+
+        .on(
+            "postgres_changes",
+            {
+                event: "*",
+                schema: "public",
+                table: "respuestas",
+                filter:
+                    `sala_id=eq.${salaId}`
+            },
+            async () => {
+
+                if (
+                    state.sala &&
+                    state.sala.estado ===
+                    "jugando"
+                ) {
+
+                    await updateReadyCounter();
+
+                }
+
+            }
+        )
+
+        .on(
+            "postgres_changes",
+            {
+                event: "*",
+                schema: "public",
+                table: "resultados_desafios",
+                filter:
+                    `sala_id=eq.${salaId}`
+            },
+            async () => {
+
+                if (
+                    state.sala &&
+                    state.sala.estado ===
+                    "resultados"
+                ) {
+
+                    await showChallengeResults();
+
+                }
+
+            }
+        )
+
+        .subscribe(
+            status => {
+
+                console.log(
+                    "Realtime:",
+                    status
+                );
+
+            }
+        );
+
+}
+
+
+/* =========================================================
+   29. CAMBIO DE ESTADO DE SALA
+   ========================================================= */
+
+async function handleRoomChange() {
+
+    if (!state.sala) {
+        return;
+    }
+
+
+    if (
+        state.sala.estado ===
+        "esperando"
+    ) {
+
+        await refreshLobby();
+
+        showScreen(
+            "screen-lobby"
+        );
+
+        return;
+    }
+
+
+    if (
+        state.sala.estado ===
+        "jugando"
+    ) {
+
+        const key =
+            `${state.sala.desafio_actual}-${state.sala.pregunta_actual}-${state.sala.inicio_pregunta}`;
+
+
+        if (
+            state.lastQuestionKey !==
+            key
+        ) {
+
+            state.lastQuestionKey =
+                key;
+
+            await loadCurrentQuestion();
+
+        }
+
+        return;
+    }
+
+
+    if (
+        state.sala.estado ===
+        "resultados"
+    ) {
+
+        await showChallengeResults();
+
+        return;
+    }
+
+
+    if (
+        state.sala.estado ===
+        "finalizada"
+    ) {
+
+        await showFinalResults();
+
+        return;
+    }
+
+}
+
+
+/* =========================================================
+   30. CONTADOR DE JUGADORES LISTOS
+   ========================================================= */
+
+async function updateReadyCounter() {
+
+    if (!state.sala) {
+        return;
+    }
+
+
+    const { data: players, error } =
+        await sb
+            .from("jugadores")
+            .select(
+                "id, estado_conexion, estado_respuesta, listo_avanzar"
+            )
+            .eq(
+                "sala_id",
+                state.sala.id
+            );
+
+
+    if (error) {
+        return;
+    }
+
+
+    const active =
+        (players || [])
+            .filter(
+                player =>
+                    player.estado_conexion !==
+                    "desconectado"
+            );
+
+
+    const ready =
+        active.filter(
+            player =>
+                player.listo_avanzar === true
+        );
+
+
+    $("ready-status")
+        .textContent =
+        `✅ ${ready.length} de ${active.length} jugadores listos`;
+
+}
+
+
+/* =========================================================
+   31. RESULTADOS DEL DESAFÍO
+   ========================================================= */
+
+async function showChallengeResults() {
+
+    if (!state.sala) {
+        return;
+    }
+
+
+    showScreen(
+        "screen-results"
+    );
+
+
+    try {
+
+        /*
+           Primero se asegura la generación
+           de resultados.
+        */
+
+        await callRPC(
+            "generar_resultados_desafio",
+            {
+                p_sala_id:
+                    state.sala.id,
+
+                p_numero_desafio:
+                    state.sala.desafio_actual
+            }
+        );
+
+    } catch (error) {
+
+        console.warn(
+            "Resultados:",
+            error.message
+        );
+
+    }
+
+
+    await loadChallengeResults();
+
+}
+
+
+/* =========================================================
+   32. CARGAR RESULTADOS
+   ========================================================= */
+
+async function loadChallengeResults() {
+
+    const { data, error } =
+        await sb
+            .from("resultados_desafios")
+            .select(`
+                *,
+                jugadores (
+                    nombre,
+                    equipo
+                )
+            `)
+            .eq(
+                "sala_id",
+                state.sala.id
+            )
+            .eq(
+                "desafio_id",
+                state.sala.desafio_actual
+            )
+            .order(
+                "puntaje_acumulado",
+                {
+                    ascending: false
+                }
+            )
+            .order(
+                "puntaje_desafio",
+                {
+                    ascending: false
+                }
+            );
+
+
+    if (error) {
+
+        console.error(error);
+
+        return;
+    }
+
+
+    state.resultados =
+        data || [];
+
+
+    renderChallengeResults();
+
+
+    await loadTeamResults();
+
+}
+
+
+/* =========================================================
+   33. RESULTADOS DE EQUIPOS
+   ========================================================= */
+
+async function loadTeamResults() {
+
+    try {
+
+        const data =
+            await callRPC(
+                "obtener_resultado_equipos",
+                {
+                    p_sala_id:
+                        state.sala.id
+                }
+            );
+
+
+        state.resultadoEquipos =
+            Array.isArray(data)
+            ? data
+            : data
+                ? [data]
+                : [];
+
+
+        renderTeamScores();
+
+    } catch (error) {
+
+        console.warn(
+            "Equipos:",
+            error.message
+        );
+
+
+        /*
+           Fallback:
+           calcular desde resultados individuales.
+        */
+
+        calculateTeamScoresFallback();
+
+    }
+
+}
+
+
+/* =========================================================
+   34. RENDER RESULTADOS
+   ========================================================= */
+
+function renderChallengeResults() {
+
+    const rows =
+        state.resultados;
+
+
+    if (!rows.length) {
+
+        $("challenge-ranking").innerHTML = `
+            <div style="padding:25px">
+                Esperando resultados...
+            </div>
+        `;
+
+        return;
+    }
+
+
+    const best =
+        rows[0];
+
+
+    $("results-title")
+        .textContent =
+        `Resultados del desafío ${state.sala.desafio_actual}`;
+
+
+    if (
+        best &&
+        best.jugadores
+    ) {
+
+        $("results-subtitle")
+            .textContent =
+            `🥇 ${best.jugadores.nombre} lidera el desafío`;
+
+    }
+
+
+    $("challenge-ranking").innerHTML =
+        rows
+            .map((row, index) => {
+
+                const player =
+                    row.jugadores || {};
+
+                return `
+                    <div class="rank-row">
+
+                        <div class="rank-position">
+                            ${getMedal(index + 1)}
+                        </div>
+
+                        <div>
+                            <div class="rank-name">
+                                ${escapeHtml(player.nombre || "Jugador")}
+                            </div>
+
+                            <div class="rank-team">
+                                ${escapeHtml(formatTeam(player.equipo))}
+                            </div>
+                        </div>
+
+                        <div class="rank-correct">
+                            ${Number(row.respuestas_correctas || 0)} correctas
+                        </div>
+
+                        <div class="rank-score">
+                            +${Number(row.puntaje_desafio || 0)}
+                        </div>
+
+                        <div class="rank-score">
+                            ${Number(row.puntaje_acumulado || 0)} total
+                        </div>
+
+                    </div>
+                `;
+
+            })
+            .join("");
+
+
+    const totalCorrect =
+        rows.reduce(
+            (sum, row) =>
+                sum +
+                Number(
+                    row.respuestas_correctas || 0
+                ),
+            0
+        );
+
+
+    const totalIncorrect =
+        rows.reduce(
+            (sum, row) =>
+                sum +
+                Number(
+                    row.respuestas_incorrectas || 0
+                ),
+            0
+        );
+
+
+    const totalUnanswered =
+        rows.reduce(
+            (sum, row) =>
+                sum +
+                Number(
+                    row.preguntas_sin_responder || 0
+                ),
+            0
+        );
+
+
+    $("summary-correct")
+        .textContent =
+        totalCorrect;
+
+
+    $("summary-incorrect")
+        .textContent =
+        totalIncorrect;
+
+
+    $("summary-unanswered")
+        .textContent =
+        totalUnanswered;
+
+
+    $("summary-answered")
+        .textContent =
+        totalCorrect +
+        totalIncorrect;
+
+
+    renderNextChallengeControls();
+
+}
+
+
+/* =========================================================
+   35. MEDALLAS
+   ========================================================= */
+
+function getMedal(position) {
+
+    if (position === 1) {
+        return "🥇";
+    }
+
+    if (position === 2) {
+        return "🥈";
+    }
+
+    if (position === 3) {
+        return "🥉";
+    }
+
+    return position;
+}
+
+
+/* =========================================================
+   36. PUNTAJE EQUIPOS
+   ========================================================= */
+
+function renderTeamScores() {
+
+    let scores = {
+
+        viejitos_cracks: 0,
+
+        ni_fu_ni_fa: 0,
+
+        cabros_chicos: 0
+
+    };
+
+
+    /*
+       Intentar usar respuesta RPC.
+    */
+
+    state.resultadoEquipos
+        .forEach(row => {
+
+            const team =
+                row.equipo ||
+                row.team;
+
+
+            const score =
+                Number(
+                    row.puntaje_total ??
+                    row.puntaje_acumulado ??
+                    row.total ??
+                    row.puntaje ??
+                    0
+                );
+
+
+            if (
+                Object.prototype.hasOwnProperty
+                    .call(scores, team)
+            ) {
+
+                scores[team] =
+                    score;
+
+            }
+
+        });
+
+
+    /*
+       Si no llegaron datos suficientes,
+       usar cálculo local.
+    */
+
+    if (
+        !state.resultadoEquipos.length
+    ) {
+
+        scores =
+            calculateTeamScores();
+
+    }
+
+
+    $("score-viejitos")
+        .textContent =
+        scores.viejitos_cracks || 0;
+
+
+    $("score-ni")
+        .textContent =
+        scores.ni_fu_ni_fa || 0;
+
+
+    $("score-cabros")
+        .textContent =
+        scores.cabros_chicos || 0;
+
+}
+
+
+/* =========================================================
+   37. CÁLCULO LOCAL EQUIPOS
+   ========================================================= */
+
+function calculateTeamScores() {
+
+    const scores = {
+
+        viejitos_cracks: 0,
+
+        ni_fu_ni_fa: 0,
+
+        cabros_chicos: 0
+
+    };
+
+
+    state.resultados
+        .forEach(row => {
+
+            const team =
+                row.jugadores &&
+                row.jugadores.equipo;
+
+
+            if (
+                Object.prototype.hasOwnProperty
+                    .call(scores, team)
+            ) {
+
+                scores[team] +=
+                    Number(
+                        row.puntaje_acumulado || 0
+                    );
+
+            }
+
+        });
+
+
+    return scores;
+
+}
+
+
+function calculateTeamScoresFallback() {
+
+    const scores =
+        calculateTeamScores();
+
+
+    $("score-viejitos")
+        .textContent =
+        scores.viejitos_cracks;
+
+
+    $("score-ni")
+        .textContent =
+        scores.ni_fu_ni_fa;
+
+
+    $("score-cabros")
+        .textContent =
+        scores.cabros_chicos;
+
+}
+
+
+/* =========================================================
+   38. AVANCE ENTRE DESAFÍOS
+   ========================================================= */
+
+function renderNextChallengeControls() {
+
+    const area =
+        $("next-challenge-area");
+
+
+    if (
+        Number(state.sala.desafio_actual) >=
+        10
+    ) {
+
+        area.innerHTML = `
+
+            <div class="alert alert-success">
+                🎉 ¡Han completado los 10 desafíos!
+                Preparando el resultado final...
+            </div>
+
+            <button
+                class="btn btn-primary btn-large"
+                onclick="showFinalResults()">
+
+                🏆 Ver resultado final
+
+            </button>
+
+        `;
+
+        return;
+    }
+
+
+    area.innerHTML = `
+
+        <div class="alert alert-info">
+            Cada jugador debe confirmar que está listo
+            antes de comenzar el siguiente desafío.
+        </div>
+
+        <div id="challenge-ready-counter"
+             style="font-weight:900;
+                    color:var(--azul);
+                    margin-bottom:12px">
+            Esperando confirmaciones...
+        </div>
+
+        <button
+            id="next-challenge-button"
+            class="btn btn-red btn-large"
+            onclick="readyForNextChallenge()">
+
+            🇨🇱 Listo para el siguiente desafío
+
+        </button>
+
+    `;
+
+    updateChallengeReadyCounter();
+
+}
+
+
+/* =========================================================
+   39. LISTO SIGUIENTE DESAFÍO
+   ========================================================= */
+
+async function readyForNextChallenge() {
+
+    if (
+        !state.sala ||
+        !state.jugador
+    ) {
+        return;
+    }
+
+
+    const button =
+        $("next-challenge-button");
+
+
+    if (button) {
+        button.disabled = true;
+    }
+
+
+    try {
+
+        /*
+           Reutilizamos marcar_listo.
+           La función SQL es la responsable de
+           registrar el estado del jugador.
+        */
+
+        await callRPC(
+            "marcar_listo",
+            {
+                p_sala_id:
+                    state.sala.id,
+
+                p_jugador_id:
+                    state.jugador.id
+            }
+        );
+
+
+        await tryAdvanceGame();
+
+
+        toast(
+            "✅ Quedaste listo para el siguiente desafío."
+        );
+
+
+    } catch (error) {
+
+        console.error(error);
+
+        if (button) {
+            button.disabled = false;
+        }
+
+        toast(
+            "No se pudo confirmar: " +
+            error.message
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   40. CONTADOR SIGUIENTE DESAFÍO
+   ========================================================= */
+
+async function updateChallengeReadyCounter() {
+
+    if (!state.sala) {
+        return;
+    }
+
+
+    const { data: players, error } =
+        await sb
+            .from("jugadores")
+            .select(
+                "id, estado_conexion, listo_avanzar"
+            )
+            .eq(
+                "sala_id",
+                state.sala.id
+            );
+
+
+    if (error) {
+        return;
+    }
+
+
+    const active =
+        (players || [])
+            .filter(
+                player =>
+                    player.estado_conexion !==
+                    "desconectado"
+            );
+
+
+    const ready =
+        active.filter(
+            player =>
+                player.listo_avanzar === true
+        );
+
+
+    const counter =
+        $("challenge-ready-counter");
+
+
+    if (counter) {
+
+        counter.textContent =
+            `${ready.length} de ${active.length} jugadores están listos.`;
+
+    }
+
+}
+
+
+/* =========================================================
+   41. RESULTADO FINAL
+   ========================================================= */
+
+async function showFinalResults() {
+
+    if (!state.sala) {
+        return;
+    }
+
+
+    showScreen(
+        "screen-final"
+    );
+
+
+    try {
+
+        const final =
+            await callRPC(
+                "obtener_resultado_final",
+                {
+                    p_sala_id:
+                        state.sala.id
+                }
+            );
+
+
+        state.final =
+            final;
+
+    } catch (error) {
+
+        console.warn(
+            "Resultado final:",
+            error.message
+        );
+
+    }
+
+
+    await renderFinalResults();
+
+}
+
+
+/* =========================================================
+   42. RENDER FINAL
+   ========================================================= */
+
+async function renderFinalResults() {
+
+    let results = [];
+
+
+    const { data, error } =
+        await sb
+            .from("resultados_desafios")
+            .select(`
+                *,
+                jugadores (
+                    nombre,
+                    equipo
+                )
+            `)
+            .eq(
+                "sala_id",
+                state.sala.id
+            )
+            .order(
+                "puntaje_acumulado",
+                {
+                    ascending: false
+                }
+            );
+
+
+    if (!error) {
+        results = data || [];
+    }
+
+
+    /*
+       Obtener el último resultado de cada jugador.
+    */
+
+    const latest = {};
+
+
+    results.forEach(row => {
+
+        const playerId =
+            row.jugador_id;
+
+
+        if (
+            !latest[playerId] ||
+            Number(row.desafio_id) >
+            Number(latest[playerId].desafio_id)
+        ) {
+
+            latest[playerId] =
+                row;
+
+        }
+
+    });
+
+
+    const ranking =
+        Object.values(latest)
+            .sort(
+                (a, b) =>
+                    Number(b.puntaje_acumulado || 0) -
+                    Number(a.puntaje_acumulado || 0)
+            );
+
+
+    /*
+       Puntajes por equipo.
+    */
+
+    const teamScores = {
+
+        viejitos_cracks: 0,
+
+        ni_fu_ni_fa: 0,
+
+        cabros_chicos: 0
+
+    };
+
+
+    ranking.forEach(row => {
+
+        const team =
+            row.jugadores &&
+            row.jugadores.equipo;
+
+
+        if (
+            Object.prototype.hasOwnProperty
+                .call(teamScores, team)
+        ) {
+
+            teamScores[team] +=
+                Number(
+                    row.puntaje_acumulado || 0
+                );
+
+        }
+
+    });
+
+
+    $("final-score-viejitos")
+        .textContent =
+        teamScores.viejitos_cracks;
+
+
+    $("final-score-ni")
+        .textContent =
+        teamScores.ni_fu_ni_fa;
+
+
+    $("final-score-cabros")
+        .textContent =
+        teamScores.cabros_chicos;
+
+
+    const sortedTeams =
+        Object.entries(teamScores)
+            .sort(
+                (a, b) => b[1] - a[1]
+            );
+
+
+    const topScore =
+        sortedTeams[0][1];
+
+
+    const winners =
+        sortedTeams
+            .filter(
+                ([team, score]) =>
+                    score === topScore
+            );
+
+
+    if (winners.length > 1) {
+
+        $("final-title")
+            .textContent =
+            "¡Empate!";
+
+
+        $("final-winner")
+            .textContent =
+            "La Copa del 18 termina igualada.";
+
+    } else {
+
+        $("final-title")
+            .textContent =
+            "¡La Copa del 18 tiene campeón!";
+
+
+        $("final-winner")
+            .textContent =
+            formatTeam(
+                winners[0][0]
+            );
+
+    }
+
+
+    /*
+       Ranking final.
+    */
+
+    $("final-ranking").innerHTML =
+        ranking
+            .map((row, index) => {
+
+                const player =
+                    row.jugadores || {};
+
+
+                return `
+
+                    <div class="rank-row">
+
+                        <div class="rank-position">
+                            ${getMedal(index + 1)}
+                        </div>
+
+                        <div>
+                            <div class="rank-name">
+                                ${escapeHtml(player.nombre || "Jugador")}
+                            </div>
+
+                            <div class="rank-team">
+                                ${escapeHtml(formatTeam(player.equipo))}
+                            </div>
+                        </div>
+
+                        <div>
+                            ${Number(row.respuestas_correctas || 0)}
+                            correctas
+                        </div>
+
+                        <div class="rank-score">
+                            ${Number(row.puntaje_acumulado || 0)}
+                        </div>
+
+                        <div class="rank-score">
+                            puntos
+                        </div>
+
+                    </div>
+
+                `;
+
+            })
+            .join("");
+
+
+    /*
+       Destacados.
+    */
+
+    const best =
+        ranking[0];
+
+
+    let bestCorrect = null;
+
+
+    ranking.forEach(row => {
+
+        if (
+            !bestCorrect ||
+            Number(row.respuestas_correctas || 0) >
+            Number(bestCorrect.respuestas_correctas || 0)
+        ) {
+
+            bestCorrect = row;
+
+        }
+
+    });
+
+
+    $("final-highlights").innerHTML = `
+
+        <div class="summary-grid">
+
+            <div class="summary-card">
+
+                <strong>
+                    ${escapeHtml(
+                        best?.jugadores?.nombre || "-"
+                    )}
+                </strong>
+
+                <span>
+                    👑 Mayor puntaje acumulado
+                </span>
+
+            </div>
+
+            <div class="summary-card">
+
+                <strong>
+                    ${escapeHtml(
+                        bestCorrect?.jugadores?.nombre || "-"
+                    )}
+                </strong>
+
+                <span>
+                    🎯 Más respuestas correctas
+                </span>
+
+            </div>
+
+            <div class="summary-card">
+
+                <strong>
+                    ${
+                        best
+                        ? Number(
+                            best.puntaje_acumulado || 0
+                        )
+                        : 0
+                    }
+                </strong>
+
+                <span>
+                    Puntos del líder
+                </span>
+
+            </div>
+
+            <div class="summary-card">
+
+                <strong>
+                    ${
+                        sortedTeams[0][1] -
+                        (sortedTeams[1]
+                            ? sortedTeams[1][1]
+                            : 0)
+                    }
+                </strong>
+
+                <span>
+                    Diferencia del equipo ganador
+                </span>
+
+            </div>
+
+        </div>
+
+    `;
+
+
+    /*
+       Resumen de desafíos.
+    */
+
+    const challengeSummary = {};
+
+
+    results.forEach(row => {
+
+        const challenge =
+            row.desafio_id;
+
+
+        if (!challengeSummary[challenge]) {
+
+            challengeSummary[challenge] = {
+                score: 0,
+                players: 0
+            };
+
+        }
+
+
+        challengeSummary[challenge].score +=
+            Number(
+                row.puntaje_desafio || 0
+            );
+
+        challengeSummary[challenge].players++;
+
+    });
+
+
+    $("final-summary").innerHTML =
+        Object.entries(
+            challengeSummary
+        )
+        .map(([challenge, value]) => `
+
+            <div style="
+                padding:15px 0;
+                border-bottom:1px solid #edf0f4;
+                display:flex;
+                justify-content:space-between;
+                gap:15px;
+            ">
+
+                <strong>
+                    Desafío ${escapeHtml(challenge)}
+                </strong>
+
+                <span>
+                    ${value.players} jugadores
+                </span>
+
+            </div>
+
+        `)
+        .join("");
+
+}
+
+
+/* =========================================================
+   43. HEARTBEAT
+   ========================================================= */
+
+function startHeartbeat() {
+
+    clearInterval(
+        state.heartbeatInterval
+    );
+
+
+    if (
+        !state.sala ||
+        !state.jugador
+    ) {
+        return;
+    }
+
+
+    async function ping() {
+
+        try {
+
+            await callRPC(
+                "actualizar_conexion",
+                {
+                    p_sala_id:
+                        state.sala.id,
+
+                    p_jugador_id:
+                        state.jugador.id
+                }
+            );
+
+        } catch (error) {
+
+            console.warn(
+                "Heartbeat:",
+                error.message
+            );
+
+        }
+
+    }
+
+
+    ping();
+
+
+    state.heartbeatInterval =
+        setInterval(
+            ping,
+            15000
+        );
+
+}
+
+
+/* =========================================================
+   44. MARCAR DESCONECTADOS
+   ========================================================= */
+
+async function markDisconnectedPlayers() {
+
+    if (!state.sala) {
+        return;
+    }
+
+
+    try {
+
+        await callRPC(
+            "marcar_desconectados",
+            {
+                p_sala_id:
+                    state.sala.id
+            }
+        );
+
+    } catch (error) {
+
+        console.warn(
+            "Desconectados:",
+            error.message
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   45. LIMPIAR AL SALIR
+   ========================================================= */
+
+window.addEventListener(
+    "beforeunload",
+    () => {
+
+        clearInterval(
+            state.timerInterval
+        );
+
+        clearInterval(
+            state.heartbeatInterval
+        );
+
+        if (
+            state.realtimeChannel
+        ) {
+
+            sb.removeChannel(
+                state.realtimeChannel
+            );
+
+        }
+
+    }
+);
+
+
+/* =========================================================
+   46. VOLVER AL INICIO
+   ========================================================= */
+
+function resetGame() {
+
+    clearInterval(
+        state.timerInterval
+    );
+
+    clearInterval(
+        state.heartbeatInterval
+    );
+
+
+    if (
+        state.realtimeChannel
+    ) {
+
+        sb.removeChannel(
+            state.realtimeChannel
+        );
+
+    }
+
+
+    state.sala = null;
+    state.jugador = null;
+    state.jugadores = [];
+    state.desafios = [];
+    state.pregunta = null;
+    state.respuestas = [];
+    state.resultados = [];
+    state.resultadoEquipos = [];
+    state.final = null;
+    state.realtimeChannel = null;
+    state.timerInterval = null;
+    state.heartbeatInterval = null;
+    state.questionLocked = false;
+    state.readyClicked = false;
+    state.lastQuestionKey = null;
+
+
+    showScreen(
+        "screen-home"
+    );
+
+}
+
+
+/* =========================================================
+   47. DETECTAR CAMBIOS DE VISIBILIDAD
+   ========================================================= */
+
+document.addEventListener(
+    "visibilitychange",
+    async () => {
+
+        if (
+            !document.hidden &&
+            state.sala
+        ) {
+
+            await refreshRoom();
+
+        }
+
+    }
+);
+
+
+/* =========================================================
+   48. CONTROL PERIÓDICO DE DESCONEXIONES
+   ========================================================= */
+
+setInterval(
+    async () => {
+
+        if (
+            state.sala &&
+            state.jugador
+        ) {
+
+            await markDisconnectedPlayers();
+
+        }
+
+    },
+    30000
+);
+
+
+/* =========================================================
+   49. INICIALIZACIÓN
+   ========================================================= */
+
+async function initializeApp() {
+
+    console.log(
+        "🇨🇱 La Copa del 18 iniciada"
+    );
+
+
+    /*
+       Validación sencilla de configuración.
+    */
+
+    if (
+        SUPABASE_ANON_KEY ===
+        "PEGA_AQUI_TU_ANON_KEY"
+    ) {
+
+        console.warn(
+            "⚠️ Falta configurar SUPABASE_ANON_KEY."
+        );
+
+    }
+
+
+    /*
+       No se cargan preguntas automáticamente
+       en la pantalla inicial.
+    */
+
+}
+
+
+initializeApp();
+
+
+/* =========================================================
+   FIN DEL JAVASCRIPT
+   ========================================================= */
+
+</script>
+
+</body>
+</html>
