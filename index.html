@@ -1959,7 +1959,7 @@ async function createRoom() {
         const data = await callRPC(
             "crear_sala",
             {
-                p_nombre: name,
+                p_nombre_jugador: name,
                 p_fecha_nacimiento: birth
             }
         );
@@ -2051,7 +2051,7 @@ async function joinRoom() {
             "unirse_sala",
             {
                 p_codigo: code,
-                p_nombre: name,
+                p_nombre_jugador: name,
                 p_fecha_nacimiento: birth
             }
         );
