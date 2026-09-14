@@ -3926,6 +3926,21 @@ async function procesarCambioSala(
     estadoJuego.desafioActual = desafio;
 
     /*
+     * Al iniciar la partida, iniciar_partida() deja P1 en la sala
+     * antes de que el anfitrión muestre la introducción. Los demás
+     * dispositivos deben esperar el broadcast "intro_desafio" y
+     * NO entrar directamente a la pregunta.
+     */
+    if (
+        pregunta === 1 &&
+        !estadoJuego.introActiva &&
+        estadoJuego.fase !== "jugando"
+    ) {
+        estadoJuego.partidaIniciada = true;
+        return;
+    }
+
+    /*
      * Si estamos en la intro y el servidor todavía conserva
      * exactamente el mismo inicio_pregunta, no hacemos nada.
      * Cuando el anfitrión pulse COMENZAR, iniciar_pregunta
@@ -4387,7 +4402,7 @@ async function cargarPreguntaActual() {
                 );
 
             video.src =
-                pregunta.video_url;
+                convertirUrlYoutube(pregunta.video_url);
 
             video.width =
                 "560";
@@ -4615,6 +4630,52 @@ async function cargarPreguntaActual() {
                 pregunta
         }
     );
+
+}
+
+
+/* =========================================================
+   CONVERTIR URL DE YOUTUBE PARA IFRAME
+========================================================= */
+
+function convertirUrlYoutube(url) {
+
+    if (!url) {
+        return "";
+    }
+
+    const texto = String(url).trim();
+
+    try {
+
+        const urlObj = new URL(texto);
+        let id = "";
+
+        if (urlObj.hostname.includes("youtu.be")) {
+            id = urlObj.pathname.replace(/^\//, "").split("/")[0];
+        }
+        else if (urlObj.hostname.includes("youtube.com")) {
+            if (urlObj.pathname === "/watch") {
+                id = urlObj.searchParams.get("v") || "";
+            }
+            else if (urlObj.pathname.startsWith("/embed/")) {
+                id = urlObj.pathname.split("/embed/")[1].split("/")[0];
+            }
+            else if (urlObj.pathname.startsWith("/shorts/")) {
+                id = urlObj.pathname.split("/shorts/")[1].split("/")[0];
+            }
+        }
+
+        if (id) {
+            return "https://www.youtube-nocookie.com/embed/" + id + "?rel=0";
+        }
+
+    }
+    catch (error) {
+        console.warn("URL de video no válida:", url);
+    }
+
+    return texto;
 
 }
 
@@ -4991,35 +5052,25 @@ async function marcarJugadorListo(
         return;
     }
 
-    const cambios = {
-
-        listo_avanzar:
-            Boolean(listo)
-
-    };
-
-    if (estadoRespuesta) {
-
-        cambios.estado_respuesta =
-            estadoRespuesta;
-
-    }
-
     const {
         error
     } =
         await supabaseClient
-            .from("jugadores")
-            .update(
-                cambios
-            )
-            .eq(
-                "id",
-                estadoJuego.jugadorId
-            )
-            .eq(
-                "sala_id",
-                estadoJuego.salaId
+            .rpc(
+                "marcar_jugador_listo",
+                {
+                    p_sala_id:
+                        estadoJuego.salaId,
+
+                    p_jugador_id:
+                        estadoJuego.jugadorId,
+
+                    p_listo:
+                        Boolean(listo),
+
+                    p_estado_respuesta:
+                        estadoRespuesta
+                }
             );
 
     if (error) {
