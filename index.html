@@ -2108,56 +2108,193 @@ function renderizarJugadores(lista) {
 
 }
 
-
 /* =========================================================
-   CONFIRMACIÓN
+   MOSTRAR CONFIRMACIÓN
 ========================================================= */
 
 function mostrarConfirmacion() {
 
     if (!jugadorSeleccionado) {
 
+        alert(
+            "Primero debes ingresar tus datos."
+        );
+
+        mostrarPantalla(
+            "pantallaSeleccion"
+        );
+
         return;
 
     }
 
 
-    document.getElementById(
-        "nombreConfirmacion"
-    ).textContent =
-        jugadorSeleccionado.nombre;
+    const nombre =
+        jugadorSeleccionado.nombre ||
+        "";
 
 
-    document.getElementById(
-        "avatarConfirmacion"
-    ).textContent =
-        obtenerIniciales(
-            jugadorSeleccionado.nombre
+    const fechaNacimiento =
+        jugadorSeleccionado.fecha_nacimiento ||
+        "";
+
+
+    if (!nombre || !fechaNacimiento) {
+
+        alert(
+            "Falta el nombre o la fecha de nacimiento."
+        );
+
+        mostrarPantalla(
+            "pantallaSeleccion"
+        );
+
+        return;
+
+    }
+
+
+    /* =====================================================
+       AVATAR
+    ===================================================== */
+
+    const avatar =
+        document.getElementById(
+            "avatarConfirmacion"
         );
 
 
-    const etiqueta =
+    if (avatar) {
+
+        const iniciales =
+            nombre
+                .trim()
+                .split(/\s+/)
+                .slice(0, 2)
+                .map(
+                    palabra =>
+                        palabra
+                            .charAt(0)
+                            .toUpperCase()
+                )
+                .join("");
+
+
+        avatar.textContent =
+            iniciales || "?";
+
+    }
+
+
+    /* =====================================================
+       NOMBRE
+    ===================================================== */
+
+    const nombreElemento =
+        document.getElementById(
+            "nombreConfirmacion"
+        );
+
+
+    if (nombreElemento) {
+
+        nombreElemento.textContent =
+            nombre;
+
+    }
+
+
+    /* =====================================================
+       FECHA DE NACIMIENTO
+    ===================================================== */
+
+    const fechaElemento =
+        document.getElementById(
+            "fechaConfirmacion"
+        );
+
+
+    if (fechaElemento) {
+
+        const partes =
+            fechaNacimiento.split("-");
+
+
+        let fechaFormateada =
+            fechaNacimiento;
+
+
+        if (partes.length === 3) {
+
+            fechaFormateada =
+                partes[2] +
+                "/" +
+                partes[1] +
+                "/" +
+                partes[0];
+
+        }
+
+
+        fechaElemento.textContent =
+            "Fecha de nacimiento: " +
+            fechaFormateada;
+
+    }
+
+
+    /* =====================================================
+       EQUIPO
+       
+       Todavía no se asigna aquí.
+       Se determinará cuando el anfitrión inicie la partida.
+    ===================================================== */
+
+    const equipoElemento =
         document.getElementById(
             "equipoConfirmacion"
         );
 
 
-    const equipo =
-        jugadorSeleccionado.equipo;
+    if (equipoElemento) {
+
+        if (
+            jugadorSeleccionado.equipo
+        ) {
+
+            const nombresEquipos = {
+
+                viejitos_cracks:
+                    "🟥 Los Viejitos Cracks",
+
+                ni_fu_ni_fa:
+                    "🟨 Los Ni Fu Ni Fa",
+
+                cabros_chicos:
+                    "🟦 Los Cabros Chicos"
+
+            };
 
 
-    etiqueta.textContent =
-        obtenerNombreEquipo(
-            equipo
-        );
+            equipoElemento.textContent =
+                nombresEquipos[
+                    jugadorSeleccionado.equipo
+                ] ||
+                "Equipo pendiente";
+
+        } else {
+
+            equipoElemento.textContent =
+                "Equipo pendiente";
+
+        }
+
+    }
 
 
-    etiqueta.className =
-        "etiqueta etiqueta-" +
-        obtenerClaseEquipo(
-            equipo
-        );
-
+    /* =====================================================
+       MOSTRAR PANTALLA
+    ===================================================== */
 
     mostrarPantalla(
         "pantallaConfirmacion"
