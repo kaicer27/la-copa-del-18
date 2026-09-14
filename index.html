@@ -1035,7 +1035,6 @@ h1 {
 
 <main class="app">
 
-
 <!-- =========================================================
      INICIO
 ========================================================= -->
@@ -1085,7 +1084,7 @@ h1 {
 
 
 <!-- =========================================================
-     SELECCIÓN
+     ACCESO A SALA
 ========================================================= -->
 
 <section
@@ -1096,11 +1095,11 @@ h1 {
     <div class="encabezado">
 
         <h2>
-            Selecciona tu nombre
+            ¡Bienvenido a La Copa del 18!
         </h2>
 
         <p>
-            Busca tu nombre y selecciona el jugador correcto.
+            Elige cómo quieres participar en la competencia.
         </p>
 
     </div>
@@ -1108,39 +1107,204 @@ h1 {
 
     <div class="contenido">
 
-        <input
-            id="buscador"
-            class="buscador"
-            type="text"
-            placeholder="Escribe tu nombre..."
-            oninput="filtrarJugadores()"
-        >
 
+        <!-- =================================================
+             OPCIONES PRINCIPALES
+        ================================================== -->
 
         <div
-            id="listaJugadores"
-            class="lista-jugadores"
-        ></div>
-
-
-        <div class="acciones">
+            id="opcionesSala"
+            class="opciones-sala"
+        >
 
             <button
-                class="boton secundario"
-                onclick="mostrarInicio()"
-            >
-                Volver
-            </button>
-
-
-            <button
-                id="botonContinuar"
+                type="button"
                 class="boton principal"
-                onclick="mostrarConfirmacion()"
-                disabled
+                onclick="mostrarFormularioSala('crear')"
             >
-                Continuar
+                🏠 Crear sala
             </button>
+
+
+            <button
+                type="button"
+                class="boton secundario"
+                onclick="mostrarFormularioSala('unirse')"
+            >
+                🚪 Unirse a una sala
+            </button>
+
+        </div>
+
+
+        <!-- =================================================
+             FORMULARIO CREAR SALA
+        ================================================== -->
+
+        <div
+            id="formularioCrearSala"
+            class="formulario-sala"
+            style="display:none;"
+        >
+
+            <div class="encabezado">
+
+                <h3>
+                    Crear sala
+                </h3>
+
+                <p>
+                    Ingresa tus datos para crear una nueva sala.
+                </p>
+
+            </div>
+
+
+            <div class="campo-formulario">
+
+                <label for="nombreCrearSala">
+                    Nombre
+                </label>
+
+                <input
+                    id="nombreCrearSala"
+                    type="text"
+                    placeholder="Ingresa tu nombre"
+                    autocomplete="off"
+                >
+
+            </div>
+
+
+            <div class="campo-formulario">
+
+                <label for="fechaCrearSala">
+                    Fecha de nacimiento
+                </label>
+
+                <input
+                    id="fechaCrearSala"
+                    type="date"
+                >
+
+            </div>
+
+
+            <div class="acciones">
+
+                <button
+                    type="button"
+                    class="boton secundario"
+                    onclick="volverOpcionesSala()"
+                >
+                    Volver
+                </button>
+
+
+                <button
+                    type="button"
+                    class="boton principal"
+                    onclick="crearSalaDesdeFormulario()"
+                >
+                    Crear sala
+                </button>
+
+            </div>
+
+        </div>
+
+
+        <!-- =================================================
+             FORMULARIO UNIRSE A SALA
+        ================================================== -->
+
+        <div
+            id="formularioUnirseSala"
+            class="formulario-sala"
+            style="display:none;"
+        >
+
+            <div class="encabezado">
+
+                <h3>
+                    Unirse a una sala
+                </h3>
+
+                <p>
+                    Ingresa los datos de la sala y tus datos personales.
+                </p>
+
+            </div>
+
+
+            <div class="campo-formulario">
+
+                <label for="codigoUnirseSala">
+                    Código de sala
+                </label>
+
+                <input
+                    id="codigoUnirseSala"
+                    type="text"
+                    placeholder="Ej: ABC123"
+                    maxlength="6"
+                    autocomplete="off"
+                    style="text-transform:uppercase;"
+                >
+
+            </div>
+
+
+            <div class="campo-formulario">
+
+                <label for="nombreUnirseSala">
+                    Nombre
+                </label>
+
+                <input
+                    id="nombreUnirseSala"
+                    type="text"
+                    placeholder="Ingresa tu nombre"
+                    autocomplete="off"
+                >
+
+            </div>
+
+
+            <div class="campo-formulario">
+
+                <label for="fechaUnirseSala">
+                    Fecha de nacimiento
+                </label>
+
+                <input
+                    id="fechaUnirseSala"
+                    type="date"
+                >
+
+            </div>
+
+
+            <div class="acciones">
+
+                <button
+                    type="button"
+                    class="boton secundario"
+                    onclick="volverOpcionesSala()"
+                >
+                    Volver
+                </button>
+
+
+                <button
+                    type="button"
+                    class="boton principal"
+                    onclick="unirseSalaDesdeFormulario()"
+                >
+                    Unirse a la sala
+                </button>
+
+            </div>
 
         </div>
 
@@ -1161,11 +1325,11 @@ h1 {
     <div class="encabezado">
 
         <h2>
-            Confirma tu participación
+            Confirma tus datos
         </h2>
 
         <p>
-            Revisa tu nombre antes de entrar a la sala.
+            Revisa tu nombre y fecha de nacimiento antes de continuar.
         </p>
 
     </div>
@@ -1186,11 +1350,19 @@ h1 {
         </h3>
 
 
+        <div
+            id="fechaConfirmacion"
+            class="fecha-confirmacion"
+        >
+            Fecha de nacimiento
+        </div>
+
+
         <span
             id="equipoConfirmacion"
             class="etiqueta"
         >
-            Equipo
+            Equipo pendiente
         </span>
 
     </div>
@@ -1199,18 +1371,20 @@ h1 {
     <div class="acciones">
 
         <button
+            type="button"
             class="boton secundario"
             onclick="mostrarSeleccion()"
         >
-            Cambiar jugador
+            Cambiar datos
         </button>
 
 
         <button
+            type="button"
             class="boton verde"
             onclick="entrarSala()"
         >
-            Confirmar participación
+            Confirmar y continuar
         </button>
 
     </div>
@@ -1353,7 +1527,6 @@ h1 {
     </p>
 
 </section>
-
 
 <!-- =========================================================
      JUEGO
@@ -1532,7 +1705,7 @@ const SUPABASE_URL =
 
 
 const SUPABASE_ANON_KEY =
-    "PEGA_AQUI_TU_ANON_KEY";
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZpbWp6ZGJoc3lheGplY2ZwdnhyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkxMzM0OTcsImV4cCI6MjEwNDcwOTQ5N30.M3wEPPcOiJOVnJ2IAPU4MIgHOzQy49OSHQNE7dwe8C0";
 
 
 const supabaseClient =
