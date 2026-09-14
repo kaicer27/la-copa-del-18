@@ -2520,7 +2520,7 @@ async function iniciarPartida() {
                         p_sala_id:
                             estadoJuego.salaId,
 
-                        p_id_anfitrion:
+                        p_jugador_id:
                             estadoJuego.jugadorId
                     }
                 );
@@ -2665,21 +2665,29 @@ async function procesarCambioSala(
     }
 
 
+    /* ---------------------------------------------------------
+       ACTUALIZAR CÓDIGO DE SALA
+    --------------------------------------------------------- */
+
     if (
-        registro.codigo_sala
+        registro.codigo
     ) {
 
         estadoJuego.codigoSala =
-            registro.codigo_sala;
+            registro.codigo;
 
         actualizarCodigoSala();
 
     }
 
 
+    /* ---------------------------------------------------------
+       PARTIDA INICIADA
+    --------------------------------------------------------- */
+
     if (
         registro.estado ===
-        "en_juego"
+        "jugando"
     ) {
 
         estadoJuego.desafioActual =
@@ -2697,15 +2705,676 @@ async function procesarCambioSala(
 
 }
 
-
-/* =========================================================
+    /* =========================================================
    CARGAR PREGUNTA ACTUAL
 ========================================================= */
 
 async function cargarPreguntaActual() {
 
+    if (!estadoJuego.salaId) {
+        return;
+    }
+
+    /* ---------------------------------------------------------
+       REINICIAR ESTADO DE RESPUESTA
+    --------------------------------------------------------- */
+
+    estadoJuego.respuestaRegistrada = false;
+    estadoJuego.resultadoRespuesta = null;
+
+
+    /* ---------------------------------------------------------
+       OBTENER ESTADO ACTUAL DE LA SALA
+    --------------------------------------------------------- */
+
+    const {
+        data: sala,
+        error: errorSala
+    } = await supabaseClient
+        .from("salas")
+        .select(`
+            desafio_actual,
+            pregunta_actual,
+            inicio_pregunta,
+            estado
+        `)
+        .eq("id", estadoJuego.salaId)
+        .single();
+
+
+    if (errorSala || !sala) {
+
+        console.error(
+            "Error cargando estado de la sala:",
+            errorSala
+        );
+
+        return;
+
+    }
+
+
+    /* ---------------------------------------------------------
+       GUARDAR ESTADO
+    --------------------------------------------------------- */
+
+    estadoJuego.desafioActual =
+        sala.desafio_actual;
+
+    const numeroDesafio =
+        sala.desafio_actual || 1;
+
+    const numeroPregunta =
+        sala.pregunta_actual || 1;
+
+
+    /* ---------------------------------------------------------
+       MOSTRAR INFORMACIÓN DEL DESAFÍO
+    --------------------------------------------------------- */
+
+    const elementoNumeroDesafio =
+        document.getElementById(
+            "challenge-number"
+        );
+
+    if (elementoNumeroDesafio) {
+
+        elementoNumeroDesafio.textContent =
+            "DESAFÍO " + numeroDesafio;
+
+    }
+
+
+    const elementoNombreDesafio =
+        document.getElementById(
+            "challenge-name"
+        );
+
+    if (elementoNombreDesafio) {
+
+        elementoNombreDesafio.textContent =
+            NOMBRES_DESAFIOS[numeroDesafio] ||
+            "Desafío";
+
+    }
+
+
+    /* ---------------------------------------------------------
+       BUSCAR EL DESAFÍO
+    --------------------------------------------------------- */
+
+    const {
+        data: desafio,
+        error: errorDesafio
+    } = await supabaseClient
+        .from("desafios")
+        .select(`
+            id,
+            numero,
+            nombre,
+            puntaje_pregunta,
+            tiempo_respuesta
+        `)
+        .eq(
+            "numero",
+            numeroDesafio
+        )
+        .maybeSingle();
+
+
+    if (errorDesafio) {
+
+        console.error(
+            "Error cargando desafío:",
+            errorDesafio
+        );
+
+        return;
+
+    }
+
+
+    if (!desafio) {
+
+        console.error(
+            "No se encontró el desafío:",
+            numeroDesafio
+        );
+
+        return;
+
+    }
+
+
+    /* ---------------------------------------------------------
+       BUSCAR LA PREGUNTA ACTUAL
+    --------------------------------------------------------- */
+
+    const {
+        data: pregunta,
+        error: errorPregunta
+    } = await supabaseClient
+        .from("preguntas")
+        .select(`
+            id,
+            desafio_id,
+            numero,
+            texto,
+            alternativa_a,
+            alternativa_b,
+            alternativa_c,
+            alternativa_d,
+            respuesta_correcta,
+            imagen_url,
+            imagen_url_2,
+            imagen_url_3,
+            video_url,
+            segundo_inicio,
+            segundo_termino
+        `)
+        .eq(
+            "desafio_id",
+            desafio.id
+        )
+        .eq(
+            "numero",
+            numeroPregunta
+        )
+        .maybeSingle();
+
+
+    if (errorPregunta) {
+
+        console.error(
+            "Error cargando pregunta:",
+            errorPregunta
+        );
+
+        return;
+
+    }
+
+
+    if (!pregunta) {
+
+        console.error(
+            "No se encontró la pregunta:",
+            numeroPregunta,
+            "del desafío:",
+            numeroDesafio
+        );
+
+        const textoPregunta =
+            document.getElementById(
+                "textoPregunta"
+            );
+
+        if (textoPregunta) {
+
+            textoPregunta.textContent =
+                "No hay preguntas disponibles.";
+
+        }
+
+        return;
+
+    }
+
+
+    /* ---------------------------------------------------------
+       GUARDAR PREGUNTA ACTUAL
+    --------------------------------------------------------- */
+
+    estadoJuego.preguntaActual =
+        pregunta;
+
+
+    /* ---------------------------------------------------------
+       MOSTRAR TEXTO
+    --------------------------------------------------------- */
+
+    const textoPregunta =
+        document.getElementById(
+            "textoPregunta"
+        );
+
+    if (textoPregunta) {
+
+        textoPregunta.textContent =
+            pregunta.texto ||
+            "Pregunta sin texto";
+
+    }
+
+
+    /* ---------------------------------------------------------
+       LIMPIAR IMÁGENES
+    --------------------------------------------------------- */
+
+    const contenedorImagenes =
+        document.getElementById(
+            "contenedorImagenes"
+        );
+
+
+    if (contenedorImagenes) {
+
+        contenedorImagenes.innerHTML =
+            "";
+
+        contenedorImagenes.style.display =
+            "none";
+
+
+        /* -----------------------------------------------------
+           CARGAR HASTA 3 IMÁGENES
+        ----------------------------------------------------- */
+
+        const imagenes = [
+
+            pregunta.imagen_url,
+
+            pregunta.imagen_url_2,
+
+            pregunta.imagen_url_3
+
+        ].filter(
+            url =>
+                url !== null &&
+                url !== undefined &&
+                String(url).trim() !== ""
+        );
+
+
+        imagenes.forEach(
+            (url, indice) => {
+
+                const imagen =
+                    document.createElement("img");
+
+
+                imagen.src =
+                    url;
+
+
+                imagen.alt =
+                    "Imagen " +
+                    (indice + 1) +
+                    " de la pregunta";
+
+
+                imagen.style.maxWidth =
+                    "300px";
+
+
+                imagen.style.maxHeight =
+                    "250px";
+
+
+                imagen.style.borderRadius =
+                    "15px";
+
+
+                imagen.style.objectFit =
+                    "contain";
+
+
+                contenedorImagenes.appendChild(
+                    imagen
+                );
+
+            }
+        );
+
+
+        if (imagenes.length > 0) {
+
+            contenedorImagenes.style.display =
+                "flex";
+
+        }
+
+    }
+
+
+    /* ---------------------------------------------------------
+       LIMPIAR VIDEO
+    --------------------------------------------------------- */
+
+    const contenedorVideo =
+        document.getElementById(
+            "contenedorVideo"
+        );
+
+
+    if (contenedorVideo) {
+
+        contenedorVideo.innerHTML =
+            "";
+
+        contenedorVideo.style.display =
+            "none";
+
+
+        /* -----------------------------------------------------
+           CARGAR VIDEO
+        ----------------------------------------------------- */
+
+        if (pregunta.video_url) {
+
+            const video =
+                document.createElement("iframe");
+
+
+            video.src =
+                pregunta.video_url;
+
+
+            video.width =
+                "560";
+
+
+            video.height =
+                "315";
+
+
+            video.allow =
+                "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
+
+
+            video.allowFullscreen =
+                true;
+
+
+            video.style.maxWidth =
+                "100%";
+
+
+            video.style.border =
+                "none";
+
+
+            video.style.borderRadius =
+                "15px";
+
+
+            contenedorVideo.appendChild(
+                video
+            );
+
+
+            contenedorVideo.style.display =
+                "flex";
+
+        }
+
+    }
+
+
+    /* ---------------------------------------------------------
+       ALTERNATIVAS
+    --------------------------------------------------------- */
+
+    const contenedorAlternativas =
+        document.getElementById(
+            "alternativasPregunta"
+        );
+
+
+    if (!contenedorAlternativas) {
+
+        console.error(
+            "No existe el contenedor de alternativas."
+        );
+
+        return;
+
+    }
+
+
+    contenedorAlternativas.innerHTML =
+        "";
+
+
+    const alternativas = [
+
+        {
+            letra: "A",
+            texto: pregunta.alternativa_a
+        },
+
+        {
+            letra: "B",
+            texto: pregunta.alternativa_b
+        },
+
+        {
+            letra: "C",
+            texto: pregunta.alternativa_c
+        },
+
+        {
+            letra: "D",
+            texto: pregunta.alternativa_d
+        }
+
+    ]
+    .filter(
+        alternativa =>
+            alternativa.texto !== null &&
+            alternativa.texto !== undefined &&
+            String(
+                alternativa.texto
+            ).trim() !== ""
+    );
+
+
+    /* ---------------------------------------------------------
+       MEZCLAR ALTERNATIVAS
+    --------------------------------------------------------- */
+
+    for (
+        let i = alternativas.length - 1;
+        i > 0;
+        i--
+    ) {
+
+        const j =
+            Math.floor(
+                Math.random() * (i + 1)
+            );
+
+
+        [
+            alternativas[i],
+            alternativas[j]
+        ] = [
+            alternativas[j],
+            alternativas[i]
+        ];
+
+    }
+
+
+    /* ---------------------------------------------------------
+       CREAR BOTONES
+    --------------------------------------------------------- */
+
+    alternativas.forEach(
+        alternativa => {
+
+            const boton =
+                document.createElement(
+                    "button"
+                );
+
+
+            boton.type =
+                "button";
+
+
+            boton.className =
+                "alternativa";
+
+
+            boton.dataset.letra =
+                alternativa.letra;
+
+
+            boton.innerHTML = `
+
+                <strong>
+                    ${alternativa.letra}.
+                </strong>
+
+                ${escapeHtml(
+                    alternativa.texto
+                )}
+
+            `;
+
+
+            boton.addEventListener(
+                "click",
+                () => {
+
+                    responderPregunta(
+                        alternativa.letra,
+                        boton
+                    );
+
+                }
+            );
+
+
+            contenedorAlternativas
+                .appendChild(
+                    boton
+                );
+
+        }
+    );
+
+
+    /* ---------------------------------------------------------
+       TIEMPO
+    --------------------------------------------------------- */
+
+    const tiempo =
+        Number(
+            desafio.tiempo_respuesta
+        ) || 30;
+
+
+    const elementoTiempo =
+        document.getElementById(
+            "tiempoPregunta"
+        );
+
+
+    if (elementoTiempo) {
+
+        elementoTiempo.textContent =
+            tiempo +
+            " segundos";
+
+    }
+
+
+    /* ---------------------------------------------------------
+       GUARDAR INFORMACIÓN PARA EL TEMPORIZADOR
+    --------------------------------------------------------- */
+
+    estadoJuego.inicioPregunta =
+        sala.inicio_pregunta;
+
+
+    estadoJuego.tiempoPregunta =
+        tiempo;
+
+
+    /* ---------------------------------------------------------
+       INICIAR TEMPORIZADOR
+    --------------------------------------------------------- */
+
+    iniciarTemporizador(
+        sala.inicio_pregunta,
+        tiempo
+    );
+
+
+    /* ---------------------------------------------------------
+       MENSAJE DE RESPUESTA
+    --------------------------------------------------------- */
+
+    const mensaje =
+        document.getElementById(
+            "mensajeRespuesta"
+        );
+
+
+    if (mensaje) {
+
+        mensaje.textContent =
+            "";
+
+        mensaje.className =
+            "mensaje-respuesta";
+
+    }
+
+
+    /* ---------------------------------------------------------
+       CONSOLA
+    --------------------------------------------------------- */
+
+    console.log(
+        "Pregunta cargada:",
+        {
+            desafio: numeroDesafio,
+            pregunta: numeroPregunta,
+            inicio: sala.inicio_pregunta,
+            datos: pregunta
+        }
+    );
+
+}
+
+
+/* =========================================================
+   RESPONDER PREGUNTA
+========================================================= */
+
+async function responderPregunta(
+    alternativa,
+    botonSeleccionado
+) {
+
+    /* ---------------------------------------------------------
+       VALIDAR INFORMACIÓN
+    --------------------------------------------------------- */
+
     if (
-        !estadoJuego.salaId
+        !estadoJuego.salaId ||
+        !estadoJuego.jugadorId ||
+        !estadoJuego.preguntaActual
+    ) {
+
+        console.error(
+            "Falta información para registrar la respuesta."
+        );
+
+        return;
+
+    }
+
+
+    /* ---------------------------------------------------------
+       EVITAR DOBLE RESPUESTA
+    --------------------------------------------------------- */
+
+    if (
+        estadoJuego.respuestaRegistrada
     ) {
 
         return;
@@ -2713,32 +3382,396 @@ async function cargarPreguntaActual() {
     }
 
 
-    const numeroDesafio =
-        estadoJuego.desafioActual ||
-        1;
+    const botones =
+        document.querySelectorAll(
+            "#alternativasPregunta .alternativa"
+        );
 
 
-    document.getElementById(
-        "challenge-number"
-    ).textContent =
-        "DESAFÍO " +
-        numeroDesafio;
+    botones.forEach(
+        boton => {
+
+            boton.disabled =
+                true;
+
+        }
+    );
 
 
-    document.getElementById(
-        "challenge-name"
-    ).textContent =
-        NOMBRES_DESAFIOS[
-            numeroDesafio
-        ] ||
-        "Desafío";
+    /* ---------------------------------------------------------
+       MARCAR BOTÓN SELECCIONADO
+    --------------------------------------------------------- */
+
+    if (botonSeleccionado) {
+
+        botonSeleccionado.classList.add(
+            "seleccionada"
+        );
+
+    }
 
 
-    /*
-       La consulta exacta de la pregunta
-       se conectará con la estructura
-       actual de Supabase.
-    */
+    /* ---------------------------------------------------------
+       REGISTRAR RESPUESTA EN SUPABASE
+    --------------------------------------------------------- */
+
+    try {
+
+        const {
+            data,
+            error
+        } =
+            await supabaseClient
+                .rpc(
+                    "registrar_respuesta",
+                    {
+                        p_sala_id:
+                            estadoJuego.salaId,
+
+                        p_jugador_id:
+                            estadoJuego.jugadorId,
+
+                        p_pregunta_id:
+                            estadoJuego.preguntaActual.id,
+
+                        p_alternativa:
+                            alternativa
+                    }
+                );
+
+
+        if (error) {
+
+            throw error;
+
+        }
+
+
+        console.log(
+            "Respuesta registrada:",
+            data
+        );
+
+
+        /* -----------------------------------------------------
+           MOSTRAR RESULTADO
+        ----------------------------------------------------- */
+
+        const resultado =
+            Array.isArray(data)
+                ? data[0]
+                : data;
+
+
+        const mensaje =
+            document.getElementById(
+                "mensajeRespuesta"
+            );
+
+
+        if (mensaje && resultado) {
+
+            if (resultado.correcta) {
+
+                mensaje.textContent =
+                    "✅ ¡Correcto! +" +
+                    (
+                        resultado.puntaje_obtenido ||
+                        0
+                    ) +
+                    " puntos";
+
+
+                mensaje.className =
+                    "mensaje-respuesta correcto";
+
+            } else {
+
+                mensaje.textContent =
+                    "❌ Incorrecto";
+
+
+                mensaje.className =
+                    "mensaje-respuesta incorrecto";
+
+            }
+
+        }
+
+
+        /* -----------------------------------------------------
+           GUARDAR ESTADO DE RESPUESTA
+        ----------------------------------------------------- */
+
+        estadoJuego.respuestaRegistrada =
+            true;
+
+
+        estadoJuego.resultadoRespuesta =
+            resultado;
+
+
+    } catch (error) {
+
+        console.error(
+            "Error registrando respuesta:",
+            error
+        );
+
+
+        /* -----------------------------------------------------
+           REACTIVAR BOTONES SI HUBO ERROR
+        ----------------------------------------------------- */
+
+        botones.forEach(
+            boton => {
+
+                boton.disabled =
+                    false;
+
+            }
+        );
+
+
+        if (botonSeleccionado) {
+
+            botonSeleccionado.classList.remove(
+                "seleccionada"
+            );
+
+        }
+
+
+        const mensaje =
+            document.getElementById(
+                "mensajeRespuesta"
+            );
+
+
+        if (mensaje) {
+
+            mensaje.textContent =
+                "No se pudo registrar la respuesta.";
+
+            mensaje.className =
+                "mensaje-respuesta error";
+
+        }
+
+    }
+
+}
+
+
+/* =========================================================
+   TEMPORIZADOR DE PREGUNTA
+========================================================= */
+
+let intervaloTemporizador =
+    null;
+
+
+/* ---------------------------------------------------------
+   INICIAR TEMPORIZADOR
+--------------------------------------------------------- */
+
+function iniciarTemporizador(
+    inicioPregunta,
+    tiempoTotal
+) {
+
+    /* -----------------------------------------------------
+       DETENER TEMPORIZADOR ANTERIOR
+    ----------------------------------------------------- */
+
+    if (intervaloTemporizador) {
+
+        clearInterval(
+            intervaloTemporizador
+        );
+
+        intervaloTemporizador =
+            null;
+
+    }
+
+
+    const elementoTiempo =
+        document.getElementById(
+            "tiempoPregunta"
+        );
+
+
+    if (!elementoTiempo) {
+
+        console.warn(
+            "No existe el elemento #tiempoPregunta"
+        );
+
+        return;
+
+    }
+
+
+    const inicio =
+        new Date(
+            inicioPregunta
+        ).getTime();
+
+
+    const duracion =
+        Number(
+            tiempoTotal
+        ) * 1000;
+
+
+    /* -----------------------------------------------------
+       ACTUALIZAR TIEMPO
+    ----------------------------------------------------- */
+
+    function actualizarTiempo() {
+
+        const ahora =
+            Date.now();
+
+
+        const transcurrido =
+            ahora - inicio;
+
+
+        const restante =
+            Math.max(
+                0,
+                duracion - transcurrido
+            );
+
+
+        const segundos =
+            Math.ceil(
+                restante / 1000
+            );
+
+
+        elementoTiempo.textContent =
+            segundos +
+            " segundos";
+
+
+        /* ---------------------------------------------
+           TIEMPO AGOTADO
+        --------------------------------------------- */
+
+        if (restante <= 0) {
+
+            clearInterval(
+                intervaloTemporizador
+            );
+
+
+            intervaloTemporizador =
+                null;
+
+
+            elementoTiempo.textContent =
+                "0 segundos";
+
+
+            manejarTiempoAgotado();
+
+        }
+
+    }
+
+
+    /* -----------------------------------------------------
+       ACTUALIZACIÓN INICIAL
+    ----------------------------------------------------- */
+
+    actualizarTiempo();
+
+
+    /* -----------------------------------------------------
+       ACTUALIZAR CADA 250 MS
+    ----------------------------------------------------- */
+
+    intervaloTemporizador =
+        setInterval(
+            actualizarTiempo,
+            250
+        );
+
+}
+
+
+/* =========================================================
+   TIEMPO AGOTADO
+========================================================= */
+
+async function manejarTiempoAgotado() {
+
+    /* ---------------------------------------------------------
+       EVITAR PROCESAR DOS VECES
+    --------------------------------------------------------- */
+
+    if (
+        estadoJuego.respuestaRegistrada
+    ) {
+
+        return;
+
+    }
+
+
+    estadoJuego.respuestaRegistrada =
+        true;
+
+
+    /* ---------------------------------------------------------
+       DESHABILITAR ALTERNATIVAS
+    --------------------------------------------------------- */
+
+    const botones =
+        document.querySelectorAll(
+            "#alternativasPregunta .alternativa"
+        );
+
+
+    botones.forEach(
+        boton => {
+
+            boton.disabled =
+                true;
+
+        }
+    );
+
+
+    /* ---------------------------------------------------------
+       MOSTRAR MENSAJE
+    --------------------------------------------------------- */
+
+    const mensaje =
+        document.getElementById(
+            "mensajeRespuesta"
+        );
+
+
+    if (mensaje) {
+
+        mensaje.textContent =
+            "⏰ ¡Tiempo agotado!";
+
+
+        mensaje.className =
+            "mensaje-respuesta error";
+
+    }
+
+
+    console.log(
+        "Tiempo agotado para la pregunta:",
+        estadoJuego.preguntaActual?.id
+    );
 
 }
 
@@ -2749,7 +3782,9 @@ async function cargarPreguntaActual() {
 
 function escapeHtml(text) {
 
-    return String(text ?? "")
+    return String(
+        text ?? ""
+    )
 
         .replace(
             /&/g,
