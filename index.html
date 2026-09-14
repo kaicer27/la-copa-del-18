@@ -2166,16 +2166,463 @@ function mostrarConfirmacion() {
 }
 
 /* =========================================================
-   CREAR / ENTRAR A SALA
+   ACCESO A SALA
+========================================================= */
+
+
+/* =========================================================
+   MOSTRAR FORMULARIO DE SALA
+========================================================= */
+
+function mostrarFormularioSala(tipo) {
+
+    const opciones =
+        document.getElementById(
+            "opcionesSala"
+        );
+
+    const formularioCrear =
+        document.getElementById(
+            "formularioCrearSala"
+        );
+
+    const formularioUnirse =
+        document.getElementById(
+            "formularioUnirseSala"
+        );
+
+
+    if (opciones) {
+        opciones.style.display = "none";
+    }
+
+
+    if (formularioCrear) {
+        formularioCrear.style.display =
+            tipo === "crear"
+                ? "block"
+                : "none";
+    }
+
+
+    if (formularioUnirse) {
+        formularioUnirse.style.display =
+            tipo === "unirse"
+                ? "block"
+                : "none";
+    }
+
+
+    /* ---------------------------------------------------------
+       LIMPIAR FORMULARIOS
+    --------------------------------------------------------- */
+
+    if (tipo === "crear") {
+
+        const nombre =
+            document.getElementById(
+                "nombreCrearSala"
+            );
+
+        const fecha =
+            document.getElementById(
+                "fechaCrearSala"
+            );
+
+        if (nombre) {
+            nombre.value = "";
+        }
+
+        if (fecha) {
+            fecha.value = "";
+        }
+
+        setTimeout(() => {
+
+            if (nombre) {
+                nombre.focus();
+            }
+
+        }, 100);
+
+    }
+
+
+    if (tipo === "unirse") {
+
+        const codigo =
+            document.getElementById(
+                "codigoUnirseSala"
+            );
+
+        const nombre =
+            document.getElementById(
+                "nombreUnirseSala"
+            );
+
+        const fecha =
+            document.getElementById(
+                "fechaUnirseSala"
+            );
+
+        if (codigo) {
+            codigo.value = "";
+        }
+
+        if (nombre) {
+            nombre.value = "";
+        }
+
+        if (fecha) {
+            fecha.value = "";
+        }
+
+        setTimeout(() => {
+
+            if (codigo) {
+                codigo.focus();
+            }
+
+        }, 100);
+
+    }
+
+}
+
+
+/* =========================================================
+   VOLVER A OPCIONES
+========================================================= */
+
+function volverOpcionesSala() {
+
+    const opciones =
+        document.getElementById(
+            "opcionesSala"
+        );
+
+    const formularioCrear =
+        document.getElementById(
+            "formularioCrearSala"
+        );
+
+    const formularioUnirse =
+        document.getElementById(
+            "formularioUnirseSala"
+        );
+
+
+    if (opciones) {
+        opciones.style.display = "flex";
+    }
+
+
+    if (formularioCrear) {
+        formularioCrear.style.display =
+            "none";
+    }
+
+
+    if (formularioUnirse) {
+        formularioUnirse.style.display =
+            "none";
+    }
+
+}
+
+
+/* =========================================================
+   CREAR SALA DESDE FORMULARIO
+========================================================= */
+
+async function crearSalaDesdeFormulario() {
+
+    const nombreInput =
+        document.getElementById(
+            "nombreCrearSala"
+        );
+
+    const fechaInput =
+        document.getElementById(
+            "fechaCrearSala"
+        );
+
+
+    const nombre =
+        nombreInput
+            ? nombreInput.value.trim()
+            : "";
+
+
+    const fechaNacimiento =
+        fechaInput
+            ? fechaInput.value
+            : "";
+
+
+    /* ---------------------------------------------------------
+       VALIDAR NOMBRE
+    --------------------------------------------------------- */
+
+    if (!nombre) {
+
+        alert(
+            "Debes ingresar tu nombre."
+        );
+
+        if (nombreInput) {
+            nombreInput.focus();
+        }
+
+        return;
+
+    }
+
+
+    /* ---------------------------------------------------------
+       VALIDAR FECHA
+    --------------------------------------------------------- */
+
+    if (!fechaNacimiento) {
+
+        alert(
+            "Debes ingresar tu fecha de nacimiento."
+        );
+
+        if (fechaInput) {
+            fechaInput.focus();
+        }
+
+        return;
+
+    }
+
+
+    /* ---------------------------------------------------------
+       GUARDAR DATOS TEMPORALES DEL JUGADOR
+       
+       Todavía NO se inserta nada en jugadores.
+       La inserción la hará crear_sala().
+    --------------------------------------------------------- */
+
+    jugadorSeleccionado = {
+
+        id: null,
+
+        nombre:
+            nombre,
+
+        fecha_nacimiento:
+            fechaNacimiento,
+
+        equipo:
+            null
+
+    };
+
+
+    /* ---------------------------------------------------------
+       MOSTRAR CONFIRMACIÓN
+    --------------------------------------------------------- */
+
+    mostrarConfirmacion();
+
+}
+
+
+/* =========================================================
+   UNIRSE A SALA DESDE FORMULARIO
+========================================================= */
+
+async function unirseSalaDesdeFormulario() {
+
+    const codigoInput =
+        document.getElementById(
+            "codigoUnirseSala"
+        );
+
+    const nombreInput =
+        document.getElementById(
+            "nombreUnirseSala"
+        );
+
+    const fechaInput =
+        document.getElementById(
+            "fechaUnirseSala"
+        );
+
+
+    const codigo =
+        codigoInput
+            ? codigoInput.value
+                .trim()
+                .toUpperCase()
+            : "";
+
+
+    const nombre =
+        nombreInput
+            ? nombreInput.value.trim()
+            : "";
+
+
+    const fechaNacimiento =
+        fechaInput
+            ? fechaInput.value
+            : "";
+
+
+    /* ---------------------------------------------------------
+       VALIDAR CÓDIGO
+    --------------------------------------------------------- */
+
+    if (!codigo) {
+
+        alert(
+            "Debes ingresar el código de la sala."
+        );
+
+        if (codigoInput) {
+            codigoInput.focus();
+        }
+
+        return;
+
+    }
+
+
+    if (codigo.length !== 6) {
+
+        alert(
+            "El código de la sala debe tener 6 caracteres."
+        );
+
+        if (codigoInput) {
+            codigoInput.focus();
+        }
+
+        return;
+
+    }
+
+
+    /* ---------------------------------------------------------
+       VALIDAR NOMBRE
+    --------------------------------------------------------- */
+
+    if (!nombre) {
+
+        alert(
+            "Debes ingresar tu nombre."
+        );
+
+        if (nombreInput) {
+            nombreInput.focus();
+        }
+
+        return;
+
+    }
+
+
+    /* ---------------------------------------------------------
+       VALIDAR FECHA
+    --------------------------------------------------------- */
+
+    if (!fechaNacimiento) {
+
+        alert(
+            "Debes ingresar tu fecha de nacimiento."
+        );
+
+        if (fechaInput) {
+            fechaInput.focus();
+        }
+
+        return;
+
+    }
+
+
+    /* ---------------------------------------------------------
+       GUARDAR DATOS TEMPORALES
+    --------------------------------------------------------- */
+
+    jugadorSeleccionado = {
+
+        id: null,
+
+        nombre:
+            nombre,
+
+        fecha_nacimiento:
+            fechaNacimiento,
+
+        equipo:
+            null,
+
+        codigoSala:
+            codigo
+
+    };
+
+
+    /* ---------------------------------------------------------
+       MOSTRAR CONFIRMACIÓN
+    --------------------------------------------------------- */
+
+    mostrarConfirmacion();
+
+}
+
+
+/* =========================================================
+   ENTRAR / CREAR SALA
 ========================================================= */
 
 async function entrarSala() {
 
     if (!jugadorSeleccionado) {
 
+        alert(
+            "Primero debes ingresar tus datos."
+        );
+
+        mostrarPantalla(
+            "pantallaSeleccion"
+        );
+
         return;
 
     }
+
+
+    const nombre =
+        jugadorSeleccionado.nombre;
+
+
+    const fechaNacimiento =
+        jugadorSeleccionado.fecha_nacimiento;
+
+
+    if (!nombre || !fechaNacimiento) {
+
+        alert(
+            "Falta el nombre o la fecha de nacimiento."
+        );
+
+        mostrarPantalla(
+            "pantallaSeleccion"
+        );
+
+        return;
+
+    }
+
+
+    const codigoSala =
+        jugadorSeleccionado.codigoSala ||
+        null;
 
 
     const estadoConexion =
@@ -2189,135 +2636,40 @@ async function entrarSala() {
     );
 
 
-    estadoConexion.textContent =
-        "Conectando con la sala...";
+    if (estadoConexion) {
+
+        estadoConexion.textContent =
+            codigoSala
+                ? "Conectando con la sala..."
+                : "Creando nueva sala...";
+
+        estadoConexion.style.background =
+            "";
+
+        estadoConexion.style.color =
+            "";
+
+    }
 
 
     try {
-
-        /* ---------------------------------------------------------
-           PREGUNTAR SI QUIERE CREAR O UNIRSE
-        --------------------------------------------------------- */
-
-        const crearNuevaSala =
-            confirm(
-                "¿Quieres crear una nueva sala?\n\n" +
-                "Aceptar = Crear nueva sala\n" +
-                "Cancelar = Unirse a una sala existente"
-            );
-
 
         let data;
         let error;
 
 
-        /* =========================================================
-           CREAR NUEVA SALA
-        ========================================================= */
-
-        if (crearNuevaSala) {
-
-            estadoConexion.textContent =
-                "Creando nueva sala...";
-
-
-            const resultado =
-                await supabaseClient
-                    .rpc(
-                        "crear_sala",
-                        {
-                            p_nombre_jugador:
-                                jugadorSeleccionado.nombre,
-
-                            p_fecha_nacimiento:
-                                jugadorSeleccionado.fecha_nacimiento
-                        }
-                    );
-
-
-            data =
-                Array.isArray(
-                    resultado.data
-                )
-                    ? resultado.data[0]
-                    : resultado.data;
-
-
-            error =
-                resultado.error;
-
-
-            if (error) {
-
-                throw error;
-
-            }
-
-
-            console.log(
-                "Sala creada:",
-                data
-            );
-
-
-            /* -----------------------------------------------------
-               EL CREADOR ES EL ANFITRIÓN
-            ----------------------------------------------------- */
-
-            estadoJuego.esAnfitrion =
-                true;
-
-        }
-
-
-        /* =========================================================
+        /* =====================================================
            UNIRSE A SALA EXISTENTE
-        ========================================================= */
+        ===================================================== */
 
-        else {
+        if (codigoSala) {
 
-            const codigo =
-                prompt(
-                    "Ingresa el código de la sala:"
-                );
+            if (estadoConexion) {
 
-
-            if (!codigo) {
-
-                mostrarPantalla(
-                    "pantallaSeleccion"
-                );
-
-                return;
+                estadoConexion.textContent =
+                    "Buscando sala...";
 
             }
-
-
-            const codigoLimpio =
-                codigo
-                    .trim()
-                    .toUpperCase();
-
-
-            if (
-                codigoLimpio.length === 0
-            ) {
-
-                alert(
-                    "Debes ingresar un código de sala."
-                );
-
-                mostrarPantalla(
-                    "pantallaSeleccion"
-                );
-
-                return;
-
-            }
-
-
-            estadoConexion.textContent =
-                "Buscando sala...";
 
 
             const resultado =
@@ -2326,13 +2678,13 @@ async function entrarSala() {
                         "unirse_sala",
                         {
                             p_codigo:
-                                codigoLimpio,
+                                codigoSala,
 
                             p_nombre_jugador:
-                                jugadorSeleccionado.nombre,
+                                nombre,
 
                             p_fecha_nacimiento:
-                                jugadorSeleccionado.fecha_nacimiento
+                                fechaNacimiento
                         }
                     );
 
@@ -2350,9 +2702,7 @@ async function entrarSala() {
 
 
             if (error) {
-
                 throw error;
-
             }
 
 
@@ -2362,19 +2712,72 @@ async function entrarSala() {
             );
 
 
-            /* -----------------------------------------------------
-               LOS JUGADORES QUE SE UNEN NO SON ANFITRIONES
-            ----------------------------------------------------- */
-
             estadoJuego.esAnfitrion =
                 false;
 
         }
 
 
-        /* =========================================================
-           GUARDAR DATOS DE LA SALA
-        ========================================================= */
+        /* =====================================================
+           CREAR NUEVA SALA
+        ===================================================== */
+
+        else {
+
+            if (estadoConexion) {
+
+                estadoConexion.textContent =
+                    "Creando nueva sala...";
+
+            }
+
+
+            const resultado =
+                await supabaseClient
+                    .rpc(
+                        "crear_sala",
+                        {
+                            p_nombre_jugador:
+                                nombre,
+
+                            p_fecha_nacimiento:
+                                fechaNacimiento
+                        }
+                    );
+
+
+            data =
+                Array.isArray(
+                    resultado.data
+                )
+                    ? resultado.data[0]
+                    : resultado.data;
+
+
+            error =
+                resultado.error;
+
+
+            if (error) {
+                throw error;
+            }
+
+
+            console.log(
+                "Sala creada:",
+                data
+            );
+
+
+            estadoJuego.esAnfitrion =
+                true;
+
+        }
+
+
+        /* =====================================================
+           VALIDAR RESPUESTA
+        ===================================================== */
 
         if (!data) {
 
@@ -2385,6 +2788,10 @@ async function entrarSala() {
         }
 
 
+        /* =====================================================
+           GUARDAR DATOS DE LA SALA
+        ===================================================== */
+
         estadoJuego.salaId =
             data.sala_id ||
             data.id_sala ||
@@ -2394,6 +2801,7 @@ async function entrarSala() {
         estadoJuego.codigoSala =
             data.codigo_sala ||
             data.codigo ||
+            codigoSala ||
             null;
 
 
@@ -2403,22 +2811,14 @@ async function entrarSala() {
             null;
 
 
-        /* ---------------------------------------------------------
-           EQUIPO
-           
-           El equipo todavía puede ser null.
-           Los equipos se asignan al iniciar la partida mediante
-           iniciar_partida() → asignar_equipos().
-        --------------------------------------------------------- */
-
         estadoJuego.equipo =
             data.equipo ||
             null;
 
 
-        /* =========================================================
+        /* =====================================================
            VALIDAR DATOS RECIBIDOS
-        ========================================================= */
+        ===================================================== */
 
         if (
             !estadoJuego.salaId ||
@@ -2430,44 +2830,49 @@ async function entrarSala() {
                 data
             );
 
+
             throw new Error(
-                "La sala fue creada/encontrada, pero faltan datos del jugador."
+                "Supabase creó/encontró la sala, pero no devolvió correctamente los datos del jugador."
             );
 
         }
 
 
-        /* =========================================================
-           MOSTRAR CÓDIGO DE SALA
-        ========================================================= */
+        /* =====================================================
+           MOSTRAR CÓDIGO
+        ===================================================== */
 
         actualizarCodigoSala();
 
 
-        /* =========================================================
+        /* =====================================================
            ESTADO CONECTADO
-        ========================================================= */
+        ===================================================== */
 
-        estadoConexion.textContent =
-            "Conectado correctamente a la sala.";
+        if (estadoConexion) {
 
-        estadoConexion.style.background =
-            "#edfff3";
+            estadoConexion.textContent =
+                "Conectado correctamente a la sala.";
 
-        estadoConexion.style.color =
-            "#16803c";
+            estadoConexion.style.background =
+                "#edfff3";
+
+            estadoConexion.style.color =
+                "#16803c";
+
+        }
 
 
-        /* =========================================================
+        /* =====================================================
            CARGAR LOBBY
-        ========================================================= */
+        ===================================================== */
 
         await cargarLobby();
 
 
-        /* =========================================================
+        /* =====================================================
            INICIAR REALTIME
-        ========================================================= */
+        ===================================================== */
 
         iniciarRealtime();
 
@@ -2475,6 +2880,7 @@ async function entrarSala() {
         console.log(
             "Sala lista:",
             {
+
                 salaId:
                     estadoJuego.salaId,
 
@@ -2486,6 +2892,7 @@ async function entrarSala() {
 
                 anfitrion:
                     estadoJuego.esAnfitrion
+
             }
         );
 
@@ -2498,14 +2905,18 @@ async function entrarSala() {
         );
 
 
-        estadoConexion.textContent =
-            "No se pudo conectar con la sala.";
+        if (estadoConexion) {
 
-        estadoConexion.style.background =
-            "#fff0f0";
+            estadoConexion.textContent =
+                "No se pudo conectar con la sala.";
 
-        estadoConexion.style.color =
-            "#b00020";
+            estadoConexion.style.background =
+                "#fff0f0";
+
+            estadoConexion.style.color =
+                "#b00020";
+
+        }
 
 
         alert(
@@ -2516,10 +2927,15 @@ async function entrarSala() {
             )
         );
 
+
+        mostrarPantalla(
+            "pantallaSeleccion"
+        );
+
     }
 
 }
-
+    
 /* =========================================================
    CÓDIGO DE SALA
 ========================================================= */
