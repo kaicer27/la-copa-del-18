@@ -1764,6 +1764,15 @@ h1 {
         3
     </div>
 
+    <button
+        id="botonComenzarDesafio"
+        class="boton principal boton-continuar-desafio"
+        onclick="comenzarDesafioDesdeIntro()"
+        style="margin-top:20px;"
+    >
+        ▶️ COMENZAR DESAFÍO 1
+    </button>
+
 </section>
 
 
@@ -3544,80 +3553,85 @@ function iniciarCuentaRegresivaIntro(
 ) {
 
     if (temporizadorIntro) {
-
-        clearInterval(
-            temporizadorIntro
-        );
-
-        temporizadorIntro =
-            null;
-
+        clearInterval(temporizadorIntro);
+        temporizadorIntro = null;
     }
-
-    let restante = 3;
 
     const cuenta =
         document.getElementById(
             "introCuentaRegresiva"
         );
 
-    if (cuenta) {
-
-        cuenta.textContent =
-            restante;
-
-    }
-
-    temporizadorIntro =
-        setInterval(
-            async () => {
-
-                restante--;
-
-                if (cuenta) {
-
-                    cuenta.textContent =
-                        restante > 0
-                            ? restante
-                            : "▶️";
-
-                }
-
-                if (restante <= 0) {
-
-                    clearInterval(
-                        temporizadorIntro
-                    );
-
-                    temporizadorIntro =
-                        null;
-
-                    estadoJuego.introActiva =
-                        false;
-
-                    if (soyAnfitrion) {
-
-                        await iniciarPreguntaServidor(
-                            numeroDesafio,
-                            1
-                        );
-
-                    }
-
-                }
-
-            },
-            1000
+    const boton =
+        document.getElementById(
+            "botonComenzarDesafio"
         );
 
+    if (cuenta) {
+        cuenta.textContent = "3";
+    }
+
+    if (boton) {
+        boton.textContent =
+            "▶️ COMENZAR DESAFÍO " + numeroDesafio;
+        boton.disabled = false;
+        boton.style.display = "inline-flex";
+    }
 }
 
+
+async function comenzarDesafioDesdeIntro() {
+
+    if (!estadoJuego.salaId) {
+        return;
+    }
+
+    if (!estadoJuego.esAnfitrion) {
+        alert("Solo el anfitrión puede comenzar el desafío.");
+        return;
+    }
+
+    const numeroDesafio =
+        Number(estadoJuego.desafioActual) || 1;
+
+    const boton =
+        document.getElementById(
+            "botonComenzarDesafio"
+        );
+
+    if (boton) {
+        boton.disabled = true;
+        boton.textContent = "⏳ PREPARANDO...";
+    }
+
+    estadoJuego.introActiva = false;
+
+    try {
+        await iniciarPreguntaServidor(
+            numeroDesafio,
+            1
+        );
+    }
+    catch (error) {
+        console.error(
+            "Error comenzando desafío:",
+            error
+        );
+
+        if (boton) {
+            boton.disabled = false;
+            boton.textContent =
+                "▶️ COMENZAR DESAFÍO " +
+                numeroDesafio;
+        }
+    }
+}
 
 /* =========================================================
    INICIAR PREGUNTA EN SERVIDOR
 ========================================================= */
 
-async function iniciarPreguntaServidor(
+async function iniciarPerguntaNoServidor(
     numeroDesafio,
     numeroPregunta
 ) {
@@ -5126,6 +5140,153 @@ async function obtenerJugadoresConectados() {
             jugador.estado_conexion ===
             "conectado"
     );
+
+}
+
+
+/* =========================================================
+   COMPROBAR AVANCE DE PREGUNTA
+========================================================= */
+
+async function comprobarAvanceActual() {
+
+    if (!estadoJuego.esAnfitrion) {
+        return;
+    }
+
+    if (
+        estadoJuego.fase !==
+        "jugando"
+    ) {
+        return;
+    }
+
+    const jugadores =
+        await obtenerJugadoresConectados();
+
+    if (!jugadores.length) {
+        return;
+    }
+
+    const todosListos =
+        jugadores.every(
+            jugador =>
+                jugador.listo_avanzar ===
+                true
+        );
+
+    if (!todosListos) {
+
+        return;
+
+    }
+
+    const desafio =
+        Number(
+            estadoJuego.desafioActual
+        ) || 1;
+
+    const pregunta =
+        Number(
+            estadoJuego.preguntaActual?.numero
+        ) || 1;
+
+    /*
+     * P1-P9:
+     * avanzamos directamente a la siguiente
+     * pregunta del mismo desafío.
+     */
+    if (
+        pregunta < 10
+    ) {
+
+        console.log(
+            "Todos respondieron. Avanzando a P" +
+            (
+                pregunta + 1
+            )
+        );
+
+        await iniciarPreguntaServidor(
+            desafio,
+            pregunta + 1
+        );
+
+        return;
+
+    }
+
+    /*
+     * P10:
+     * termina el desafío y se generan
+     * sus resultados.
+     */
+    await finalizarDesafio(
+        desafio
+    );
+
+}
+
+
+
+
+async function iniciarPreguntaServidor(
+    numeroDesafio,
+    numeroPregunta
+) {
+
+    if (!estadoJuego.esAnfitrion) {
+        return;
+    }
+
+    try {
+
+        const {
+            data,
+            error
+        } =
+            await supabaseClient
+                .rpc(
+                    "iniciar_pregunta",
+                    {
+                        p_sala_id:
+                            estadoJuego.salaId,
+
+                        p_desafio:
+                            numeroDesafio,
+
+                        p_pregunta:
+                            numeroPregunta
+                    }
+                );
+
+        if (error) {
+            throw error;
+        }
+
+        console.log(
+            "Siguiente pregunta iniciada:",
+            data
+        );
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "Error iniciando siguiente pregunta:",
+            error
+        );
+
+        alert(
+            "No se pudo avanzar a la siguiente pregunta:\n\n" +
+            (
+                error.message ||
+                error
+            )
+        );
+
+    }
 
 }
 
