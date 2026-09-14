@@ -1889,6 +1889,8 @@ h1 {
      SUPABASE
 ========================================================= -->
 
+<script src="https://www.youtube.com/iframe_api"></script>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 
@@ -4387,87 +4389,28 @@ async function cargarPreguntaActual() {
         );
 
     if (contenedorVideo) {
+        contenedorVideo.innerHTML = "";
 
-        contenedorVideo.innerHTML =
-            "";
-
-        contenedorVideo.style.display =
-            "none";
+        /* El reproductor existe solo para entregar audio. */
+        contenedorVideo.style.setProperty("display", "block", "important");
+        contenedorVideo.style.setProperty("width", "1px", "important");
+        contenedorVideo.style.setProperty("height", "1px", "important");
+        contenedorVideo.style.setProperty("overflow", "hidden", "important");
+        contenedorVideo.style.setProperty("position", "absolute", "important");
+        contenedorVideo.style.setProperty("left", "-99999px", "important");
+        contenedorVideo.style.setProperty("top", "0", "important");
+        contenedorVideo.style.setProperty("opacity", "0", "important");
+        contenedorVideo.style.setProperty("pointer-events", "none", "important");
+        contenedorVideo.style.setProperty("z-index", "-1", "important");
 
         if (pregunta.video_url) {
-
-            const video =
-                document.createElement(
-                    "iframe"
-                );
-
-            video.src =
-                convertirUrlYoutube(pregunta.video_url);
-
-            /*
-             * MODO AUDIO:
-             * El video de YouTube queda completamente oculto.
-             * Se mantiene el iframe para que YouTube reproduzca
-             * el audio, pero no se muestra título, miniatura ni video.
-             */
-            video.width =
-                "1";
-
-            video.height =
-                "1";
-
-            video.setAttribute(
-                "frameborder",
-                "0"
+            reproducirFragmentoYoutube(
+                pregunta.video_url,
+                pregunta.segundo_inicio,
+                pregunta.segundo_termino,
+                contenedorVideo
             );
-
-            video.setAttribute(
-                "allow",
-                "autoplay; encrypted-media"
-            );
-
-            video.setAttribute(
-                "title",
-                "Reproductor de audio"
-            );
-
-            video.style.width =
-                "1px";
-
-            video.style.height =
-                "1px";
-
-            video.style.position =
-                "absolute";
-
-            video.style.left =
-                "-9999px";
-
-            video.style.top =
-                "0";
-
-            video.style.opacity =
-                "0";
-
-            video.style.pointerEvents =
-                "none";
-
-            video.style.border =
-                "0";
-
-            contenedorVideo.appendChild(
-                video
-            );
-
-            /*
-             * No mostramos el contenedor:
-             * el jugador escucha solamente el audio.
-             */
-            contenedorVideo.style.display =
-                "none";
-
         }
-
     }
 
     const contenedorAlternativas =
@@ -4669,49 +4612,208 @@ async function cargarPreguntaActual() {
 
 
 /* =========================================================
-   CONVERTIR URL DE YOUTUBE PARA IFRAME
+   REPRODUCTOR YOUTUBE — SOLO AUDIO / FRAGMENTO
 ========================================================= */
 
-function convertirUrlYoutube(url) {
+let jugadorYoutubeCopa = null;
+let intervaloYoutubeCopa = null;
+let youtubePendienteCopa = null;
+let youtubeContenedorCopa = null;
 
-    if (!url) {
-        return "";
+function limpiarReproductorYoutube() {
+
+    if (intervaloYoutubeCopa) {
+        clearInterval(intervaloYoutubeCopa);
+        intervaloYoutubeCopa = null;
     }
 
-    const texto = String(url).trim();
+    if (jugadorYoutubeCopa) {
+        try {
+            jugadorYoutubeCopa.stopVideo();
+            jugadorYoutubeCopa.destroy();
+        } catch (error) {
+            console.warn("No se pudo destruir el reproductor anterior:", error);
+        }
+        jugadorYoutubeCopa = null;
+    }
+
+    youtubePendienteCopa = null;
+}
+
+function obtenerIdYoutube(url) {
+
+    if (!url) return "";
 
     try {
-
+        const texto = String(url).trim();
         const urlObj = new URL(texto);
         let id = "";
 
         if (urlObj.hostname.includes("youtu.be")) {
             id = urlObj.pathname.replace(/^\//, "").split("/")[0];
-        }
-        else if (urlObj.hostname.includes("youtube.com")) {
+        } else if (urlObj.hostname.includes("youtube.com")) {
             if (urlObj.pathname === "/watch") {
                 id = urlObj.searchParams.get("v") || "";
-            }
-            else if (urlObj.pathname.startsWith("/embed/")) {
+            } else if (urlObj.pathname.startsWith("/embed/")) {
                 id = urlObj.pathname.split("/embed/")[1].split("/")[0];
-            }
-            else if (urlObj.pathname.startsWith("/shorts/")) {
+            } else if (urlObj.pathname.startsWith("/shorts/")) {
                 id = urlObj.pathname.split("/shorts/")[1].split("/")[0];
             }
         }
 
-        if (id) {
-            return "https://www.youtube-nocookie.com/embed/" + id +
-                "?autoplay=1&controls=0&rel=0&modestbranding=1&iv_load_policy=3&playsinline=1";
+        return id;
+
+    } catch (error) {
+        console.warn("URL de YouTube no válida:", url);
+        return "";
+    }
+}
+
+function ocultarIframeYoutube(iframe) {
+
+    if (!iframe) return;
+
+    iframe.style.setProperty("width", "1px", "important");
+    iframe.style.setProperty("height", "1px", "important");
+    iframe.style.setProperty("min-width", "1px", "important");
+    iframe.style.setProperty("min-height", "1px", "important");
+    iframe.style.setProperty("max-width", "1px", "important");
+    iframe.style.setProperty("max-height", "1px", "important");
+    iframe.style.setProperty("position", "absolute", "important");
+    iframe.style.setProperty("left", "-99999px", "important");
+    iframe.style.setProperty("top", "0", "important");
+    iframe.style.setProperty("opacity", "0", "important");
+    iframe.style.setProperty("visibility", "hidden", "important");
+    iframe.style.setProperty("display", "block", "important");
+    iframe.style.setProperty("border", "0", "important");
+    iframe.style.setProperty("pointer-events", "none", "important");
+}
+
+function crearJugadorYoutubeCopa() {
+
+    if (!youtubePendienteCopa || !youtubeContenedorCopa) {
+        return;
+    }
+
+    if (!window.YT || !window.YT.Player) {
+        return;
+    }
+
+    const pendiente = youtubePendienteCopa;
+    youtubePendienteCopa = null;
+
+    limpiarReproductorYoutube();
+
+    const iframe = document.createElement("div");
+    iframe.id = "youtube-audio-copa-" + Date.now();
+    youtubeContenedorCopa.innerHTML = "";
+    youtubeContenedorCopa.appendChild(iframe);
+
+    ocultarIframeYoutube(iframe);
+
+    const inicio = Math.max(0, Number(pendiente.inicio) || 0);
+    const termino = Number(pendiente.termino);
+    const tieneTermino = Number.isFinite(termino) && termino > inicio;
+
+    jugadorYoutubeCopa = new YT.Player(iframe.id, {
+        videoId: pendiente.videoId,
+        width: "1",
+        height: "1",
+        playerVars: {
+            autoplay: 1,
+            controls: 0,
+            rel: 0,
+            modestbranding: 1,
+            iv_load_policy: 3,
+            playsinline: 1,
+            start: Math.floor(inicio)
+        },
+        events: {
+            onReady: function(evento) {
+
+                try {
+                    evento.target.seekTo(inicio, true);
+                    evento.target.playVideo();
+                } catch (error) {
+                    console.warn("No se pudo iniciar automáticamente el audio:", error);
+                }
+
+                if (tieneTermino) {
+                    intervaloYoutubeCopa = setInterval(function() {
+
+                        if (!jugadorYoutubeCopa) return;
+
+                        try {
+                            const actual = jugadorYoutubeCopa.getCurrentTime();
+
+                            if (actual >= termino - 0.05) {
+                                jugadorYoutubeCopa.pauseVideo();
+                                clearInterval(intervaloYoutubeCopa);
+                                intervaloYoutubeCopa = null;
+                            }
+                        } catch (error) {
+                            console.warn("Error controlando el fragmento de YouTube:", error);
+                        }
+
+                    }, 100);
+                }
+            },
+            onStateChange: function(evento) {
+                /* Si YouTube vuelve a reproducir después del límite,
+                   lo detenemos inmediatamente. */
+                if (tieneTermino && evento.data === YT.PlayerState.PLAYING) {
+                    try {
+                        if (jugadorYoutubeCopa.getCurrentTime() >= termino - 0.05) {
+                            jugadorYoutubeCopa.pauseVideo();
+                        }
+                    } catch (error) {
+                        console.warn("No se pudo comprobar el límite del audio:", error);
+                    }
+                }
+            }
         }
+    });
+}
 
+window.onYouTubeIframeAPIReady = function() {
+    crearJugadorYoutubeCopa();
+};
+
+function reproducirFragmentoYoutube(url, segundoInicio, segundoTermino, contenedor) {
+
+    limpiarReproductorYoutube();
+
+    youtubeContenedorCopa = contenedor;
+
+    if (!url || !contenedor) {
+        return;
     }
-    catch (error) {
-        console.warn("URL de video no válida:", url);
+
+    const videoId = obtenerIdYoutube(url);
+
+    if (!videoId) {
+        console.warn("No se pudo obtener el ID de YouTube:", url);
+        return;
     }
 
-    return texto;
+    youtubePendienteCopa = {
+        videoId: videoId,
+        inicio: segundoInicio,
+        termino: segundoTermino
+    };
 
+    crearJugadorYoutubeCopa();
+}
+
+function convertirUrlYoutube(url) {
+    const id = obtenerIdYoutube(url);
+
+    if (!id) {
+        return String(url || "");
+    }
+
+    return "https://www.youtube-nocookie.com/embed/" + id +
+        "?autoplay=1&controls=0&rel=0&modestbranding=1&iv_load_policy=3&playsinline=1";
 }
 
 
@@ -4860,11 +4962,10 @@ async function responderPregunta(
             }
         );
 
-        await marcarJugadorListo(
-            true,
-            "respondido"
-        );
-
+        // registrar_respuesta() ya marca al jugador como listo
+        // en Supabase. No hacemos una segunda actualización
+        // para evitar que un fallo secundario provoque un falso
+        // "No se pudo registrar la respuesta".
         await comprobarAvanceActual();
 
     }
