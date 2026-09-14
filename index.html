@@ -1940,6 +1940,9 @@ const estadoJuego = {
     fase: "lobby",
 
     introActiva: false,
+    introInicioPregunta: null,
+    puntajesVivos: { viejitos_cracks: 0, ni_fu_ni_fa: 0, cabros_chicos: 0 },
+    respuestasPuntajeProcesadas: {},
 
     desafioResultadoActual: null,
 
@@ -2882,6 +2885,15 @@ async function cargarLobby() {
     const jugadores =
         data || [];
 
+    const jugadorActual =
+        jugadores.find(
+            jugador => jugador.id === estadoJuego.jugadorId
+        );
+
+    if (jugadorActual?.equipo) {
+        estadoJuego.equipo = jugadorActual.equipo;
+    }
+
     renderizarEquipos(
         jugadores
     );
@@ -3157,83 +3169,50 @@ async function obtenerPuntajesEquipos() {
 
 async function actualizarPuntajes() {
 
-    const puntajes =
-        await obtenerPuntajesEquipos();
+    const puntajesServidor = await obtenerPuntajesEquipos();
+    const puntajes = estadoJuego.fase === "jugando"
+        ? estadoJuego.puntajesVivos
+        : puntajesServidor;
 
-    const elementoViejitos =
-        document.getElementById(
-            "puntajeViejitos"
-        );
+    const valores = {
+        viejitos_cracks: Number(puntajes.viejitos_cracks || 0),
+        ni_fu_ni_fa: Number(puntajes.ni_fu_ni_fa || 0),
+        cabros_chicos: Number(puntajes.cabros_chicos || 0)
+    };
 
-    const elementoNiFu =
-        document.getElementById(
-            "puntajeNiFu"
-        );
+    const ids = {
+        viejitos_cracks: ["puntajeViejitos", "puntajeJuegoViejitos"],
+        ni_fu_ni_fa: ["puntajeNiFu", "puntajeJuegoNiFu"],
+        cabros_chicos: ["puntajeCabros", "puntajeJuegoCabros"]
+    };
 
-    const elementoCabros =
-        document.getElementById(
-            "puntajeCabros"
-        );
+    Object.keys(ids).forEach(equipo => {
+        ids[equipo].forEach(id => {
+            const elemento = document.getElementById(id);
+            if (elemento) elemento.textContent = valores[equipo];
+        });
+    });
 
-    if (elementoViejitos) {
+    return valores;
+}
 
-        elementoViejitos.textContent =
-            puntajes.viejitos_cracks;
+function aplicarPuntajeEnVivo(jugadorId, equipo, puntaje, desafio, pregunta) {
 
+    if (!equipo || !Object.prototype.hasOwnProperty.call(estadoJuego.puntajesVivos, equipo)) {
+        return;
     }
 
-    if (elementoNiFu) {
+    const clave = jugadorId + "-" + desafio + "-" + pregunta;
 
-        elementoNiFu.textContent =
-            puntajes.ni_fu_ni_fa;
-
+    if (estadoJuego.respuestasPuntajeProcesadas[clave]) {
+        return;
     }
 
-    if (elementoCabros) {
+    estadoJuego.respuestasPuntajeProcesadas[clave] = true;
+    estadoJuego.puntajesVivos[equipo] =
+        Number(estadoJuego.puntajesVivos[equipo] || 0) + Number(puntaje || 0);
 
-        elementoCabros.textContent =
-            puntajes.cabros_chicos;
-
-    }
-
-    const juegoViejitos =
-        document.getElementById(
-            "puntajeJuegoViejitos"
-        );
-
-    const juegoNiFu =
-        document.getElementById(
-            "puntajeJuegoNiFu"
-        );
-
-    const juegoCabros =
-        document.getElementById(
-            "puntajeJuegoCabros"
-        );
-
-    if (juegoViejitos) {
-
-        juegoViejitos.textContent =
-            puntajes.viejitos_cracks;
-
-    }
-
-    if (juegoNiFu) {
-
-        juegoNiFu.textContent =
-            puntajes.ni_fu_ni_fa;
-
-    }
-
-    if (juegoCabros) {
-
-        juegoCabros.textContent =
-            puntajes.cabros_chicos;
-
-    }
-
-    return puntajes;
-
+    actualizarPuntajes();
 }
 
 
@@ -3428,166 +3407,93 @@ async function prepararIntroDesafio(
     try {
 
         const desafio =
-            await obtenerDesafio(
-                numeroDesafio
-            );
+            await obtenerDesafio(numeroDesafio);
 
-        estadoJuego.desafioActual =
-            numeroDesafio;
+        estadoJuego.desafioActual = numeroDesafio;
+        estadoJuego.fase = "intro";
+        estadoJuego.introActiva = true;
+        estadoJuego.puntajesVivos = { viejitos_cracks: 0, ni_fu_ni_fa: 0, cabros_chicos: 0 };
+        estadoJuego.respuestasPuntajeProcesadas = {};
 
         /*
-         * Marcamos que la próxima actualización del servidor
-         * corresponde a la pregunta 1 después de la intro.
+         * Guardamos la marca de tiempo de la pregunta que
+         * provocó esta introducción. Cuando el anfitrión pulse
+         * COMENZAR, iniciar_pregunta cambiará esta marca y todos
+         * los jugadores podrán detectar el cambio.
          */
+        const { data: salaActual } =
+            await supabaseClient
+                .from("salas")
+                .select("inicio_pregunta, pregunta_actual, desafio_actual")
+                .eq("id", estadoJuego.salaId)
+                .single();
+
+        estadoJuego.introInicioPregunta =
+            salaActual?.inicio_pregunta || null;
+
         estadoJuego.ultimaClavePregunta =
             "intro-" + numeroDesafio;
 
-        estadoJuego.fase =
-            "intro";
+        mostrarPantalla("pantallaIntroDesafio");
 
-        estadoJuego.introActiva =
-            true;
-
-        mostrarPantalla(
-            "pantallaIntroDesafio"
-        );
-
-        const numero =
-            document.getElementById(
-                "introNumeroDesafio"
-            );
-
-        const nombre =
-            document.getElementById(
-                "introNombreDesafio"
-            );
-
-        const mensaje =
-            document.getElementById(
-                "introMensajeDesafio"
-            );
-
-        const cuenta =
-            document.getElementById(
-                "introCuentaRegresiva"
-            );
+        const numero = document.getElementById("introNumeroDesafio");
+        const nombre = document.getElementById("introNombreDesafio");
+        const mensaje = document.getElementById("introMensajeDesafio");
+        const cuenta = document.getElementById("introCuentaRegresiva");
+        const boton = document.getElementById("botonComenzarDesafio");
 
         if (numero) {
-
-            numero.textContent =
-                "DESAFÍO " +
-                numeroDesafio;
-
+            numero.textContent = "DESAFÍO " + numeroDesafio;
         }
 
         if (nombre) {
-
-            nombre.textContent =
-                desafio.nombre;
-
+            nombre.textContent = desafio.nombre;
         }
 
         if (mensaje) {
-
-            mensaje.textContent =
-                "Prepárense para responder las 10 preguntas.";
-
+            mensaje.textContent = soyAnfitrion
+                ? "Cuando todos estén preparados, presiona el botón para comenzar."
+                : "Esperando a que el anfitrión comience el desafío...";
         }
 
         if (cuenta) {
+            cuenta.textContent = "🇨🇱";
+        }
 
-            cuenta.textContent =
-                "3";
-
+        if (boton) {
+            boton.style.display = soyAnfitrion ? "inline-flex" : "none";
+            boton.disabled = false;
+            boton.textContent = "▶️ COMENZAR DESAFÍO " + numeroDesafio;
         }
 
         if (soyAnfitrion) {
-
-            await enviarBroadcast(
-                "intro_desafio",
-                {
-                    desafio:
-                        numeroDesafio
-                }
-            );
-
+            await enviarBroadcast("intro_desafio", {
+                desafio: numeroDesafio
+            });
         }
 
-        iniciarCuentaRegresivaIntro(
-            numeroDesafio,
-            soyAnfitrion
-        );
-
     }
-
     catch (error) {
 
-        console.error(
-            "Error preparando intro:",
-            error
-        );
+        console.error("Error preparando intro:", error);
 
         alert(
             "No se pudo cargar el desafío:\n\n" +
-            (
-                error.message ||
-                error
-            )
+            (error.message || error)
         );
 
     }
 
-}
-
-
-/* =========================================================
-   CUENTA REGRESIVA DE INTRO
-========================================================= */
-
-let temporizadorIntro = null;
-
-
-function iniciarCuentaRegresivaIntro(
-    numeroDesafio,
-    soyAnfitrion
-) {
-
-    if (temporizadorIntro) {
-        clearInterval(temporizadorIntro);
-        temporizadorIntro = null;
-    }
-
-    const cuenta =
-        document.getElementById(
-            "introCuentaRegresiva"
-        );
-
-    const boton =
-        document.getElementById(
-            "botonComenzarDesafio"
-        );
-
-    if (cuenta) {
-        cuenta.textContent = "3";
-    }
-
-    if (boton) {
-        boton.textContent =
-            "▶️ COMENZAR DESAFÍO " + numeroDesafio;
-        boton.disabled = false;
-        boton.style.display = "inline-flex";
-    }
 }
 
 
 async function comenzarDesafioDesdeIntro() {
 
-    if (!estadoJuego.salaId) {
+    if (!estadoJuego.salaId || !estadoJuego.jugadorId) {
         return;
     }
 
     if (!estadoJuego.esAnfitrion) {
-        alert("Solo el anfitrión puede comenzar el desafío.");
         return;
     }
 
@@ -3595,37 +3501,47 @@ async function comenzarDesafioDesdeIntro() {
         Number(estadoJuego.desafioActual) || 1;
 
     const boton =
-        document.getElementById(
-            "botonComenzarDesafio"
-        );
+        document.getElementById("botonComenzarDesafio");
 
     if (boton) {
         boton.disabled = true;
-        boton.textContent = "⏳ PREPARANDO...";
+        boton.textContent = "⏳ INICIANDO...";
     }
 
-    estadoJuego.introActiva = false;
-
     try {
+
+        estadoJuego.introActiva = false;
+        estadoJuego.fase = "jugando";
+
         await iniciarPreguntaServidor(
             numeroDesafio,
             1
         );
+
+        /*
+         * Cargamos inmediatamente la pregunta en el anfitrión.
+         * Los demás dispositivos la cargarán mediante Realtime.
+         */
+        await cargarPreguntaActual();
+
     }
     catch (error) {
-        console.error(
-            "Error comenzando desafío:",
-            error
-        );
+
+        console.error("Error comenzando desafío:", error);
+
+        estadoJuego.introActiva = true;
+        estadoJuego.fase = "intro";
 
         if (boton) {
             boton.disabled = false;
             boton.textContent =
-                "▶️ COMENZAR DESAFÍO " +
-                numeroDesafio;
+                "▶️ COMENZAR DESAFÍO " + numeroDesafio;
         }
+
     }
+
 }
+
 
 /* =========================================================
    INICIAR PREGUNTA EN SERVIDOR
@@ -3784,6 +3700,25 @@ function iniciarRealtime() {
                         false
                     );
 
+                }
+            )
+
+            .on(
+                "broadcast",
+                {
+                    event:
+                        "respuesta_puntaje"
+                },
+                async payload => {
+                    const datos = payload?.payload;
+                    if (!datos) return;
+                    aplicarPuntajeEnVivo(
+                        datos.jugadorId,
+                        datos.equipo,
+                        datos.puntaje,
+                        Number(datos.desafio) || 1,
+                        Number(datos.pregunta) || 1
+                    );
                 }
             )
 
@@ -3960,111 +3895,56 @@ async function procesarCambioSala(
     if (
         estadoJuego.salaId &&
         registro.id &&
-        registro.id !==
-            estadoJuego.salaId
+        registro.id !== estadoJuego.salaId
     ) {
         return;
     }
 
     if (registro.codigo) {
-
-        estadoJuego.codigoSala =
-            registro.codigo;
-
+        estadoJuego.codigoSala = registro.codigo;
         actualizarCodigoSala();
-
     }
 
-    if (
-        registro.estado ===
-        "jugando"
-    ) {
-
-        estadoJuego.partidaIniciada =
-            true;
-
-        const desafio =
-            Number(
-                registro.desafio_actual
-            ) || 1;
-
-        const pregunta =
-            Number(
-                registro.pregunta_actual
-            ) || 1;
-
-        estadoJuego.desafioActual =
-            desafio;
-
-        /*
-         * Si estamos mostrando la introducción,
-         * no cargamos todavía la pregunta.
-         */
-        if (
-            estadoJuego.introActiva
-        ) {
-
-            return;
-
-        }
-
-        /*
-         * La primera activación de la partida
-         * muestra la introducción antes de P1.
-         */
-        if (
-            estadoJuego.ultimaClavePregunta ===
-            null &&
-            pregunta === 1
-        ) {
-
-            estadoJuego.ultimaClavePregunta =
-                "intro-" + desafio;
-
-            await prepararIntroDesafio(
-                desafio,
-                false
-            );
-
-            return;
-
-        }
-
-        const clave =
-            desafio +
-            "-" +
-            pregunta +
-            "-" +
-            (
-                registro.inicio_pregunta ||
-                ""
-            );
-
-        if (
-            estadoJuego.ultimaClavePregunta ===
-            clave
-        ) {
-
-            return;
-
-        }
-
-        estadoJuego.ultimaClavePregunta =
-            clave;
-
-        estadoJuego.fase =
-            "jugando";
-
-        mostrarPantalla(
-            "pantallaJuego"
-        );
-
-        await cargarPreguntaActual();
-
+    if (registro.estado !== "jugando") {
         return;
-
     }
 
+    estadoJuego.partidaIniciada = true;
+
+    const desafio = Number(registro.desafio_actual) || 1;
+    const pregunta = Number(registro.pregunta_actual) || 1;
+    const inicioServidor = registro.inicio_pregunta || null;
+
+    estadoJuego.desafioActual = desafio;
+
+    /*
+     * Si estamos en la intro y el servidor todavía conserva
+     * exactamente el mismo inicio_pregunta, no hacemos nada.
+     * Cuando el anfitrión pulse COMENZAR, iniciar_pregunta
+     * genera una nueva marca de tiempo y entonces todos entran.
+     */
+    if (
+        estadoJuego.introActiva &&
+        estadoJuego.introInicioPregunta === inicioServidor
+    ) {
+        return;
+    }
+
+    estadoJuego.introActiva = false;
+    estadoJuego.introInicioPregunta = inicioServidor;
+
+    const clave =
+        desafio + "-" + pregunta + "-" + (inicioServidor || "");
+
+    if (estadoJuego.ultimaClavePregunta === clave) {
+        return;
+    }
+
+    estadoJuego.ultimaClavePregunta = clave;
+    estadoJuego.fase = "jugando";
+
+    mostrarPantalla("pantallaJuego");
+    await cargarPreguntaActual();
 }
 
 
@@ -4822,6 +4702,30 @@ async function responderPregunta(
         estadoJuego.resultadoRespuesta =
             resultado;
 
+        const equipoRespuesta = estadoJuego.equipo;
+        const puntajeRespuesta = Number(resultado?.puntaje_obtenido || 0);
+        const desafioRespuesta = Number(estadoJuego.desafioActual) || 1;
+        const preguntaRespuesta = Number(estadoJuego.preguntaActual?.numero) || 1;
+
+        aplicarPuntajeEnVivo(
+            estadoJuego.jugadorId,
+            equipoRespuesta,
+            puntajeRespuesta,
+            desafioRespuesta,
+            preguntaRespuesta
+        );
+
+        await enviarBroadcast(
+            "respuesta_puntaje",
+            {
+                jugadorId: estadoJuego.jugadorId,
+                equipo: equipoRespuesta,
+                puntaje: puntajeRespuesta,
+                desafio: desafioRespuesta,
+                pregunta: preguntaRespuesta
+            }
+        );
+
         await marcarJugadorListo(
             true,
             "respondido"
@@ -5154,58 +5058,28 @@ async function comprobarAvanceActual() {
         return;
     }
 
-    if (
-        estadoJuego.fase !==
-        "jugando"
-    ) {
+    if (estadoJuego.fase !== "jugando") {
         return;
     }
 
-    const jugadores =
-        await obtenerJugadoresConectados();
+    const jugadores = await obtenerJugadoresConectados();
 
     if (!jugadores.length) {
         return;
     }
 
-    const todosListos =
-        jugadores.every(
-            jugador =>
-                jugador.listo_avanzar ===
-                true
-        );
+    const todosListos = jugadores.every(
+        jugador => jugador.listo_avanzar === true
+    );
 
     if (!todosListos) {
-
         return;
-
     }
 
-    const desafio =
-        Number(
-            estadoJuego.desafioActual
-        ) || 1;
+    const desafio = Number(estadoJuego.desafioActual) || 1;
+    const pregunta = Number(estadoJuego.preguntaActual?.numero) || 1;
 
-    const pregunta =
-        Number(
-            estadoJuego.preguntaActual?.numero
-        ) || 1;
-
-    /*
-     * P1-P9:
-     * avanzamos directamente a la siguiente
-     * pregunta del mismo desafío.
-     */
-    if (
-        pregunta < 10
-    ) {
-
-        console.log(
-            "Todos respondieron. Avanzando a P" +
-            (
-                pregunta + 1
-            )
-        );
+    if (pregunta < 10) {
 
         await iniciarPreguntaServidor(
             desafio,
@@ -5213,21 +5087,10 @@ async function comprobarAvanceActual() {
         );
 
         return;
-
     }
 
-    /*
-     * P10:
-     * termina el desafío y se generan
-     * sus resultados.
-     */
-    await finalizarDesafio(
-        desafio
-    );
-
+    await finalizarDesafio(desafio);
 }
-
-
 
 
 async function iniciarPreguntaServidor(
@@ -5239,55 +5102,30 @@ async function iniciarPreguntaServidor(
         return;
     }
 
-    try {
-
-        const {
-            data,
-            error
-        } =
-            await supabaseClient
-                .rpc(
-                    "iniciar_pregunta",
-                    {
-                        p_sala_id:
-                            estadoJuego.salaId,
-
-                        p_desafio:
-                            numeroDesafio,
-
-                        p_pregunta:
-                            numeroPregunta
-                    }
-                );
-
-        if (error) {
-            throw error;
-        }
-
-        console.log(
-            "Siguiente pregunta iniciada:",
-            data
-        );
-
+    if (!estadoJuego.salaId) {
+        return;
     }
 
-    catch (error) {
+    const {
+        data,
+        error
+    } = await supabaseClient
+        .rpc("iniciar_pregunta", {
+            p_sala_id: estadoJuego.salaId,
+            p_desafio: numeroDesafio,
+            p_pregunta: numeroPregunta
+        });
 
-        console.error(
-            "Error iniciando siguiente pregunta:",
-            error
-        );
-
-        alert(
-            "No se pudo avanzar a la siguiente pregunta:\n\n" +
-            (
-                error.message ||
-                error
-            )
-        );
-
+    if (error) {
+        console.error("Error iniciando pregunta:", error);
+        throw error;
     }
 
+    console.log("Pregunta iniciada:", data);
+
+    estadoJuego.introActiva = false;
+    estadoJuego.fase = "jugando";
+    estadoJuego.desafioActual = Number(numeroDesafio);
 }
 
 
@@ -5929,9 +5767,9 @@ async function comprobarTodosListosParaSiguiente(
         );
 
         /*
-         * La función iniciar_pregunta()
-         * se ejecutará automáticamente después
-         * de la cuenta regresiva del anfitrión.
+         * La pregunta NO se inicia automáticamente.
+         * El anfitrión deberá pulsar COMENZAR DESAFÍO
+         * en la pantalla de introducción.
          */
 
     }
