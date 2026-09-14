@@ -6,681 +6,1142 @@
 
 <title>La Copa del 18 🇨🇱</title>
 
-<!-- =========================================================
-     SUPABASE
-========================================================= -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
 <style>
 
 :root {
-    --azul: #0039A6;
-    --azul-oscuro: #001F5B;
-    --rojo: #D52B1E;
-    --blanco: #FFFFFF;
-    --gris: #F3F5F8;
-    --gris-texto: #5C6675;
-    --verde: #1E9E5A;
-    --amarillo: #F4C542;
-    --sombra: 0 10px 30px rgba(0,0,0,.12);
-    --radio: 20px;
+    --rojo: #d62828;
+    --rojo-oscuro: #a4161a;
+    --azul: #12355b;
+    --azul-claro: #1d5d9b;
+    --amarillo: #f2c94c;
+    --verde: #16803c;
+    --blanco: #ffffff;
+    --gris: #f3f5f7;
+    --texto: #20252b;
+    --borde: #dfe5eb;
 }
 
 * {
     box-sizing: border-box;
-    margin: 0;
-    padding: 0;
 }
 
 body {
-    font-family: Arial, Helvetica, sans-serif;
+    margin: 0;
+    min-height: 100vh;
+    padding: 20px;
+
+    font-family:
+        Arial,
+        Helvetica,
+        sans-serif;
+
+    color: var(--texto);
+
     background:
         linear-gradient(
             135deg,
-            rgba(0,57,166,.08),
-            rgba(255,255,255,.95),
-            rgba(213,43,30,.08)
+            #d62828 0%,
+            #d62828 33%,
+            #ffffff 33%,
+            #ffffff 66%,
+            #12355b 66%,
+            #12355b 100%
         );
-    color: #18202A;
-    min-height: 100vh;
-}
 
-/* =========================================================
-   FONDO
-========================================================= */
-
-body::before {
-    content: "";
-    position: fixed;
-    inset: 0;
-    pointer-events: none;
-    opacity: .08;
-    background-image:
-        radial-gradient(circle at 20% 20%, #0039A6 2px, transparent 3px),
-        radial-gradient(circle at 80% 70%, #D52B1E 2px, transparent 3px);
-    background-size: 70px 70px;
-}
-
-/* =========================================================
-   CONTENEDOR
-========================================================= */
-
-.app {
-    width: 100%;
-    min-height: 100vh;
-    padding: 20px;
     display: flex;
     justify-content: center;
     align-items: center;
 }
 
-.container {
+.app {
     width: 100%;
-    max-width: 1100px;
-    margin: auto;
-}
+    max-width: 1000px;
+    min-height: 650px;
 
-/* =========================================================
-   TARJETA PRINCIPAL
-========================================================= */
-
-.card {
-    background: rgba(255,255,255,.97);
-    border-radius: var(--radio);
-    box-shadow: var(--sombra);
-    padding: 35px;
-    position: relative;
     overflow: hidden;
+
+    background: rgba(255,255,255,0.98);
+
+    border-radius: 26px;
+
+    box-shadow:
+        0 20px 60px rgba(0,0,0,0.25);
 }
 
-.card::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 7px;
-    background: linear-gradient(
-        90deg,
-        var(--azul) 0%,
-        var(--azul) 50%,
-        var(--blanco) 50%,
-        var(--blanco) 66%,
-        var(--rojo) 66%,
-        var(--rojo) 100%
-    );
+.pantalla {
+    display: none;
+
+    min-height: 650px;
+
+    padding: 35px;
 }
+
+.pantalla.activa {
+    display: flex;
+    flex-direction: column;
+}
+
 
 /* =========================================================
-   PORTADA
+   INICIO
 ========================================================= */
 
-.logo {
+.inicio {
+    justify-content: center;
+    align-items: center;
     text-align: center;
-    margin-bottom: 25px;
 }
 
 .bandera {
-    font-size: 55px;
-    margin-bottom: 10px;
+    display: flex;
+
+    width: 210px;
+    height: 18px;
+
+    overflow: hidden;
+
+    margin-bottom: 25px;
+
+    border-radius: 20px;
 }
 
-.logo h1 {
-    color: var(--azul-oscuro);
-    font-size: clamp(32px, 6vw, 58px);
+.bandera span {
+    flex: 1;
+}
+
+.bandera .rojo {
+    background: var(--rojo);
+}
+
+.bandera .blanco {
+    background: white;
+
+    border-top: 1px solid #ddd;
+    border-bottom: 1px solid #ddd;
+}
+
+.bandera .azul {
+    background: var(--azul);
+}
+
+.escudo {
+    width: 110px;
+    height: 110px;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    margin-bottom: 20px;
+
+    border: 8px solid var(--azul);
+    border-radius: 50%;
+
+    background: var(--rojo);
+
+    font-size: 48px;
+}
+
+h1 {
+    margin: 0;
+
+    color: var(--azul);
+
+    font-size:
+        clamp(2.3rem, 7vw, 4.5rem);
+
     font-weight: 900;
+
     line-height: 1;
 }
 
-.logo h1 span {
-    color: var(--rojo);
-}
-
 .subtitulo {
-    margin-top: 12px;
-    font-size: 18px;
-    color: var(--gris-texto);
-    font-weight: 600;
+    margin: 15px 0 8px;
+
+    color: var(--rojo);
+
+    font-size:
+        clamp(1.2rem, 3vw, 2rem);
+
+    font-weight: 800;
 }
 
 .frase {
-    text-align: center;
-    margin: 25px auto;
-    font-size: 22px;
-    font-weight: 800;
-    color: var(--azul);
+    margin: 0 0 35px;
+
+    color: #555;
 }
+
+
+/* =========================================================
+   ENCABEZADOS
+========================================================= */
+
+.encabezado {
+    margin-bottom: 25px;
+
+    text-align: center;
+}
+
+.encabezado h2 {
+    margin: 0 0 8px;
+
+    color: var(--azul);
+
+    font-size: 2rem;
+}
+
+.encabezado p {
+    margin: 0;
+
+    color: #666;
+}
+
+.contenido {
+    width: 100%;
+    max-width: 750px;
+
+    margin: 0 auto;
+}
+
 
 /* =========================================================
    BOTONES
 ========================================================= */
 
-.btn {
+.boton {
     border: none;
+
     border-radius: 14px;
-    padding: 16px 24px;
-    font-size: 17px;
+
+    padding: 15px 25px;
+
+    font-size: 1rem;
     font-weight: 800;
+
     cursor: pointer;
-    transition: .2s ease;
-    width: 100%;
-    margin-top: 12px;
+
+    transition: 0.2s;
 }
 
-.btn:hover {
+.boton:hover {
     transform: translateY(-2px);
+
+    box-shadow:
+        0 7px 18px rgba(0,0,0,0.15);
 }
 
-.btn:active {
-    transform: scale(.98);
-}
+.boton:disabled {
+    opacity: 0.45;
 
-.btn-primary {
-    background: var(--azul);
-    color: white;
-}
-
-.btn-primary:hover {
-    background: var(--azul-oscuro);
-}
-
-.btn-red {
-    background: var(--rojo);
-    color: white;
-}
-
-.btn-secondary {
-    background: #E9EDF3;
-    color: #18202A;
-}
-
-.btn-success {
-    background: var(--verde);
-    color: white;
-}
-
-.btn:disabled {
-    opacity: .45;
     cursor: not-allowed;
+
     transform: none;
+
+    box-shadow: none;
 }
+
+.principal {
+    color: white;
+
+    background: var(--rojo);
+}
+
+.secundario {
+    color: var(--azul);
+
+    background: #e7edf4;
+}
+
+.verde {
+    color: white;
+
+    background: var(--verde);
+}
+
 
 /* =========================================================
-   OPCIONES INICIO
+   BUSCADOR
 ========================================================= */
 
-.home-buttons {
-    max-width: 500px;
-    margin: 30px auto 0;
-}
-
-/* =========================================================
-   FORMULARIOS
-========================================================= */
-
-.form-group {
-    margin-bottom: 18px;
-}
-
-.form-group label {
-    display: block;
-    margin-bottom: 8px;
-    font-weight: 800;
-    color: var(--azul-oscuro);
-}
-
-.form-group input {
+.buscador {
     width: 100%;
-    border: 2px solid #DDE2EA;
-    border-radius: 12px;
-    padding: 14px 16px;
-    font-size: 17px;
+
+    margin-bottom: 18px;
+
+    padding: 16px;
+
+    border:
+        2px solid var(--borde);
+
+    border-radius: 14px;
+
+    font-size: 1rem;
+
     outline: none;
-    transition: .2s;
 }
 
-.form-group input:focus {
-    border-color: var(--azul);
-    box-shadow: 0 0 0 3px rgba(0,57,166,.1);
+.buscador:focus {
+    border-color:
+        var(--azul-claro);
 }
 
-.form-title {
-    text-align: center;
-    font-size: 28px;
-    font-weight: 900;
-    color: var(--azul-oscuro);
-    margin-bottom: 25px;
-}
 
 /* =========================================================
-   PANTALLAS
+   JUGADORES
 ========================================================= */
 
-.screen {
-    display: none;
+.lista-jugadores {
+    display: grid;
+
+    grid-template-columns:
+        repeat(
+            2,
+            minmax(0,1fr)
+        );
+
+    gap: 12px;
+
+    max-height: 340px;
+
+    overflow-y: auto;
+
+    padding: 3px;
 }
 
-.screen.active {
-    display: block;
-}
+.jugador {
+    display: flex;
 
-/* =========================================================
-   MENSAJES
-========================================================= */
+    align-items: center;
 
-.message {
-    margin-top: 18px;
+    gap: 12px;
+
     padding: 14px;
-    border-radius: 12px;
+
+    border:
+        2px solid var(--borde);
+
+    border-radius: 14px;
+
+    background: white;
+
+    text-align: left;
+
+    cursor: pointer;
+}
+
+.jugador:hover {
+    border-color:
+        var(--azul-claro);
+
+    background: #f5f9ff;
+}
+
+.jugador.seleccionado {
+    border-color:
+        var(--verde);
+
+    background: #edfff3;
+}
+
+.avatar {
+    width: 42px;
+    height: 42px;
+
+    flex-shrink: 0;
+
+    display: flex;
+
+    justify-content: center;
+    align-items: center;
+
+    border-radius: 50%;
+
+    color: white;
+
+    background:
+        var(--azul);
+
+    font-size: 0.85rem;
+
+    font-weight: 900;
+}
+
+.jugador-info strong {
+    display: block;
+
+    font-size: 0.95rem;
+}
+
+.jugador-info small {
+    display: block;
+
+    margin-top: 4px;
+
+    color: #777;
+
+    font-size: 0.75rem;
+}
+
+
+/* =========================================================
+   ACCIONES
+========================================================= */
+
+.acciones {
+    display: flex;
+
+    justify-content: center;
+
+    gap: 12px;
+
+    flex-wrap: wrap;
+
+    margin-top: 25px;
+}
+
+
+/* =========================================================
+   TARJETA CONFIRMACIÓN
+========================================================= */
+
+.tarjeta {
+    width: 100%;
+
+    max-width: 560px;
+
+    margin: 0 auto;
+
+    padding: 30px;
+
+    border:
+        2px solid var(--borde);
+
+    border-radius: 22px;
+
+    background:
+        linear-gradient(
+            135deg,
+            #f8fbff,
+            #edf2f7
+        );
+
     text-align: center;
-    font-weight: 700;
-    display: none;
 }
 
-.message.error {
-    display: block;
-    background: #FDECEC;
-    color: #A82020;
+.avatar-grande {
+    width: 85px;
+    height: 85px;
+
+    display: flex;
+
+    justify-content: center;
+    align-items: center;
+
+    margin:
+        0 auto 15px;
+
+    border-radius: 50%;
+
+    color: white;
+
+    background:
+        var(--azul);
+
+    font-size: 1.8rem;
+
+    font-weight: 900;
 }
 
-.message.success {
-    display: block;
-    background: #E8F7EF;
-    color: #167541;
+.tarjeta h3 {
+    margin: 0 0 12px;
+
+    color: var(--azul);
+
+    font-size: 1.7rem;
 }
 
-.message.info {
-    display: block;
-    background: #EAF1FF;
-    color: var(--azul-oscuro);
+.etiqueta {
+    display: inline-block;
+
+    padding: 8px 15px;
+
+    border-radius: 30px;
+
+    color: white;
+
+    font-size: 0.9rem;
+
+    font-weight: 800;
 }
+
+.etiqueta-viejitos {
+    background:
+        var(--rojo);
+}
+
+.etiqueta-ni-fu {
+    background:
+        var(--amarillo);
+
+    color:
+        #5b4800;
+}
+
+.etiqueta-cabros {
+    background:
+        var(--azul);
+}
+
 
 /* =========================================================
    SALA
 ========================================================= */
 
-.room-code {
-    text-align: center;
-    margin: 20px 0;
-    padding: 20px;
-    background: var(--azul-oscuro);
-    color: white;
-    border-radius: 16px;
+.sala {
+    background:
+        radial-gradient(
+            circle at top left,
+            #fff1f1,
+            transparent 35%
+        ),
+
+        radial-gradient(
+            circle at bottom right,
+            #eaf2ff,
+            transparent 35%
+        ),
+
+        white;
 }
 
-.room-code small {
-    display: block;
-    font-size: 13px;
-    opacity: .8;
-    margin-bottom: 5px;
-}
+.sala-cabecera {
+    display: flex;
 
-.room-code strong {
-    font-size: 42px;
-    letter-spacing: 8px;
-}
+    justify-content:
+        space-between;
 
-/* =========================================================
-   DESAFÍOS
-========================================================= */
+    align-items:
+        center;
 
-.challenge-header {
-    text-align: center;
+    gap: 15px;
+
+    flex-wrap: wrap;
+
     margin-bottom: 25px;
 }
 
-.challenge-number {
-    display: inline-block;
-    background: var(--rojo);
-    color: white;
-    padding: 7px 15px;
-    border-radius: 20px;
-    font-weight: 800;
-    font-size: 14px;
+.sala-cabecera h2 {
+    margin: 0;
+
+    color: var(--azul);
+
+    font-size: 2rem;
 }
 
-.challenge-header h2 {
-    margin-top: 12px;
-    color: var(--azul-oscuro);
-    font-size: 32px;
+.codigo {
+    padding: 10px 16px;
+
+    border-radius: 12px;
+
+    color: white;
+
+    background:
+        var(--azul);
+
+    font-weight: 900;
+
+    letter-spacing: 2px;
 }
+
+.estado-conexion {
+    margin-bottom: 25px;
+
+    padding: 12px;
+
+    border-radius: 12px;
+
+    background:
+        #edfff3;
+
+    color:
+        var(--verde);
+
+    text-align: center;
+
+    font-weight: 700;
+}
+
+.mensaje {
+    text-align: center;
+
+    margin-bottom: 25px;
+}
+
+.mensaje .icono {
+    font-size: 3.5rem;
+}
+
+.mensaje h3 {
+    margin: 8px 0;
+
+    color:
+        var(--azul);
+
+    font-size: 1.7rem;
+}
+
+.mensaje p {
+    margin: 0;
+
+    color: #666;
+}
+
+
+/* =========================================================
+   EQUIPOS
+========================================================= */
+
+.equipos {
+    display: grid;
+
+    grid-template-columns:
+        repeat(
+            3,
+            minmax(0,1fr)
+        );
+
+    gap: 15px;
+
+    margin-bottom: 25px;
+}
+
+.team-card {
+    padding: 18px;
+
+    border-radius: 18px;
+
+    background: white;
+
+    border:
+        2px solid var(--borde);
+}
+
+.team-card.viejitos {
+    border-color:
+        var(--rojo);
+}
+
+.team-card.nifu {
+    border-color:
+        var(--amarillo);
+}
+
+.team-card.cabros {
+    border-color:
+        var(--azul);
+}
+
+.team-title {
+    margin-bottom: 12px;
+
+    font-weight: 900;
+
+    text-align: center;
+}
+
+.team-player {
+    padding: 8px 0;
+
+    border-bottom:
+        1px solid #eee;
+
+    font-size: 0.9rem;
+}
+
+.team-player:last-child {
+    border-bottom: none;
+}
+
+.connection-dot {
+    margin-right: 5px;
+}
+
+.host-badge {
+    display: inline-block;
+
+    margin-left: 5px;
+
+    padding: 3px 7px;
+
+    border-radius: 8px;
+
+    color: white;
+
+    background:
+        var(--verde);
+
+    font-size: 0.65rem;
+
+    font-weight: 900;
+}
+
+
+/* =========================================================
+   MARCADORES
+========================================================= */
+
+.marcadores {
+    display: grid;
+
+    grid-template-columns:
+        repeat(
+            3,
+            minmax(0,1fr)
+        );
+
+    gap: 15px;
+
+    margin-bottom: 25px;
+}
+
+.marcador {
+    position: relative;
+
+    overflow: hidden;
+
+    padding: 22px;
+
+    border-radius: 20px;
+
+    color: white;
+
+    text-align: center;
+}
+
+.marcador.viejitos {
+    background:
+        linear-gradient(
+            135deg,
+            #d62828,
+            #a4161a
+        );
+}
+
+.marcador.nifu {
+    color: #5b4800;
+
+    background:
+        linear-gradient(
+            135deg,
+            #ffe58a,
+            #f2c94c
+        );
+}
+
+.marcador.cabros {
+    background:
+        linear-gradient(
+            135deg,
+            #12355b,
+            #1d5d9b
+        );
+}
+
+.marcador h3 {
+    margin: 0 0 12px;
+
+    font-size: 1rem;
+}
+
+.puntaje {
+    font-size: 2.7rem;
+
+    font-weight: 900;
+}
+
+
+/* =========================================================
+   LISTADO SALA
+========================================================= */
+
+.lista-sala {
+    display: grid;
+
+    grid-template-columns:
+        repeat(
+            3,
+            minmax(0,1fr)
+        );
+
+    gap: 15px;
+
+    margin-top: 25px;
+}
+
+.grupo {
+    padding: 18px;
+
+    border:
+        1px solid var(--borde);
+
+    border-radius: 16px;
+
+    background: white;
+}
+
+.grupo h4 {
+    margin: 0 0 12px;
+
+    color:
+        var(--azul);
+}
+
+.grupo ul {
+    margin: 0;
+
+    padding-left: 20px;
+}
+
+.grupo li {
+    margin-bottom: 6px;
+
+    font-size: 0.9rem;
+}
+
+.nota {
+    margin-top: 20px;
+
+    color: #777;
+
+    text-align: center;
+
+    font-size: 0.85rem;
+}
+
+
+/* =========================================================
+   JUEGO
+========================================================= */
+
+.pregunta-tarjeta {
+    width: 100%;
+
+    max-width: 700px;
+
+    margin: 0 auto;
+
+    padding: 28px;
+
+    border:
+        2px solid var(--borde);
+
+    border-radius: 22px;
+
+    background:
+        linear-gradient(
+            135deg,
+            #f8fbff,
+            #edf2f7
+        );
+
+    text-align: center;
+}
+
+.contador {
+    display: inline-block;
+
+    margin-bottom: 18px;
+
+    padding: 10px 18px;
+
+    border-radius: 30px;
+
+    color: white;
+
+    background:
+        var(--rojo);
+
+    font-size: 1.2rem;
+
+    font-weight: 900;
+}
+
+.pregunta-tarjeta h3 {
+    margin: 0 0 25px;
+
+    color:
+        var(--azul);
+
+    font-size:
+        clamp(
+            1.3rem,
+            3vw,
+            2rem
+        );
+}
+
+.alternativas {
+    display: grid;
+
+    grid-template-columns:
+        repeat(
+            2,
+            minmax(0,1fr)
+        );
+
+    gap: 14px;
+}
+
+.alternativa {
+    border:
+        2px solid var(--borde);
+
+    border-radius: 14px;
+
+    padding: 16px;
+
+    color:
+        var(--azul);
+
+    background: white;
+
+    font-size: 1rem;
+
+    font-weight: 800;
+
+    cursor: pointer;
+
+    transition: 0.2s;
+}
+
+.alternativa:hover {
+    border-color:
+        var(--azul-claro);
+
+    background:
+        #f5f9ff;
+
+    transform:
+        translateY(-2px);
+}
+
+.alternativa.correcta {
+    border-color:
+        var(--verde);
+
+    color:
+        var(--verde);
+
+    background:
+        #edfff3;
+}
+
+.alternativa.incorrecta {
+    border-color:
+        var(--rojo);
+
+    color:
+        var(--rojo);
+
+    background:
+        #fff0f0;
+}
+
+.alternativa:disabled {
+    cursor:
+        not-allowed;
+
+    opacity:
+        0.75;
+}
+
+.mensaje-respuesta {
+    min-height: 28px;
+
+    margin-top: 20px;
+
+    font-weight: 800;
+
+    text-align: center;
+}
+
+.mensaje-respuesta.correcto {
+    color:
+        var(--verde);
+}
+
+.mensaje-respuesta.incorrecto {
+    color:
+        var(--rojo);
+}
+
 
 /* =========================================================
    RESPONSIVE
 ========================================================= */
 
-@media (max-width: 700px) {
-
-    .app {
-        padding: 10px;
-    }
-
-    .card {
-        padding: 25px 18px;
-        border-radius: 16px;
-    }
-
-    .bandera {
-        font-size: 42px;
-    }
-
-    .logo h1 {
-        font-size: 38px;
-    }
-
-    .subtitulo {
-        font-size: 16px;
-    }
-
-    .frase {
-        font-size: 19px;
-    }
-
-    .room-code strong {
-        font-size: 32px;
-        letter-spacing: 5px;
-    }
-
-    .challenge-header h2 {
-        font-size: 26px;
-    }
-}
-
-/* =========================================================
-   PARTE 2 - ESTILOS DEL LOBBY
-========================================================= */
-
-.lobby-top {
-    text-align: center;
-    margin-bottom: 25px;
-}
-
-.lobby-top h2 {
-    color: var(--azul-oscuro);
-    font-size: 30px;
-    margin-bottom: 8px;
-}
-
-.lobby-subtitle {
-    color: var(--gris-texto);
-    font-weight: 600;
-}
-
-.lobby-stats {
-    display: flex;
-    justify-content: center;
-    gap: 12px;
-    flex-wrap: wrap;
-    margin: 20px 0;
-}
-
-.lobby-stat {
-    background: #F3F5F8;
-    border-radius: 14px;
-    padding: 12px 20px;
-    min-width: 130px;
-    text-align: center;
-}
-
-.lobby-stat-number {
-    display: block;
-    font-size: 25px;
-    font-weight: 900;
-    color: var(--azul);
-}
-
-.lobby-stat-label {
-    font-size: 12px;
-    color: var(--gris-texto);
-    font-weight: 700;
-    text-transform: uppercase;
-}
-
-/* EQUIPOS */
-
-.teams-container {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 15px;
-    margin-top: 25px;
-}
-
-.team-card {
-    border-radius: 18px;
-    padding: 18px;
-    min-height: 180px;
-}
-
-.team-card.viejitos {
-    background: #FFF0EE;
-    border: 2px solid rgba(213,43,30,.25);
-}
-
-.team-card.nifu {
-    background: #FFF9DD;
-    border: 2px solid rgba(244,197,66,.45);
-}
-
-.team-card.cabros {
-    background: #EEF4FF;
-    border: 2px solid rgba(0,57,166,.22);
-}
-
-.team-title {
-    font-size: 17px;
-    font-weight: 900;
-    margin-bottom: 15px;
-}
-
-.team-card.viejitos .team-title {
-    color: var(--rojo);
-}
-
-.team-card.nifu .team-title {
-    color: #9A7900;
-}
-
-.team-card.cabros .team-title {
-    color: var(--azul);
-}
-
-.team-player {
-    background: rgba(255,255,255,.8);
-    border-radius: 10px;
-    padding: 9px 11px;
-    margin-top: 7px;
-    font-weight: 700;
-    font-size: 14px;
-}
-
-.host-badge {
-    display: inline-block;
-    background: var(--azul-oscuro);
-    color: white;
-    border-radius: 8px;
-    padding: 3px 7px;
-    font-size: 10px;
-    margin-left: 5px;
-    vertical-align: middle;
-}
-
-.connection-dot {
-    font-size: 11px;
-    margin-right: 4px;
-}
-
-/* JUGADORES ESPERANDO */
-
-.waiting-players {
-    margin-top: 20px;
-}
-
-.waiting-title {
-    font-size: 16px;
-    font-weight: 900;
-    color: var(--azul-oscuro);
-    margin-bottom: 10px;
-}
-
-.waiting-player {
-    background: #F3F5F8;
-    border-radius: 10px;
-    padding: 10px 12px;
-    margin-top: 7px;
-    font-size: 14px;
-    font-weight: 700;
-}
-
-/* PANEL DEL ANFITRIÓN */
-
-.host-panel {
-    margin-top: 25px;
-    padding: 20px;
-    border-radius: 16px;
-    background: #F5F8FF;
-    border: 1px solid #DDE7FF;
-    text-align: center;
-}
-
-.host-panel strong {
-    color: var(--azul-oscuro);
-}
-
-.host-warning {
-    margin-top: 10px;
-    color: var(--gris-texto);
-    font-size: 14px;
-    font-weight: 600;
-}
-
-/* RESPONSIVE */
-
 @media (max-width: 800px) {
 
-    .teams-container {
+    .equipos,
+    .marcadores,
+    .lista-sala {
         grid-template-columns: 1fr;
     }
 
-    .team-card {
-        min-height: auto;
+}
+
+@media (max-width: 650px) {
+
+    body {
+        padding: 10px;
+    }
+
+    .app {
+        border-radius: 18px;
+    }
+
+    .pantalla {
+        min-height: 680px;
+
+        padding:
+            24px 16px;
+    }
+
+    .lista-jugadores,
+    .alternativas {
+        grid-template-columns:
+            1fr;
+    }
+
+    .sala-cabecera {
+        justify-content:
+            center;
+
+        text-align:
+            center;
+    }
+
+    .sala-cabecera h2 {
+        width: 100%;
     }
 
 }
-     
+
 </style>
 </head>
 
 <body>
 
-<div class="app">
-<div class="container">
+<main class="app">
 
-<!-- =====================================================
-     PANTALLA INICIO
-===================================================== -->
 
-<section id="screen-home" class="screen active">
+<!-- =========================================================
+     INICIO
+========================================================= -->
 
-    <div class="card">
+<section
+    id="pantallaInicio"
+    class="pantalla activa inicio"
+>
 
-        <div class="logo">
+    <div class="bandera">
 
-            <div class="bandera">
-                🇨🇱
-            </div>
-
-            <h1>
-                La Copa <span>del 18</span>
-            </h1>
-
-            <div class="subtitulo">
-                Trivia, cultura y picardía chilena
-            </div>
-
-        </div>
-
-        <div class="frase">
-            ¡Que comience la competencia! 🎉
-        </div>
-
-        <div class="home-buttons">
-
-            <button
-                class="btn btn-primary"
-                onclick="mostrarPantalla('screen-create')">
-                🇨🇱 Crear una sala
-            </button>
-
-            <button
-                class="btn btn-red"
-                onclick="mostrarPantalla('screen-join')">
-                🚪 Unirse a una sala
-            </button>
-
-        </div>
+        <span class="rojo"></span>
+        <span class="blanco"></span>
+        <span class="azul"></span>
 
     </div>
+
+
+    <div class="escudo">
+        🇨🇱
+    </div>
+
+
+    <h1>
+        La Copa del 18
+    </h1>
+
+
+    <p class="subtitulo">
+        La gran competencia dieciochera
+    </p>
+
+
+    <p class="frase">
+        Tres equipos. Diez desafíos. Un solo campeón.
+    </p>
+
+
+    <button
+        class="boton principal"
+        onclick="mostrarSeleccion()"
+    >
+        Comenzar juego
+    </button>
 
 </section>
 
 
-<!-- =====================================================
-     CREAR SALA
-===================================================== -->
+<!-- =========================================================
+     SELECCIÓN
+========================================================= -->
 
-<section id="screen-create" class="screen">
+<section
+    id="pantallaSeleccion"
+    class="pantalla"
+>
 
-    <div class="card">
+    <div class="encabezado">
 
-        <div class="form-title">
-            🇨🇱 Crear una sala
-        </div>
+        <h2>
+            Selecciona tu nombre
+        </h2>
 
-        <div class="form-group">
+        <p>
+            Busca tu nombre y selecciona el jugador correcto.
+        </p>
 
-            <label for="create-name">
-                Tu nombre
-            </label>
+    </div>
 
-            <input
-                id="create-name"
-                type="text"
-                maxlength="40"
-                placeholder="Ej: Rodrigo">
 
-        </div>
+    <div class="contenido">
 
-        <div class="form-group">
+        <input
+            id="buscador"
+            class="buscador"
+            type="text"
+            placeholder="Escribe tu nombre..."
+            oninput="filtrarJugadores()"
+        >
 
-            <label for="create-birth">
-                Fecha de nacimiento
-            </label>
-
-            <input
-                id="create-birth"
-                type="date">
-
-        </div>
-
-        <button
-            class="btn btn-primary"
-            onclick="crearSala()">
-
-            Crear sala 🇨🇱
-
-        </button>
-
-        <button
-            class="btn btn-secondary"
-            onclick="mostrarPantalla('screen-home')">
-
-            Volver
-
-        </button>
 
         <div
-            id="create-message"
-            class="message">
+            id="listaJugadores"
+            class="lista-jugadores"
+        ></div>
+
+
+        <div class="acciones">
+
+            <button
+                class="boton secundario"
+                onclick="mostrarInicio()"
+            >
+                Volver
+            </button>
+
+
+            <button
+                id="botonContinuar"
+                class="boton principal"
+                onclick="mostrarConfirmacion()"
+                disabled
+            >
+                Continuar
+            </button>
+
         </div>
 
     </div>
@@ -688,219 +1149,376 @@ body::before {
 </section>
 
 
-<!-- =====================================================
-     UNIRSE
-===================================================== -->
+<!-- =========================================================
+     CONFIRMACIÓN
+========================================================= -->
 
-<section id="screen-join" class="screen">
+<section
+    id="pantallaConfirmacion"
+    class="pantalla"
+>
 
-    <div class="card">
+    <div class="encabezado">
 
-        <div class="form-title">
-            🚪 Unirse a una sala
-        </div>
+        <h2>
+            Confirma tu participación
+        </h2>
 
-        <div class="form-group">
+        <p>
+            Revisa tu nombre antes de entrar a la sala.
+        </p>
 
-            <label for="join-code">
-                Código de sala
-            </label>
+    </div>
 
-            <input
-                id="join-code"
-                type="text"
-                maxlength="6"
-                placeholder="Ej: ABC123"
-                style="text-transform:uppercase">
 
-        </div>
-
-        <div class="form-group">
-
-            <label for="join-name">
-                Tu nombre
-            </label>
-
-            <input
-                id="join-name"
-                type="text"
-                maxlength="40"
-                placeholder="Ej: Camila">
-
-        </div>
-
-        <div class="form-group">
-
-            <label for="join-birth">
-                Fecha de nacimiento
-            </label>
-
-            <input
-                id="join-birth"
-                type="date">
-
-        </div>
-
-        <button
-            class="btn btn-red"
-            onclick="unirseSala()">
-
-            Entrar a la sala 🇨🇱
-
-        </button>
-
-        <button
-            class="btn btn-secondary"
-            onclick="mostrarPantalla('screen-home')">
-
-            Volver
-
-        </button>
+    <div class="tarjeta">
 
         <div
-            id="join-message"
-            class="message">
+            id="avatarConfirmacion"
+            class="avatar-grande"
+        >
+            ?
         </div>
+
+
+        <h3 id="nombreConfirmacion">
+            Jugador
+        </h3>
+
+
+        <span
+            id="equipoConfirmacion"
+            class="etiqueta"
+        >
+            Equipo
+        </span>
+
+    </div>
+
+
+    <div class="acciones">
+
+        <button
+            class="boton secundario"
+            onclick="mostrarSeleccion()"
+        >
+            Cambiar jugador
+        </button>
+
+
+        <button
+            class="boton verde"
+            onclick="entrarSala()"
+        >
+            Confirmar participación
+        </button>
 
     </div>
 
 </section>
 
 
-<!-- =====================================================
-     SALA DE ESPERA
-===================================================== -->
+<!-- =========================================================
+     SALA
+========================================================= -->
 
-<section id="screen-lobby" class="screen">
+<section
+    id="pantallaSala"
+    class="pantalla sala"
+>
 
-    <div class="card">
+    <div class="sala-cabecera">
 
-        <div class="logo">
+        <h2>
+            Sala de espera
+        </h2>
 
-            <div class="bandera">🇨🇱</div>
-
-            <h1 style="font-size:38px">
-                Sala de espera
-            </h1>
-
-            <div class="subtitulo">
-                ¡Que se armen los equipos!
-            </div>
-
-        </div>
-
-        <div class="room-code">
-
-            <small>CÓDIGO DE LA SALA</small>
-
-            <strong id="lobby-code">
-                ------
-            </strong>
-
-        </div>
-
-        <div id="lobby-content">
-
-            <p style="
-                text-align:center;
-                color:#5C6675;
-                font-weight:700;
-                margin:20px 0;">
-                Esperando jugadores...
-            </p>
-
+        <div
+            id="codigoSala"
+            class="codigo"
+        >
+            SALA
         </div>
 
     </div>
 
-</section>
+
+    <div
+        id="estadoConexion"
+        class="estado-conexion"
+    >
+        Conectando con la partida...
+    </div>
 
 
-<!-- =====================================================
-     PARTIDA
-===================================================== -->
+    <div class="mensaje">
 
-<section id="screen-game" class="screen">
+        <div class="icono">
+            🎉
+        </div>
 
-    <div class="card">
+        <h3>
+            ¡Ya estás dentro!
+        </h3>
 
-        <div class="challenge-header">
+        <p>
+            Espera a que todos los participantes ingresen.
+            El anfitrión podrá iniciar la partida.
+        </p>
+
+    </div>
+
+
+    <div
+        id="contenedorEquipos"
+        class="equipos"
+    ></div>
+
+
+    <div class="marcadores">
+
+        <div class="marcador viejitos">
+
+            <h3>
+                🟥 Los Viejitos Cracks
+            </h3>
 
             <div
-                id="challenge-number"
-                class="challenge-number">
+                id="puntajeViejitos"
+                class="puntaje"
+            >
+                0
+            </div>
+
+            <div>
+                puntos
+            </div>
+
+        </div>
+
+
+        <div class="marcador nifu">
+
+            <h3>
+                🟨 Los Ni Fu Ni Fa
+            </h3>
+
+            <div
+                id="puntajeNiFu"
+                class="puntaje"
+            >
+                0
+            </div>
+
+            <div>
+                puntos
+            </div>
+
+        </div>
+
+
+        <div class="marcador cabros">
+
+            <h3>
+                🟦 Los Cabros Chicos
+            </h3>
+
+            <div
+                id="puntajeCabros"
+                class="puntaje"
+            >
+                0
+            </div>
+
+            <div>
+                puntos
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div
+        class="acciones"
+        id="accionesSala"
+    ></div>
+
+
+    <p class="nota">
+
+        Los jugadores que ingresen desde otros dispositivos
+        aparecerán automáticamente en esta sala.
+
+    </p>
+
+</section>
+
+
+<!-- =========================================================
+     JUEGO
+========================================================= -->
+
+<section
+    id="pantallaJuego"
+    class="pantalla sala"
+>
+
+    <div class="sala-cabecera">
+
+        <h2>
+            Desafío en curso
+        </h2>
+
+        <div class="codigo">
+
+            <span id="challenge-number">
                 DESAFÍO 1
+            </span>
+
+        </div>
+
+    </div>
+
+
+    <div
+        id="challenge-name"
+        style="
+            text-align:center;
+            margin-bottom:20px;
+            color:#12355b;
+            font-size:1.4rem;
+            font-weight:900;
+        "
+    >
+        Cultura general chilena
+    </div>
+
+
+    <div class="pregunta-tarjeta">
+
+        <div
+            id="tiempoPregunta"
+            class="contador"
+        >
+            30 segundos
+        </div>
+
+
+        <h3 id="textoPregunta">
+            Cargando pregunta...
+        </h3>
+
+
+        <div
+            id="contenedorImagenes"
+            style="
+                display:none;
+                gap:15px;
+                justify-content:center;
+                flex-wrap:wrap;
+                margin-bottom:20px;
+            "
+        ></div>
+
+
+        <div
+            id="contenedorVideo"
+            style="
+                display:none;
+                margin-bottom:20px;
+            "
+        ></div>
+
+
+        <div
+            id="alternativasPregunta"
+            class="alternativas"
+        ></div>
+
+
+        <div
+            id="mensajeRespuesta"
+            class="mensaje-respuesta"
+        ></div>
+
+    </div>
+
+
+    <div class="marcadores">
+
+        <div class="marcador viejitos">
+
+            <h3>
+                🟥 Los Viejitos Cracks
+            </h3>
+
+            <div
+                id="puntajeJuegoViejitos"
+                class="puntaje"
+            >
+                0
             </div>
 
-            <h2 id="challenge-name">
-                Chile, Chile Lindo
-            </h2>
-
         </div>
 
-        <div id="game-content">
 
-            <!-- Se completará en la siguiente parte -->
+        <div class="marcador nifu">
 
-        </div>
+            <h3>
+                🟨 Los Ni Fu Ni Fa
+            </h3>
 
-    </div>
-
-</section>
-
-
-<!-- =====================================================
-     RESULTADOS DESAFÍO
-===================================================== -->
-
-<section id="screen-results" class="screen">
-
-    <div class="card">
-
-        <div class="form-title">
-            🏆 Resultados
-        </div>
-
-        <div id="results-content">
-            <!-- Se completará -->
-        </div>
-
-    </div>
-
-</section>
-
-
-<!-- =====================================================
-     RESULTADO FINAL
-===================================================== -->
-
-<section id="screen-final" class="screen">
-
-    <div class="card">
-
-        <div class="logo">
-
-            <div class="bandera">
-                🇨🇱🏆🇨🇱
+            <div
+                id="puntajeJuegoNiFu"
+                class="puntaje"
+            >
+                0
             </div>
 
-            <h1 style="font-size:40px">
-                ¡Final de la Copa!
-            </h1>
+        </div>
+
+
+        <div class="marcador cabros">
+
+            <h3>
+                🟦 Los Cabros Chicos
+            </h3>
+
+            <div
+                id="puntajeJuegoCabros"
+                class="puntaje"
+            >
+                0
+            </div>
 
         </div>
 
-        <div id="final-content">
-            <!-- Se completará -->
-        </div>
+    </div>
+
+
+    <div class="acciones">
+
+        <button
+            class="boton secundario"
+            onclick="mostrarPantalla('pantallaSala')"
+        >
+            Volver a la sala
+        </button>
 
     </div>
 
 </section>
 
 
-</div>
-</div>
+</main>
+
+
+<!-- =========================================================
+     SUPABASE
+========================================================= -->
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 
 <script>
@@ -910,10 +1528,12 @@ body::before {
 ========================================================= */
 
 const SUPABASE_URL =
-    'https://fimjzdbhsyaxjecfpvxr.supabase.co';
+    "https://fimjzdbhsyaxjecfpvxr.supabase.co";
+
 
 const SUPABASE_ANON_KEY =
-    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZpbWp6ZGJoc3lheGplY2ZwdnhyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkxMzM0OTcsImV4cCI6MjEwNDcwOTQ5N30.M3wEPPcOiJOVnJ2IAPU4MIgHOzQy49OSHQNE7dwe8C0';
+    "PEGA_AQUI_TU_ANON_KEY";
+
 
 const supabaseClient =
     window.supabase.createClient(
@@ -923,230 +1543,588 @@ const supabaseClient =
 
 
 /* =========================================================
-   ESTADO DEL JUEGO
+   ESTADO GLOBAL DEL JUEGO
 ========================================================= */
 
-let estadoJuego = {
+const estadoJuego = {
 
     salaId: null,
 
-    jugadorId: null,
-
     codigoSala: null,
+
+    jugadorId: null,
 
     esAnfitrion: false,
 
-    desafioActual: 0,
+    equipo: null,
 
-    preguntaActual: 0,
+    desafioActual: null,
 
-    tiempoInicio: null,
+    preguntaActual: null,
 
-    canal: null
+    canalSala: null,
+
+    canalJugadores: null
 
 };
 
 
 /* =========================================================
-   NOMBRES DEFINITIVOS DE LOS DESAFÍOS
+   NOMBRES DE LOS DESAFÍOS
 ========================================================= */
 
 const NOMBRES_DESAFIOS = {
 
-    1: 'Chile, Chile Lindo',
-    2: '¿De Qué Año Es?',
-    3: 'Adivina la Canción',
-    4: 'Películas y TV',
-    5: 'Adivina la Frase',
-    6: 'Chile a Prueba',
-    7: '¿De Qué Año Fue?',
-    8: '¿Te La Sabes?',
-    9: '¿De Qué Película Es?',
-    10: 'Adivinanzas con Picardía'
+    1: "Cultura general chilena",
+
+    2: "¿De qué año es?",
+
+    3: "Adivina la canción",
+
+    4: "Películas y televisión",
+
+    5: "Adivina la frase con imágenes"
 
 };
 
 
 /* =========================================================
-   CAMBIO DE PANTALLA
+   NOMBRES DE EQUIPOS
+========================================================= */
+
+function obtenerNombreEquipo(equipo) {
+
+    const equipos = {
+
+        viejitos_cracks:
+            "🟥 Los Viejitos Cracks",
+
+        ni_fu_ni_fa:
+            "🟨 Los Ni Fu Ni Fa",
+
+        cabros_chicos:
+            "🟦 Los Cabros Chicos"
+
+    };
+
+
+    return equipos[equipo]
+        || "Equipo pendiente";
+}
+
+
+/* =========================================================
+   CLASE VISUAL EQUIPO
+========================================================= */
+
+function obtenerClaseEquipo(equipo) {
+
+    const clases = {
+
+        viejitos_cracks:
+            "viejitos",
+
+        ni_fu_ni_fa:
+            "nifu",
+
+        cabros_chicos:
+            "cabros"
+
+    };
+
+
+    return clases[equipo]
+        || "";
+}
+
+
+/* =========================================================
+   NAVEGACIÓN
 ========================================================= */
 
 function mostrarPantalla(id) {
 
     document
-        .querySelectorAll('.screen')
-        .forEach(screen => {
+        .querySelectorAll(".pantalla")
+        .forEach(
+            pantalla =>
+                pantalla.classList.remove("activa")
+        );
 
-            screen.classList.remove('active');
-
-        });
 
     const pantalla =
         document.getElementById(id);
 
+
     if (pantalla) {
-        pantalla.classList.add('active');
+
+        pantalla.classList.add("activa");
+
     }
 
 }
 
 
-/* =========================================================
-   MENSAJES
-========================================================= */
+function mostrarInicio() {
 
-function mostrarMensaje(
-    elementoId,
-    texto,
-    tipo = 'info'
-) {
+    mostrarPantalla(
+        "pantallaInicio"
+    );
 
-    const elemento =
-        document.getElementById(elementoId);
+}
 
-    if (!elemento) return;
 
-    elemento.textContent = texto;
+function mostrarSeleccion() {
 
-    elemento.className =
-        'message ' + tipo;
+    mostrarPantalla(
+        "pantallaSeleccion"
+    );
+
+
+    document.getElementById(
+        "buscador"
+    ).value = "";
+
+
+    document.getElementById(
+        "botonContinuar"
+    ).disabled = true;
+
+
+    cargarJugadores();
+
+
+    setTimeout(() => {
+
+        document
+            .getElementById("buscador")
+            ?.focus();
+
+    }, 100);
 
 }
 
 
 /* =========================================================
-   NORMALIZAR CÓDIGO
+   JUGADORES
 ========================================================= */
 
-document
-    .getElementById('join-code')
-    .addEventListener('input', function() {
+let jugadoresDisponibles = [];
 
-        this.value =
-            this.value
-                .toUpperCase()
-                .replace(/[^A-Z0-9]/g, '');
+let jugadorSeleccionado = null;
+
+
+async function cargarJugadores() {
+
+    const {
+        data,
+        error
+    } = await supabaseClient
+        .from("jugadores")
+        .select("*")
+        .order(
+            "fecha_nacimiento",
+            {
+                ascending: true
+            }
+        );
+
+
+    if (error) {
+
+        console.error(
+            "Error cargando jugadores:",
+            error
+        );
+
+        return;
+
+    }
+
+
+    jugadoresDisponibles =
+        data || [];
+
+
+    renderizarJugadores(
+        jugadoresDisponibles
+    );
+
+}
+
+
+function obtenerIniciales(nombre) {
+
+    if (!nombre) {
+        return "?";
+    }
+
+
+    const partes =
+        nombre
+            .trim()
+            .split(/\s+/);
+
+
+    if (partes.length === 1) {
+
+        return partes[0]
+            .substring(0, 2)
+            .toUpperCase();
+
+    }
+
+
+    return (
+        partes[0][0] +
+        partes[partes.length - 1][0]
+    ).toUpperCase();
+
+}
+
+
+/* =========================================================
+   FILTRAR JUGADORES
+========================================================= */
+
+function filtrarJugadores() {
+
+    const texto =
+        document
+            .getElementById("buscador")
+            .value
+            .toLowerCase()
+            .trim();
+
+
+    const resultados =
+        jugadoresDisponibles.filter(
+            jugador =>
+                jugador.nombre
+                    .toLowerCase()
+                    .includes(texto)
+        );
+
+
+    renderizarJugadores(
+        resultados
+    );
+
+}
+
+
+/* =========================================================
+   RENDER JUGADORES
+========================================================= */
+
+function renderizarJugadores(lista) {
+
+    const contenedor =
+        document.getElementById(
+            "listaJugadores"
+        );
+
+
+    contenedor.innerHTML = "";
+
+
+    if (!lista.length) {
+
+        contenedor.innerHTML = `
+            <p style="
+                grid-column:1/-1;
+                text-align:center;
+                color:#777;
+            ">
+                No encontramos ese nombre.
+            </p>
+        `;
+
+        return;
+
+    }
+
+
+    lista.forEach(jugador => {
+
+        const tarjeta =
+            document.createElement(
+                "button"
+            );
+
+
+        tarjeta.type = "button";
+
+        tarjeta.className =
+            "jugador";
+
+
+        if (
+            jugadorSeleccionado &&
+            jugadorSeleccionado.id === jugador.id
+        ) {
+
+            tarjeta.classList.add(
+                "seleccionado"
+            );
+
+        }
+
+
+        tarjeta.innerHTML = `
+
+            <div class="avatar">
+
+                ${obtenerIniciales(
+                    jugador.nombre
+                )}
+
+            </div>
+
+            <div class="jugador-info">
+
+                <strong>
+                    ${escapeHtml(
+                        jugador.nombre
+                    )}
+                </strong>
+
+                <small>
+
+                    ${
+                        jugador.equipo
+                            ? obtenerNombreEquipo(
+                                jugador.equipo
+                            )
+                            : "Equipo pendiente"
+                    }
+
+                </small>
+
+            </div>
+
+        `;
+
+
+        tarjeta.addEventListener(
+            "click",
+            () => {
+
+                jugadorSeleccionado =
+                    jugador;
+
+
+                document.getElementById(
+                    "botonContinuar"
+                ).disabled = false;
+
+
+                renderizarJugadores(
+                    lista
+                );
+
+            }
+        );
+
+
+        contenedor.appendChild(
+            tarjeta
+        );
 
     });
 
+}
+
 
 /* =========================================================
-   CREAR SALA
+   CONFIRMACIÓN
 ========================================================= */
 
-async function crearSala() {
+function mostrarConfirmacion() {
 
-    const nombre =
-        document
-            .getElementById('create-name')
-            .value
-            .trim();
-
-    const fechaNacimiento =
-        document
-            .getElementById('create-birth')
-            .value;
-
-    if (!nombre) {
-
-        mostrarMensaje(
-            'create-message',
-            'Ingresa tu nombre.',
-            'error'
-        );
+    if (!jugadorSeleccionado) {
 
         return;
+
     }
 
-    if (!fechaNacimiento) {
 
-        mostrarMensaje(
-            'create-message',
-            'Ingresa tu fecha de nacimiento.',
-            'error'
+    document.getElementById(
+        "nombreConfirmacion"
+    ).textContent =
+        jugadorSeleccionado.nombre;
+
+
+    document.getElementById(
+        "avatarConfirmacion"
+    ).textContent =
+        obtenerIniciales(
+            jugadorSeleccionado.nombre
         );
 
-        return;
-    }
 
-    mostrarMensaje(
-        'create-message',
-        'Creando sala...',
-        'info'
+    const etiqueta =
+        document.getElementById(
+            "equipoConfirmacion"
+        );
+
+
+    const equipo =
+        jugadorSeleccionado.equipo;
+
+
+    etiqueta.textContent =
+        obtenerNombreEquipo(
+            equipo
+        );
+
+
+    etiqueta.className =
+        "etiqueta etiqueta-" +
+        obtenerClaseEquipo(
+            equipo
+        );
+
+
+    mostrarPantalla(
+        "pantallaConfirmacion"
     );
+
+}
+
+
+/* =========================================================
+   CREAR / ENTRAR A SALA
+========================================================= */
+
+async function entrarSala() {
+
+    if (!jugadorSeleccionado) {
+
+        return;
+
+    }
+
+
+    const estadoConexion =
+        document.getElementById(
+            "estadoConexion"
+        );
+
+
+    mostrarPantalla(
+        "pantallaSala"
+    );
+
+
+    estadoConexion.textContent =
+        "Conectando con la sala...";
+
 
     try {
 
-        const { data, error } =
-            await supabaseClient.rpc(
-                'crear_sala',
-                {
-                    p_nombre_jugador: nombre,
-                    p_fecha_nacimiento: fechaNacimiento
-                }
-            );
+        const {
+            data,
+            error
+        } =
+            await supabaseClient
+                .rpc(
+                    "entrar_sala",
+                    {
+                        p_nombre_jugador:
+                            jugadorSeleccionado.nombre,
+
+                        p_fecha_nacimiento:
+                            jugadorSeleccionado.fecha_nacimiento
+                    }
+                );
+
 
         if (error) {
+
             throw error;
+
         }
 
-        if (!data) {
-            throw new Error(
-                'Supabase no devolvió los datos de la sala.'
-            );
-        }
 
         console.log(
-            'Sala creada:',
+            "Entrada a sala:",
             data
         );
 
-        /*
-         * La función puede devolver un objeto,
-         * una fila o un arreglo dependiendo de
-         * cómo quedó definida en Supabase.
-         */
 
-        let sala = Array.isArray(data)
-            ? data[0]
-            : data;
+        if (data) {
 
-        estadoJuego.salaId =
-            sala.sala_id || sala.id || sala.sala;
+            estadoJuego.salaId =
+                data.sala_id ||
+                data.id_sala ||
+                null;
 
-        estadoJuego.jugadorId =
-            sala.jugador_id || sala.jugador;
 
-        estadoJuego.codigoSala =
-            sala.codigo || sala.codigo_sala;
+            estadoJuego.codigoSala =
+                data.codigo_sala ||
+                data.codigo ||
+                null;
 
-        estadoJuego.esAnfitrion = true;
 
-        document
-            .getElementById('lobby-code')
-            .textContent =
-            estadoJuego.codigoSala || '------';
+            estadoJuego.jugadorId =
+                data.jugador_id ||
+                data.id_jugador ||
+                null;
 
-        mostrarPantalla(
-            'screen-lobby'
-        );
+
+            estadoJuego.esAnfitrion =
+                Boolean(
+                    data.es_anfitrion
+                );
+
+
+            estadoJuego.equipo =
+                data.equipo ||
+                null;
+
+        }
+
+
+        actualizarCodigoSala();
+
+
+        estadoConexion.textContent =
+            "Conectado correctamente a la sala.";
+
+        estadoConexion.style.background =
+            "#edfff3";
+
+        estadoConexion.style.color =
+            "#16803c";
+
+
+        await cargarLobby();
+
 
         iniciarRealtime();
-
-        cargarLobby();
 
     } catch (error) {
 
         console.error(
-            'Error creando sala:',
+            "Error entrando a sala:",
             error
         );
 
-        mostrarMensaje(
-            'create-message',
-            'No se pudo crear la sala: ' +
-            (error.message || error),
-            'error'
+
+        estadoConexion.textContent =
+            "No se pudo conectar con la sala.";
+
+        estadoConexion.style.background =
+            "#fff0f0";
+
+        estadoConexion.style.color =
+            "#b00020";
+
+
+        alert(
+            "No se pudo ingresar a la sala:\n\n" +
+            (error.message || error)
         );
 
     }
@@ -1155,284 +2133,29 @@ async function crearSala() {
 
 
 /* =========================================================
-   UNIRSE A SALA
+   CÓDIGO DE SALA
 ========================================================= */
 
-async function unirseSala() {
+function actualizarCodigoSala() {
 
-    const codigo =
-        document
-            .getElementById('join-code')
-            .value
-            .trim()
-            .toUpperCase();
-
-    const nombre =
-        document
-            .getElementById('join-name')
-            .value
-            .trim();
-
-    const fechaNacimiento =
-        document
-            .getElementById('join-birth')
-            .value;
-
-    if (!codigo) {
-
-        mostrarMensaje(
-            'join-message',
-            'Ingresa el código de la sala.',
-            'error'
+    const elemento =
+        document.getElementById(
+            "codigoSala"
         );
 
-        return;
-    }
-
-    if (!nombre) {
-
-        mostrarMensaje(
-            'join-message',
-            'Ingresa tu nombre.',
-            'error'
-        );
-
-        return;
-    }
-
-    if (!fechaNacimiento) {
-
-        mostrarMensaje(
-            'join-message',
-            'Ingresa tu fecha de nacimiento.',
-            'error'
-        );
-
-        return;
-    }
-
-    mostrarMensaje(
-        'join-message',
-        'Ingresando a la sala...',
-        'info'
-    );
-
-    try {
-
-        const { data, error } =
-            await supabaseClient.rpc(
-                'unirse_sala',
-                {
-                    p_codigo_sala: codigo,
-                    p_nombre_jugador: nombre,
-                    p_fecha_nacimiento: fechaNacimiento
-                }
-            );
-
-        if (error) {
-            throw error;
-        }
-
-        if (!data) {
-            throw new Error(
-                'Supabase no devolvió los datos del jugador.'
-            );
-        }
-
-        console.log(
-            'Ingreso a sala:',
-            data
-        );
-
-        let jugador =
-            Array.isArray(data)
-                ? data[0]
-                : data;
-
-        estadoJuego.salaId =
-            jugador.sala_id ||
-            jugador.id_sala;
-
-        estadoJuego.jugadorId =
-            jugador.jugador_id ||
-            jugador.id;
-
-        estadoJuego.codigoSala =
-            codigo;
-
-        estadoJuego.esAnfitrion = false;
-
-        document
-            .getElementById('lobby-code')
-            .textContent =
-            codigo;
-
-        mostrarPantalla(
-            'screen-lobby'
-        );
-
-        iniciarRealtime();
-
-        cargarLobby();
-
-    } catch (error) {
-
-        console.error(
-            'Error entrando a sala:',
-            error
-        );
-
-        mostrarMensaje(
-            'join-message',
-            'No se pudo ingresar: ' +
-            (error.message || error),
-            'error'
-        );
-
-    }
-
-}
-
-
-/* =========================================================
-   REALTIME
-========================================================= */
-
-function iniciarRealtime() {
-
-    if (!estadoJuego.salaId) {
-        console.warn(
-            'No hay sala para iniciar Realtime.'
-        );
-        return;
-    }
-
-    if (estadoJuego.canal) {
-
-        supabaseClient
-            .removeChannel(
-                estadoJuego.canal
-            );
-
-    }
-
-    estadoJuego.canal =
-        supabaseClient
-            .channel(
-                'sala-' +
-                estadoJuego.salaId
-            )
-            .on(
-                'postgres_changes',
-                {
-                    event: '*',
-                    schema: 'public',
-                    table: 'salas',
-                    filter:
-                        'id=eq.' +
-                        estadoJuego.salaId
-                },
-                payload => {
-
-                    console.log(
-                        'Cambio en sala:',
-                        payload
-                    );
-
-                    manejarCambioSala(
-                        payload
-                    );
-
-                }
-            )
-            .on(
-                'postgres_changes',
-                {
-                    event: '*',
-                    schema: 'public',
-                    table: 'jugadores',
-                    filter:
-                        'sala_id=eq.' +
-                        estadoJuego.salaId
-                },
-                payload => {
-
-                    console.log(
-                        'Cambio jugadores:',
-                        payload
-                    );
-
-                    cargarLobby();
-
-                }
-            )
-            .subscribe(
-                status => {
-
-                    console.log(
-                        'Realtime:',
-                        status
-                    );
-
-                }
-            );
-
-}
-
-
-/* =========================================================
-   CAMBIO DE ESTADO DE SALA
-========================================================= */
-
-function manejarCambioSala(payload) {
-
-    const sala =
-        payload.new;
-
-    if (!sala) return;
-
-    estadoJuego.desafioActual =
-        sala.desafio_actual || 0;
-
-    estadoJuego.preguntaActual =
-        sala.pregunta_actual || 0;
-
-    estadoJuego.tiempoInicio =
-        sala.inicio_pregunta;
 
     if (
-        sala.estado === 'jugando'
+        estadoJuego.codigoSala
     ) {
 
-        mostrarPantalla(
-            'screen-game'
-        );
+        elemento.textContent =
+            "SALA " +
+            estadoJuego.codigoSala;
 
-        cargarPreguntaActual();
+    } else {
 
-    }
-
-    if (
-        sala.estado === 'resultados'
-    ) {
-
-        mostrarPantalla(
-            'screen-results'
-        );
-
-        cargarResultados();
-
-    }
-
-    if (
-        sala.estado === 'finalizada'
-    ) {
-
-        mostrarPantalla(
-            'screen-final'
-        );
-
-        cargarResultadoFinal();
+        elemento.textContent =
+            "SALA";
 
     }
 
@@ -1446,309 +2169,151 @@ function manejarCambioSala(payload) {
 async function cargarLobby() {
 
     if (!estadoJuego.salaId) {
+
         return;
+
     }
 
-    const { data: jugadores, error } = await supabaseClient
-        .from('jugadores')
-        .select('*')
-        .eq('sala_id', estadoJuego.salaId)
-        .order('orden_edad', {
-            ascending: true
-        });
+
+    const {
+        data,
+        error
+    } =
+        await supabaseClient
+            .from("jugadores")
+            .select("*")
+            .eq(
+                "sala_id",
+                estadoJuego.salaId
+            )
+            .order(
+                "fecha_nacimiento",
+                {
+                    ascending: true
+                }
+            );
+
 
     if (error) {
-        console.error('Error cargando jugadores:', error);
+
+        console.error(
+            "Error cargando lobby:",
+            error
+        );
+
         return;
+
     }
+
+
+    const jugadores =
+        data || [];
+
+
+    renderizarEquipos(
+        jugadores
+    );
+
+
+    actualizarPuntajes(
+        jugadores
+    );
+
+
+    actualizarBotonAnfitrion();
+
+}
+
+
+/* =========================================================
+   RENDER EQUIPOS
+========================================================= */
+
+function renderizarEquipos(
+    jugadores
+) {
 
     const contenedor =
-        document.getElementById('lobby-content');
+        document.getElementById(
+            "contenedorEquipos"
+        );
 
-    if (!contenedor) {
-        return;
-    }
-
-    const totalJugadores =
-        jugadores ? jugadores.length : 0;
-
-    const conectados =
-        jugadores
-            ? jugadores.filter(
-                jugador =>
-                    jugador.estado_conexion === 'conectado'
-            ).length
-            : 0;
-
-    const desconectados =
-        totalJugadores - conectados;
-
-
-    /* ================================================
-       SEPARAR EQUIPOS
-    ================================================ */
 
     const viejitos =
         jugadores.filter(
             jugador =>
-                jugador.equipo === 'viejitos_cracks'
+                jugador.equipo ===
+                "viejitos_cracks"
         );
 
-    const niFuNiFa =
+
+    const niFu =
         jugadores.filter(
             jugador =>
-                jugador.equipo === 'ni_fu_ni_fa'
+                jugador.equipo ===
+                "ni_fu_ni_fa"
         );
+
 
     const cabros =
         jugadores.filter(
             jugador =>
-                jugador.equipo === 'cabros_chicos'
-        );
-
-    const sinEquipo =
-        jugadores.filter(
-            jugador =>
-                !jugador.equipo
+                jugador.equipo ===
+                "cabros_chicos"
         );
 
 
-    /* ================================================
-       CONSTRUIR LOBBY
-    ================================================ */
+    contenedor.innerHTML =
+
+        renderEquipo(
+            viejitos,
+            "viejitos",
+            "🟥 Los Viejitos Cracks"
+        ) +
+
+        renderEquipo(
+            niFu,
+            "nifu",
+            "🟨 Los Ni Fu Ni Fa"
+        ) +
+
+        renderEquipo(
+            cabros,
+            "cabros",
+            "🟦 Los Cabros Chicos"
+        );
 
-    let html = `
-
-        <div class="lobby-top">
-
-            <h2>
-                ¡Que se armen los equipos! 🇨🇱
-            </h2>
-
-            <div class="lobby-subtitle">
-                Los equipos se asignan automáticamente
-                según la edad de los jugadores.
-            </div>
-
-        </div>
-
-
-        <div class="lobby-stats">
-
-            <div class="lobby-stat">
-
-                <span class="lobby-stat-number">
-                    ${totalJugadores}
-                </span>
-
-                <span class="lobby-stat-label">
-                    Jugadores
-                </span>
-
-            </div>
-
-
-            <div class="lobby-stat">
-
-                <span class="lobby-stat-number">
-                    ${conectados}
-                </span>
-
-                <span class="lobby-stat-label">
-                    Conectados
-                </span>
-
-            </div>
-
-
-            <div class="lobby-stat">
-
-                <span class="lobby-stat-number">
-                    3
-                </span>
-
-                <span class="lobby-stat-label">
-                    Equipos
-                </span>
-
-            </div>
-
-        </div>
-
-
-        <div class="teams-container">
-
-            ${renderEquipo(
-                viejitos,
-                'viejitos',
-                '🟥 Los Viejitos Cracks'
-            )}
-
-            ${renderEquipo(
-                niFuNiFa,
-                'nifu',
-                '🟨 Los Ni Fu Ni Fa'
-            )}
-
-            ${renderEquipo(
-                cabros,
-                'cabros',
-                '🟦 Los Cabros Chicos'
-            )}
-
-        </div>
-
-    `;
-
-
-    /* ================================================
-       JUGADORES SIN EQUIPO
-    ================================================ */
-
-    if (sinEquipo.length > 0) {
-
-        html += `
-
-            <div class="waiting-players">
-
-                <div class="waiting-title">
-                    ⏳ Esperando asignación de equipo
-                </div>
-
-                ${sinEquipo.map(
-                    jugador => `
-
-                    <div class="waiting-player">
-
-                        ${escapeHtml(
-                            jugador.nombre
-                        )}
-
-                    </div>
-
-                `
-                ).join('')}
-
-            </div>
-
-        `;
-
-    }
-
-
-    /* ================================================
-       PANEL DEL ANFITRIÓN
-    ================================================ */
-
-    if (estadoJuego.esAnfitrion) {
-
-        const puedeIniciar =
-            conectados >= 3;
-
-        html += `
-
-            <div class="host-panel">
-
-                <strong>
-                    👑 Eres el anfitrión
-                </strong>
-
-                <div class="host-warning">
-
-                    ${
-                        puedeIniciar
-                        ? 'Ya puedes iniciar la partida.'
-                        : 'Se necesitan al menos 3 jugadores conectados.'
-                    }
-
-                </div>
-
-                <button
-                    id="btn-start"
-                    class="btn btn-primary"
-                    onclick="iniciarPartida()"
-                    ${puedeIniciar ? '' : 'disabled'}>
-
-                    ${
-                        puedeIniciar
-                        ? '▶️ Iniciar partida'
-                        : '⏳ Esperando jugadores'
-                    }
-
-                </button>
-
-            </div>
-
-        `;
-
-    } else {
-
-        html += `
-
-            <div class="host-panel">
-
-                <strong>
-                    ⏳ Esperando al anfitrión
-                </strong>
-
-                <div class="host-warning">
-                    La partida comenzará cuando el anfitrión
-                    la inicie.
-                </div>
-
-            </div>
-
-        `;
-
-    }
-
-
-    /* ================================================
-       AVISO DE DESCONEXIONES
-    ================================================ */
-
-    if (desconectados > 0) {
-
-        html += `
-
-            <div style="
-                margin-top:15px;
-                text-align:center;
-                font-size:13px;
-                color:#777;
-            ">
-
-                🔴 ${desconectados}
-                jugador${desconectados > 1 ? 'es' : ''}
-                desconectado${desconectados > 1 ? 's' : ''}
-
-            </div>
-
-        `;
-
-    }
-
-
-    /* ================================================
-       AQUÍ SE CIERRA cargarLobby()
-    ================================================ */
-
-    contenedor.innerHTML = html;
 }
 
- function renderEquipo(jugadores, clase, titulo) {
+
+/* =========================================================
+   RENDER INDIVIDUAL EQUIPO
+========================================================= */
+
+function renderEquipo(
+    jugadores,
+    clase,
+    titulo
+) {
 
     let html = `
+
         <div class="team-card ${clase}">
 
             <div class="team-title">
                 ${titulo}
             </div>
+
     `;
 
-    if (!jugadores || jugadores.length === 0) {
+
+    if (
+        !jugadores ||
+        jugadores.length === 0
+    ) {
 
         html += `
+
             <div style="
                 text-align:center;
                 color:#777;
@@ -1757,71 +2322,167 @@ async function cargarLobby() {
             ">
                 Aún no hay jugadores
             </div>
+
         `;
 
     } else {
 
-        jugadores.forEach(jugador => {
+        jugadores.forEach(
+            jugador => {
 
-            const conectado =
-                jugador.estado_conexion === 'conectado';
+                const conectado =
+                    jugador.estado_conexion ===
+                    "conectado" ||
+                    jugador.conectado === true;
 
-            const esAnfitrion =
-                jugador.id === estadoJuego.jugadorId &&
-                estadoJuego.esAnfitrion;
 
-            html += `
-                <div class="team-player">
+                const esAnfitrion =
+                    jugador.id ===
+                        estadoJuego.jugadorId &&
+                    estadoJuego.esAnfitrion;
 
-                    <span class="connection-dot">
-                        ${conectado ? '🟢' : '🔴'}
-                    </span>
 
-                    ${escapeHtml(jugador.nombre)}
+                html += `
 
-                    ${
-                        esAnfitrion
-                        ? `
-                            <span class="host-badge">
-                                ANFITRIÓN
-                            </span>
-                          `
-                        : ''
-                    }
+                    <div class="team-player">
 
-                </div>
-            `;
-        });
+                        <span class="connection-dot">
+
+                            ${
+                                conectado
+                                    ? "🟢"
+                                    : "🔴"
+                            }
+
+                        </span>
+
+                        ${escapeHtml(
+                            jugador.nombre
+                        )}
+
+                        ${
+                            esAnfitrion
+                                ? `
+                                    <span class="host-badge">
+                                        ANFITRIÓN
+                                    </span>
+                                  `
+                                : ""
+                        }
+
+                    </div>
+
+                `;
+
+            }
+        );
+
     }
 
+
     html += `
+
         </div>
+
     `;
 
+
     return html;
-}    
-     
+
+}
+
+
 /* =========================================================
-   EQUIPOS
+   PUNTAJES
 ========================================================= */
 
-function obtenerNombreEquipo(equipo) {
+function actualizarPuntajes(
+    jugadores
+) {
 
-    const equipos = {
+    const puntajes = {
 
-        viejitos_cracks:
-            '🟥 Los Viejitos Cracks',
+        viejitos_cracks: 0,
 
-        ni_fu_ni_fa:
-            '🟨 Los Ni Fu Ni Fa',
+        ni_fu_ni_fa: 0,
 
-        cabros_chicos:
-            '🟦 Los Cabros Chicos'
+        cabros_chicos: 0
 
     };
 
-    return equipos[equipo] ||
-        'Equipo pendiente';
+
+    jugadores.forEach(
+        jugador => {
+
+            if (
+                puntajes[
+                    jugador.equipo
+                ] !== undefined
+            ) {
+
+                puntajes[
+                    jugador.equipo
+                ] += Number(
+                    jugador.puntaje || 0
+                );
+
+            }
+
+        }
+    );
+
+
+    document.getElementById(
+        "puntajeViejitos"
+    ).textContent =
+        puntajes.viejitos_cracks;
+
+
+    document.getElementById(
+        "puntajeNiFu"
+    ).textContent =
+        puntajes.ni_fu_ni_fa;
+
+
+    document.getElementById(
+        "puntajeCabros"
+    ).textContent =
+        puntajes.cabros_chicos;
+
+}
+
+
+/* =========================================================
+   BOTÓN DEL ANFITRIÓN
+========================================================= */
+
+function actualizarBotonAnfitrion() {
+
+    const contenedor =
+        document.getElementById(
+            "accionesSala"
+        );
+
+
+    if (!estadoJuego.esAnfitrion) {
+
+        contenedor.innerHTML = "";
+
+        return;
+
+    }
+
+
+    contenedor.innerHTML = `
+
+        <button
+            class="boton principal"
+            onclick="iniciarPartida()"
+        >
+            🇨🇱 Comenzar La Copa del 18
+        </button>
+
+    `;
 
 }
 
@@ -1832,15 +2493,19 @@ function obtenerNombreEquipo(equipo) {
 
 async function iniciarPartida() {
 
-    if (!estadoJuego.salaId ||
-        !estadoJuego.jugadorId) {
+    if (
+        !estadoJuego.salaId ||
+        !estadoJuego.jugadorId
+    ) {
 
         alert(
-            'No se encontró la información de la sala.'
+            "No se encontró la información de la sala."
         );
 
         return;
+
     }
+
 
     try {
 
@@ -1848,42 +2513,185 @@ async function iniciarPartida() {
             data,
             error
         } =
-            await supabaseClient.rpc(
-                'iniciar_partida',
-                {
-                    p_sala_id:
-                        estadoJuego.salaId,
+            await supabaseClient
+                .rpc(
+                    "iniciar_partida",
+                    {
+                        p_sala_id:
+                            estadoJuego.salaId,
 
-                    p_id_anfitrion:
-                        estadoJuego.jugadorId
-                }
-            );
+                        p_id_anfitrion:
+                            estadoJuego.jugadorId
+                    }
+                );
+
 
         if (error) {
+
             throw error;
+
         }
 
+
         console.log(
-            'Partida iniciada:',
+            "Partida iniciada:",
             data
         );
 
-        /*
-         * El cambio de estado llegará mediante
-         * Supabase Realtime.
-         */
 
     } catch (error) {
 
         console.error(
-            'Error iniciando partida:',
+            "Error iniciando partida:",
             error
         );
 
+
         alert(
-            'No se pudo iniciar la partida:\n\n' +
+            "No se pudo iniciar la partida:\n\n" +
             (error.message || error)
         );
+
+    }
+
+}
+
+
+/* =========================================================
+   REALTIME
+========================================================= */
+
+function iniciarRealtime() {
+
+    if (
+        estadoJuego.canalSala
+    ) {
+
+        return;
+
+    }
+
+
+    estadoJuego.canalSala =
+        supabaseClient
+            .channel(
+                "copa-del-18-" +
+                (
+                    estadoJuego.salaId ||
+                    "sala"
+                )
+            )
+
+
+            .on(
+                "postgres_changes",
+                {
+                    event: "*",
+
+                    schema: "public",
+
+                    table: "jugadores"
+                },
+
+                async () => {
+
+                    await cargarLobby();
+
+                }
+            )
+
+
+            .on(
+                "postgres_changes",
+                {
+                    event: "*",
+
+                    schema: "public",
+
+                    table: "salas"
+                },
+
+                async payload => {
+
+                    console.log(
+                        "Cambio sala:",
+                        payload
+                    );
+
+
+                    await procesarCambioSala(
+                        payload
+                    );
+
+                }
+            )
+
+
+            .subscribe();
+
+}
+
+
+/* =========================================================
+   CAMBIO DE ESTADO DE SALA
+========================================================= */
+
+async function procesarCambioSala(
+    payload
+) {
+
+    const registro =
+        payload.new ||
+        payload.old ||
+        null;
+
+
+    if (!registro) {
+
+        return;
+
+    }
+
+
+    if (
+        estadoJuego.salaId &&
+        registro.id &&
+        registro.id !==
+            estadoJuego.salaId
+    ) {
+
+        return;
+
+    }
+
+
+    if (
+        registro.codigo_sala
+    ) {
+
+        estadoJuego.codigoSala =
+            registro.codigo_sala;
+
+        actualizarCodigoSala();
+
+    }
+
+
+    if (
+        registro.estado ===
+        "en_juego"
+    ) {
+
+        estadoJuego.desafioActual =
+            registro.desafio_actual;
+
+
+        mostrarPantalla(
+            "pantallaJuego"
+        );
+
+
+        await cargarPreguntaActual();
 
     }
 
@@ -1896,77 +2704,77 @@ async function iniciarPartida() {
 
 async function cargarPreguntaActual() {
 
+    if (
+        !estadoJuego.salaId
+    ) {
+
+        return;
+
+    }
+
+
+    const numeroDesafio =
+        estadoJuego.desafioActual ||
+        1;
+
+
+    document.getElementById(
+        "challenge-number"
+    ).textContent =
+        "DESAFÍO " +
+        numeroDesafio;
+
+
+    document.getElementById(
+        "challenge-name"
+    ).textContent =
+        NOMBRES_DESAFIOS[
+            numeroDesafio
+        ] ||
+        "Desafío";
+
+
     /*
-     * Se implementará en la siguiente parte:
-     *
-     * - Obtener desafío.
-     * - Obtener pregunta.
-     * - Mostrar imágenes.
-     * - Mostrar video.
-     * - Mostrar alternativas.
-     * - Temporizador de 30 segundos.
-     * - Registrar respuesta.
-     */
-
-    const numero =
-        estadoJuego.desafioActual;
-
-    document
-        .getElementById(
-            'challenge-number'
-        )
-        .textContent =
-            'DESAFÍO ' + numero;
-
-    document
-        .getElementById(
-            'challenge-name'
-        )
-        .textContent =
-            NOMBRES_DESAFIOS[numero] ||
-            'Desafío';
+       La consulta exacta de la pregunta
+       se conectará con la estructura
+       actual de Supabase.
+    */
 
 }
 
 
 /* =========================================================
-   RESULTADOS
-========================================================= */
-
-async function cargarResultados() {
-
-    console.log(
-        'Cargando resultados...'
-    );
-
-}
-
-
-/* =========================================================
-   RESULTADO FINAL
-========================================================= */
-
-async function cargarResultadoFinal() {
-
-    console.log(
-        'Cargando resultado final...'
-    );
-
-}
-
-
-/* =========================================================
-   SEGURIDAD HTML BÁSICA
+   ESCAPE HTML
 ========================================================= */
 
 function escapeHtml(text) {
 
-    return String(text)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#039;');
+    return String(text ?? "")
+
+        .replace(
+            /&/g,
+            "&amp;"
+        )
+
+        .replace(
+            /</g,
+            "&lt;"
+        )
+
+        .replace(
+            />/g,
+            "&gt;"
+        )
+
+        .replace(
+            /"/g,
+            "&quot;"
+        )
+
+        .replace(
+            /'/g,
+            "&#039;"
+        );
 
 }
 
@@ -1975,8 +2783,15 @@ function escapeHtml(text) {
    INICIO
 ========================================================= */
 
-console.log(
-    '🇨🇱 La Copa del 18 cargada correctamente.'
+document.addEventListener(
+    "DOMContentLoaded",
+    () => {
+
+        console.log(
+            "🇨🇱 La Copa del 18 iniciada."
+        );
+
+    }
 );
 
 </script>
