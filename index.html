@@ -2747,6 +2747,11 @@ async function entrarSala() {
             data.id_jugador ||
             null;
 
+        /*
+         * crear_sala / unirse_sala no devuelven el equipo.
+         * El equipo se asigna cuando el anfitrión inicia la partida,
+         * por lo que se obtiene posteriormente desde jugadores.
+         */
         estadoJuego.equipo =
             data.equipo ||
             null;
@@ -3311,6 +3316,9 @@ async function iniciarPartida() {
 
         estadoJuego.partidaIniciada =
             true;
+
+        /* Recuperar equipo recién asignado por iniciar_partida(). */
+        await sincronizarJugadores();
 
         estadoJuego.fase =
             "intro";
@@ -3943,6 +3951,13 @@ async function procesarCambioSala(
     estadoJuego.ultimaClavePregunta = clave;
     estadoJuego.fase = "jugando";
 
+    /*
+     * La asignación de equipos ocurre dentro de iniciar_partida().
+     * Sincronizamos jugadores antes de cargar la pregunta para que
+     * cada dispositivo conozca su equipo inmediatamente.
+     */
+    await sincronizarJugadores();
+
     mostrarPantalla("pantallaJuego");
     await cargarPreguntaActual();
 }
@@ -4152,6 +4167,29 @@ async function cargarPreguntaActual() {
 
     estadoJuego.desafioActual =
         numeroDesafio;
+
+    /*
+     * Los equipos se asignan al iniciar la partida.
+     * Recuperamos siempre el equipo del jugador actual antes
+     * de pintar la pregunta para que el marcador en vivo sepa
+     * a qué equipo sumar los puntos.
+     */
+    if (estadoJuego.jugadorId) {
+
+        const {
+            data: jugadorActual,
+            error: errorJugador
+        } = await supabaseClient
+            .from("jugadores")
+            .select("equipo")
+            .eq("id", estadoJuego.jugadorId)
+            .eq("sala_id", estadoJuego.salaId)
+            .maybeSingle();
+
+        if (!errorJugador && jugadorActual?.equipo) {
+            estadoJuego.equipo = jugadorActual.equipo;
+        }
+    }
 
     const desafio =
         await obtenerDesafio(
@@ -5122,6 +5160,9 @@ async function iniciarPreguntaServidor(
     }
 
     console.log("Pregunta iniciada:", data);
+
+    /* Asegurar que el jugador conserva su equipo actualizado. */
+    await sincronizarJugadores();
 
     estadoJuego.introActiva = false;
     estadoJuego.fase = "jugando";
