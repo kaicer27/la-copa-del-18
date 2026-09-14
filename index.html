@@ -1992,7 +1992,6 @@ function mostrarConfirmacion() {
 
 }
 
-
 /* =========================================================
    CREAR / ENTRAR A SALA
 ========================================================= */
@@ -2023,71 +2022,258 @@ async function entrarSala() {
 
     try {
 
-        const {
-            data,
-            error
-        } =
-            await supabaseClient
-                .rpc(
-                    "entrar_sala",
-                    {
-                        p_nombre_jugador:
-                            jugadorSeleccionado.nombre,
+        /* ---------------------------------------------------------
+           PREGUNTAR SI QUIERE CREAR O UNIRSE
+        --------------------------------------------------------- */
 
-                        p_fecha_nacimiento:
-                            jugadorSeleccionado.fecha_nacimiento
-                    }
-                );
+        const crearNuevaSala =
+            confirm(
+                "¿Quieres crear una nueva sala?\n\n" +
+                "Aceptar = Crear nueva sala\n" +
+                "Cancelar = Unirse a una sala existente"
+            );
 
 
-        if (error) {
-
-            throw error;
-
-        }
+        let data;
+        let error;
 
 
-        console.log(
-            "Entrada a sala:",
-            data
-        );
+        /* =========================================================
+           CREAR NUEVA SALA
+        ========================================================= */
+
+        if (crearNuevaSala) {
+
+            estadoConexion.textContent =
+                "Creando nueva sala...";
 
 
-        if (data) {
+            const resultado =
+                await supabaseClient
+                    .rpc(
+                        "crear_sala",
+                        {
+                            p_nombre_jugador:
+                                jugadorSeleccionado.nombre,
 
-            estadoJuego.salaId =
-                data.sala_id ||
-                data.id_sala ||
-                null;
+                            p_fecha_nacimiento:
+                                jugadorSeleccionado.fecha_nacimiento
+                        }
+                    );
 
 
-            estadoJuego.codigoSala =
-                data.codigo_sala ||
-                data.codigo ||
-                null;
+            data =
+                Array.isArray(
+                    resultado.data
+                )
+                    ? resultado.data[0]
+                    : resultado.data;
 
 
-            estadoJuego.jugadorId =
-                data.jugador_id ||
-                data.id_jugador ||
-                null;
+            error =
+                resultado.error;
 
+
+            if (error) {
+
+                throw error;
+
+            }
+
+
+            console.log(
+                "Sala creada:",
+                data
+            );
+
+
+            /* -----------------------------------------------------
+               EL CREADOR ES EL ANFITRIÓN
+            ----------------------------------------------------- */
 
             estadoJuego.esAnfitrion =
-                Boolean(
-                    data.es_anfitrion
-                );
-
-
-            estadoJuego.equipo =
-                data.equipo ||
-                null;
+                true;
 
         }
 
+
+        /* =========================================================
+           UNIRSE A SALA EXISTENTE
+        ========================================================= */
+
+        else {
+
+            const codigo =
+                prompt(
+                    "Ingresa el código de la sala:"
+                );
+
+
+            if (!codigo) {
+
+                mostrarPantalla(
+                    "pantallaSeleccion"
+                );
+
+                return;
+
+            }
+
+
+            const codigoLimpio =
+                codigo
+                    .trim()
+                    .toUpperCase();
+
+
+            if (
+                codigoLimpio.length === 0
+            ) {
+
+                alert(
+                    "Debes ingresar un código de sala."
+                );
+
+                mostrarPantalla(
+                    "pantallaSeleccion"
+                );
+
+                return;
+
+            }
+
+
+            estadoConexion.textContent =
+                "Buscando sala...";
+
+
+            const resultado =
+                await supabaseClient
+                    .rpc(
+                        "unirse_sala",
+                        {
+                            p_codigo:
+                                codigoLimpio,
+
+                            p_nombre_jugador:
+                                jugadorSeleccionado.nombre,
+
+                            p_fecha_nacimiento:
+                                jugadorSeleccionado.fecha_nacimiento
+                        }
+                    );
+
+
+            data =
+                Array.isArray(
+                    resultado.data
+                )
+                    ? resultado.data[0]
+                    : resultado.data;
+
+
+            error =
+                resultado.error;
+
+
+            if (error) {
+
+                throw error;
+
+            }
+
+
+            console.log(
+                "Entrada a sala:",
+                data
+            );
+
+
+            /* -----------------------------------------------------
+               LOS JUGADORES QUE SE UNEN NO SON ANFITRIONES
+            ----------------------------------------------------- */
+
+            estadoJuego.esAnfitrion =
+                false;
+
+        }
+
+
+        /* =========================================================
+           GUARDAR DATOS DE LA SALA
+        ========================================================= */
+
+        if (!data) {
+
+            throw new Error(
+                "Supabase no devolvió información de la sala."
+            );
+
+        }
+
+
+        estadoJuego.salaId =
+            data.sala_id ||
+            data.id_sala ||
+            null;
+
+
+        estadoJuego.codigoSala =
+            data.codigo_sala ||
+            data.codigo ||
+            null;
+
+
+        estadoJuego.jugadorId =
+            data.jugador_id ||
+            data.id_jugador ||
+            null;
+
+
+        /* ---------------------------------------------------------
+           EQUIPO
+           
+           El equipo todavía puede ser null.
+           Los equipos se asignan al iniciar la partida mediante
+           iniciar_partida() → asignar_equipos().
+        --------------------------------------------------------- */
+
+        estadoJuego.equipo =
+            data.equipo ||
+            null;
+
+
+        /* =========================================================
+           VALIDAR DATOS RECIBIDOS
+        ========================================================= */
+
+        if (
+            !estadoJuego.salaId ||
+            !estadoJuego.jugadorId
+        ) {
+
+            console.error(
+                "Respuesta recibida:",
+                data
+            );
+
+            throw new Error(
+                "La sala fue creada/encontrada, pero faltan datos del jugador."
+            );
+
+        }
+
+
+        /* =========================================================
+           MOSTRAR CÓDIGO DE SALA
+        ========================================================= */
 
         actualizarCodigoSala();
 
+
+        /* =========================================================
+           ESTADO CONECTADO
+        ========================================================= */
 
         estadoConexion.textContent =
             "Conectado correctamente a la sala.";
@@ -2099,10 +2285,37 @@ async function entrarSala() {
             "#16803c";
 
 
+        /* =========================================================
+           CARGAR LOBBY
+        ========================================================= */
+
         await cargarLobby();
 
 
+        /* =========================================================
+           INICIAR REALTIME
+        ========================================================= */
+
         iniciarRealtime();
+
+
+        console.log(
+            "Sala lista:",
+            {
+                salaId:
+                    estadoJuego.salaId,
+
+                codigo:
+                    estadoJuego.codigoSala,
+
+                jugadorId:
+                    estadoJuego.jugadorId,
+
+                anfitrion:
+                    estadoJuego.esAnfitrion
+            }
+        );
+
 
     } catch (error) {
 
@@ -2124,13 +2337,15 @@ async function entrarSala() {
 
         alert(
             "No se pudo ingresar a la sala:\n\n" +
-            (error.message || error)
+            (
+                error.message ||
+                error
+            )
         );
 
     }
 
 }
-
 
 /* =========================================================
    CÓDIGO DE SALA
@@ -2142,6 +2357,13 @@ function actualizarCodigoSala() {
         document.getElementById(
             "codigoSala"
         );
+
+
+    if (!elemento) {
+
+        return;
+
+    }
 
 
     if (
@@ -2174,6 +2396,10 @@ async function cargarLobby() {
 
     }
 
+
+    /* ---------------------------------------------------------
+       OBTENER JUGADORES DE LA SALA
+    --------------------------------------------------------- */
 
     const {
         data,
@@ -2210,15 +2436,27 @@ async function cargarLobby() {
         data || [];
 
 
+    /* ---------------------------------------------------------
+       MOSTRAR EQUIPOS
+    --------------------------------------------------------- */
+
     renderizarEquipos(
         jugadores
     );
 
 
-    actualizarPuntajes(
-        jugadores
-    );
+    /* ---------------------------------------------------------
+       MOSTRAR PUNTAJES REALES
+       Los puntajes NO están en jugadores.
+       Se obtienen desde obtener_resultado_equipos().
+    --------------------------------------------------------- */
 
+    await actualizarPuntajes();
+
+
+    /* ---------------------------------------------------------
+       ACTUALIZAR BOTÓN DEL ANFITRIÓN
+    --------------------------------------------------------- */
 
     actualizarBotonAnfitrion();
 
@@ -2237,6 +2475,13 @@ function renderizarEquipos(
         document.getElementById(
             "contenedorEquipos"
         );
+
+
+    if (!contenedor) {
+
+        return;
+
+    }
 
 
     const viejitos =
@@ -2396,9 +2641,11 @@ function renderEquipo(
    PUNTAJES
 ========================================================= */
 
-function actualizarPuntajes(
-    jugadores
-) {
+async function actualizarPuntajes() {
+
+    /* ---------------------------------------------------------
+       PUNTAJES INICIALES
+    --------------------------------------------------------- */
 
     const puntajes = {
 
@@ -2411,46 +2658,174 @@ function actualizarPuntajes(
     };
 
 
-    jugadores.forEach(
-        jugador => {
+    /* ---------------------------------------------------------
+       VALIDAR SALA
+    --------------------------------------------------------- */
 
-            if (
-                puntajes[
-                    jugador.equipo
-                ] !== undefined
-            ) {
+    if (!estadoJuego.salaId) {
 
-                puntajes[
-                    jugador.equipo
-                ] += Number(
-                    jugador.puntaje || 0
+        return;
+
+    }
+
+
+    try {
+
+        /* -----------------------------------------------------
+           OBTENER RESULTADOS DE LOS EQUIPOS
+        ----------------------------------------------------- */
+
+        const {
+            data,
+            error
+        } =
+            await supabaseClient
+                .rpc(
+                    "obtener_resultado_equipos",
+                    {
+                        p_sala_id:
+                            estadoJuego.salaId
+                    }
                 );
 
-            }
+
+        if (error) {
+
+            throw error;
 
         }
-    );
 
 
-    document.getElementById(
-        "puntajeViejitos"
-    ).textContent =
-        puntajes.viejitos_cracks;
+        console.log(
+            "Puntajes de equipos:",
+            data
+        );
 
 
-    document.getElementById(
-        "puntajeNiFu"
-    ).textContent =
-        puntajes.ni_fu_ni_fa;
+        /* -----------------------------------------------------
+           PROCESAR RESULTADOS
+        ----------------------------------------------------- */
+
+        if (
+            Array.isArray(data)
+        ) {
+
+            data.forEach(
+                resultado => {
+
+                    const equipo =
+                        resultado.equipo;
 
 
-    document.getElementById(
-        "puntajeCabros"
-    ).textContent =
-        puntajes.cabros_chicos;
+                    const puntaje =
+                        Number(
+                            resultado.puntaje_total ||
+                            0
+                        );
+
+
+                    if (
+                        equipo ===
+                        "viejitos_cracks"
+                    ) {
+
+                        puntajes.viejitos_cracks =
+                            puntaje;
+
+                    }
+
+
+                    else if (
+                        equipo ===
+                        "ni_fu_ni_fa"
+                    ) {
+
+                        puntajes.ni_fu_ni_fa =
+                            puntaje;
+
+                    }
+
+
+                    else if (
+                        equipo ===
+                        "cabros_chicos"
+                    ) {
+
+                        puntajes.cabros_chicos =
+                            puntaje;
+
+                    }
+
+                }
+            );
+
+        }
+
+
+    } catch (error) {
+
+        console.error(
+            "Error cargando puntajes:",
+            error
+        );
+
+    }
+
+
+    /* ---------------------------------------------------------
+       MOSTRAR PUNTAJE VIEJITOS
+    --------------------------------------------------------- */
+
+    const elementoViejitos =
+        document.getElementById(
+            "puntajeViejitos"
+        );
+
+
+    if (elementoViejitos) {
+
+        elementoViejitos.textContent =
+            puntajes.viejitos_cracks;
+
+    }
+
+
+    /* ---------------------------------------------------------
+       MOSTRAR PUNTAJE NI FU NI FA
+    --------------------------------------------------------- */
+
+    const elementoNiFu =
+        document.getElementById(
+            "puntajeNiFu"
+        );
+
+
+    if (elementoNiFu) {
+
+        elementoNiFu.textContent =
+            puntajes.ni_fu_ni_fa;
+
+    }
+
+
+    /* ---------------------------------------------------------
+       MOSTRAR PUNTAJE CABROS CHICOS
+    --------------------------------------------------------- */
+
+    const elementoCabros =
+        document.getElementById(
+            "puntajeCabros"
+        );
+
+
+    if (elementoCabros) {
+
+        elementoCabros.textContent =
+            puntajes.cabros_chicos;
+
+    }
 
 }
-
 
 /* =========================================================
    BOTÓN DEL ANFITRIÓN
