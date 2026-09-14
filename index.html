@@ -1810,7 +1810,6 @@ function obtenerClaseEquipo(equipo) {
         || "";
 }
 
-
 /* =========================================================
    NAVEGACIÓN
 ========================================================= */
@@ -1849,82 +1848,65 @@ function mostrarInicio() {
 
 function mostrarSeleccion() {
 
-    mostrarPantalla(
-        "pantallaSeleccion"
-    );
+    mostrarPantalla("pantallaSeleccion");
 
 
-    document.getElementById(
-        "buscador"
-    ).value = "";
+    const opciones =
+        document.getElementById("opcionesSala");
+
+    const formularioCrear =
+        document.getElementById("formularioCrearSala");
+
+    const formularioUnirse =
+        document.getElementById("formularioUnirseSala");
 
 
-    document.getElementById(
-        "botonContinuar"
-    ).disabled = true;
+    if (opciones) {
 
-
-    cargarJugadores();
-
-
-    setTimeout(() => {
-
-        document
-            .getElementById("buscador")
-            ?.focus();
-
-    }, 100);
-
-}
-
-
-/* =========================================================
-   JUGADORES
-========================================================= */
-
-let jugadoresDisponibles = [];
-
-let jugadorSeleccionado = null;
-
-
-async function cargarJugadores() {
-
-    const {
-        data,
-        error
-    } = await supabaseClient
-        .from("jugadores")
-        .select("*")
-        .order(
-            "fecha_nacimiento",
-            {
-                ascending: true
-            }
-        );
-
-
-    if (error) {
-
-        console.error(
-            "Error cargando jugadores:",
-            error
-        );
-
-        return;
+        opciones.style.display = "flex";
 
     }
 
 
-    jugadoresDisponibles =
-        data || [];
+    if (formularioCrear) {
+
+        formularioCrear.style.display = "none";
+
+    }
 
 
-    renderizarJugadores(
-        jugadoresDisponibles
-    );
+    if (formularioUnirse) {
+
+        formularioUnirse.style.display = "none";
+
+    }
+
+
+    jugadorSeleccionado = null;
 
 }
 
+/* =========================================================
+   JUGADOR ACTUAL
+========================================================= */
+
+/*
+   El jugador ya no se busca en la base de datos.
+
+   Sus datos se ingresan directamente al crear
+   o al unirse a una sala.
+
+   La función crear_sala() o unirse_sala()
+   será la encargada de insertar al jugador
+   en la tabla "jugadores" de ESA sala.
+*/
+
+let jugadorSeleccionado = null;
+
+
+/* =========================================================
+   OBTENER INICIALES
+========================================================= */
 
 function obtenerIniciales(nombre) {
 
@@ -1952,159 +1934,6 @@ function obtenerIniciales(nombre) {
         partes[0][0] +
         partes[partes.length - 1][0]
     ).toUpperCase();
-
-}
-
-
-/* =========================================================
-   FILTRAR JUGADORES
-========================================================= */
-
-function filtrarJugadores() {
-
-    const texto =
-        document
-            .getElementById("buscador")
-            .value
-            .toLowerCase()
-            .trim();
-
-
-    const resultados =
-        jugadoresDisponibles.filter(
-            jugador =>
-                jugador.nombre
-                    .toLowerCase()
-                    .includes(texto)
-        );
-
-
-    renderizarJugadores(
-        resultados
-    );
-
-}
-
-
-/* =========================================================
-   RENDER JUGADORES
-========================================================= */
-
-function renderizarJugadores(lista) {
-
-    const contenedor =
-        document.getElementById(
-            "listaJugadores"
-        );
-
-
-    contenedor.innerHTML = "";
-
-
-    if (!lista.length) {
-
-        contenedor.innerHTML = `
-            <p style="
-                grid-column:1/-1;
-                text-align:center;
-                color:#777;
-            ">
-                No encontramos ese nombre.
-            </p>
-        `;
-
-        return;
-
-    }
-
-
-    lista.forEach(jugador => {
-
-        const tarjeta =
-            document.createElement(
-                "button"
-            );
-
-
-        tarjeta.type = "button";
-
-        tarjeta.className =
-            "jugador";
-
-
-        if (
-            jugadorSeleccionado &&
-            jugadorSeleccionado.id === jugador.id
-        ) {
-
-            tarjeta.classList.add(
-                "seleccionado"
-            );
-
-        }
-
-
-        tarjeta.innerHTML = `
-
-            <div class="avatar">
-
-                ${obtenerIniciales(
-                    jugador.nombre
-                )}
-
-            </div>
-
-            <div class="jugador-info">
-
-                <strong>
-                    ${escapeHtml(
-                        jugador.nombre
-                    )}
-                </strong>
-
-                <small>
-
-                    ${
-                        jugador.equipo
-                            ? obtenerNombreEquipo(
-                                jugador.equipo
-                            )
-                            : "Equipo pendiente"
-                    }
-
-                </small>
-
-            </div>
-
-        `;
-
-
-        tarjeta.addEventListener(
-            "click",
-            () => {
-
-                jugadorSeleccionado =
-                    jugador;
-
-
-                document.getElementById(
-                    "botonContinuar"
-                ).disabled = false;
-
-
-                renderizarJugadores(
-                    lista
-                );
-
-            }
-        );
-
-
-        contenedor.appendChild(
-            tarjeta
-        );
-
-    });
 
 }
 
