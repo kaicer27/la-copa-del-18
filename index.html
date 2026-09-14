@@ -4404,33 +4404,67 @@ async function cargarPreguntaActual() {
             video.src =
                 convertirUrlYoutube(pregunta.video_url);
 
+            /*
+             * MODO AUDIO:
+             * El video de YouTube queda completamente oculto.
+             * Se mantiene el iframe para que YouTube reproduzca
+             * el audio, pero no se muestra título, miniatura ni video.
+             */
             video.width =
-                "560";
+                "1";
 
             video.height =
-                "315";
+                "1";
 
-            video.allow =
-                "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
+            video.setAttribute(
+                "frameborder",
+                "0"
+            );
 
-            video.allowFullscreen =
-                true;
+            video.setAttribute(
+                "allow",
+                "autoplay; encrypted-media"
+            );
 
-            video.style.maxWidth =
-                "100%";
+            video.setAttribute(
+                "title",
+                "Reproductor de audio"
+            );
 
-            video.style.border =
+            video.style.width =
+                "1px";
+
+            video.style.height =
+                "1px";
+
+            video.style.position =
+                "absolute";
+
+            video.style.left =
+                "-9999px";
+
+            video.style.top =
+                "0";
+
+            video.style.opacity =
+                "0";
+
+            video.style.pointerEvents =
                 "none";
 
-            video.style.borderRadius =
-                "15px";
+            video.style.border =
+                "0";
 
             contenedorVideo.appendChild(
                 video
             );
 
+            /*
+             * No mostramos el contenedor:
+             * el jugador escucha solamente el audio.
+             */
             contenedorVideo.style.display =
-                "flex";
+                "none";
 
         }
 
@@ -4667,7 +4701,8 @@ function convertirUrlYoutube(url) {
         }
 
         if (id) {
-            return "https://www.youtube-nocookie.com/embed/" + id + "?rel=0";
+            return "https://www.youtube-nocookie.com/embed/" + id +
+                "?autoplay=1&controls=0&rel=0&modestbranding=1&iv_load_policy=3&playsinline=1";
         }
 
     }
